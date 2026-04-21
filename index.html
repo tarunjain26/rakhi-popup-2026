@@ -22,15 +22,14 @@
   import { getFirestore, collection, onSnapshot, addDoc, setDoc, deleteDoc, doc, serverTimestamp }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  // ── PASTE YOUR FIREBASE CONFIG HERE ──
   const firebaseConfig = {
-  apiKey: "AIzaSyB2bbBYqsp3G0Oh8afYvhdmzvGCV827jLc",
-  authDomain: "rakhi-popup-2026.firebaseapp.com",
-  projectId: "rakhi-popup-2026",
-  storageBucket: "rakhi-popup-2026.firebasestorage.app",
-  messagingSenderId: "922846238407",
-  appId: "1:922846238407:web:9934924466cd1d6d6990e2"
-};
+    apiKey: "AIzaSyB2bbBYqsp3G0Oh8afYvhdmzvGCV827jLc",
+    authDomain: "rakhi-popup-2026.firebaseapp.com",
+    projectId: "rakhi-popup-2026",
+    storageBucket: "rakhi-popup-2026.firebasestorage.app",
+    messagingSenderId: "922846238407",
+    appId: "1:922846238407:web:9934924466cd1d6d6990e2"
+  };
 
   const app = initializeApp(firebaseConfig);
   const db  = getFirestore(app);
@@ -67,6 +66,9 @@ nav{background:linear-gradient(135deg,#FFF8A0,#FFF0C0,#FFF8A0);border-bottom:2px
 .nav-tab{padding:0 0.85rem;font-size:12.5px;cursor:pointer;color:var(--muted);border-bottom:3px solid transparent;white-space:nowrap;transition:all 0.15s;display:flex;align-items:center}
 .nav-tab:hover{color:var(--y5);background:rgba(245,197,24,0.08)}
 .nav-tab.active{color:var(--y5);border-bottom-color:var(--y3);font-weight:500;background:rgba(245,197,24,0.12)}
+.nav-short{display:none}
+.nav-full{display:inline}
+@media(max-width:480px){.nav-short{display:inline}.nav-full{display:none}}
 .ticker{background:linear-gradient(90deg,var(--y2),var(--y1));padding:5px 1rem;border-bottom:1px solid var(--border);font-size:11px;color:var(--muted);letter-spacing:0.05em;overflow:hidden;white-space:nowrap;display:flex;gap:14px;align-items:center}
 .page{display:none;padding:1.25rem 1rem;max-width:980px;margin:0 auto;width:100%}
 .page.active{display:block}
@@ -76,7 +78,7 @@ h3{font-size:14px;font-weight:500;margin-bottom:.75rem}
 .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
 label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:3px;margin-top:10px;text-transform:uppercase;letter-spacing:.05em;font-weight:500}
 label:first-child{margin-top:0}
-input,select,textarea{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--light);color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;transition:border .15s}
+input,select,textarea{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--light);color:var(--text);font-size:16px;font-family:'DM Sans',sans-serif;outline:none;transition:border .15s;-webkit-appearance:none;appearance:none}
 input:focus,select:focus,textarea:focus{border-color:var(--y3);background:#fff;box-shadow:0 0 0 3px rgba(245,197,24,.15)}
 textarea{resize:vertical;min-height:60px}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -140,7 +142,82 @@ textarea{resize:vertical;min-height:60px}
 .sync-dot{width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;margin-left:6px;vertical-align:middle}
 .sync-dot.live{background:#4CAF50;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-@media(max-width:600px){.metric-grid{grid-template-columns:1fr 1fr}.row2,.row3{grid-template-columns:1fr}.brand-grid{grid-template-columns:1fr}.cost-metrics{grid-template-columns:1fr 1fr}}
+/* ── MOBILE RESPONSIVE ── */
+@media(max-width:640px){
+  /* Nav — scrollable, smaller text */
+  nav{padding:0 0.5rem;gap:0}
+  .nav-brand{padding:0.5rem 0.75rem 0.5rem 0;margin-right:0.5rem}
+  .nav-brand-title{font-size:14px}
+  .nav-brand-sub{font-size:9px}
+  .nav-tab{padding:0 0.6rem;font-size:11.5px}
+  #install-btn{padding:4px 8px;font-size:11px}
+
+  /* Pages — tighter padding */
+  .page{padding:1rem 0.75rem}
+
+  /* Typography */
+  h2{font-size:18px}
+  h3{font-size:13px}
+
+  /* Metrics — 2 col */
+  .metric-grid{grid-template-columns:1fr 1fr}
+  .metric-val{font-size:18px}
+  .metric-lbl{font-size:9px}
+  .cost-metrics{grid-template-columns:1fr 1fr}
+
+  /* Forms — single col */
+  .row2,.row3{grid-template-columns:1fr}
+
+  /* Exhibitor rows — stack on tiny screens */
+  .ex-row{flex-wrap:wrap;gap:8px}
+  .ex-info{width:100%;min-width:0;order:2}
+  .stall-badge{order:1}
+
+  /* Buttons — better touch targets */
+  .btn{padding:9px 14px;font-size:13px}
+  .btn-sm{padding:7px 11px;font-size:12px;min-height:36px}
+
+  /* Cards */
+  .card{padding:1rem}
+
+  /* Modal — full width on mobile */
+  .modal{padding:1.25rem;border-radius:12px 12px 0 0;position:fixed;bottom:0;left:0;right:0;max-width:100%;max-height:85vh;margin:0}
+  .modal-overlay.open{align-items:flex-end;padding:0}
+
+  /* Floor plan — scrollable */
+  .floor-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+  /* Brands */
+  .brand-grid{grid-template-columns:1fr}
+
+  /* Public hero */
+  .pub-hero{padding:1.5rem 1rem}
+  .pub-hero h1{font-size:26px}
+
+  /* Ticker — hide on very small */
+  .ticker{font-size:10px;padding:4px 0.75rem}
+
+  /* Action buttons row on exhibitor — wrap nicely */
+  .ex-row .badge{order:3}
+
+  /* Cost row */
+  .cost-row{flex-wrap:wrap}
+
+  /* Update banner */
+  #update-banner{font-size:12px;padding:10px 0.75rem}
+
+  /* Input/select touch-friendly */
+  input,select,textarea{font-size:16px !important;padding:10px 12px}
+
+  /* Floor plan download buttons stack */
+  #floor-stats{flex-direction:column;align-items:flex-start}
+}
+
+/* Extra small phones */
+@media(max-width:380px){
+  .nav-tab{padding:0 0.45rem;font-size:10.5px}
+  .metric-grid{grid-template-columns:1fr 1fr;gap:6px}
+}
 </style>
 </head>
 <body>
@@ -150,11 +227,11 @@ textarea{resize:vertical;min-height:60px}
     <div class="nav-brand-title">🍋 Rakhi Pop-Up <span class="sync-dot" id="sync-dot" title="Firebase sync status"></span></div>
     <div class="nav-brand-sub">19–20 July 2026 · Kota</div>
   </div>
-  <div class="nav-tab active" onclick="showPage('admin',this)">Exhibitors</div>
-  <div class="nav-tab" onclick="showPage('floor',this)">Floor Plan</div>
-  <div class="nav-tab" onclick="showPage('visitors',this)">Visitors</div>
-  <div class="nav-tab" onclick="showPage('costs',this)">Costs</div>
-  <div class="nav-tab" onclick="showPage('public',this)">Guest View</div>
+  <div class="nav-tab active" onclick="showPage('admin',this)"><span class="nav-full">Exhibitors</span><span class="nav-short">Stalls</span></div>
+  <div class="nav-tab" onclick="showPage('floor',this)"><span class="nav-full">Floor Plan</span><span class="nav-short">Map</span></div>
+  <div class="nav-tab" onclick="showPage('visitors',this)"><span class="nav-full">Visitors</span><span class="nav-short">Visitors</span></div>
+  <div class="nav-tab" onclick="showPage('costs',this)"><span class="nav-full">Costs</span><span class="nav-short">Costs</span></div>
+  <div class="nav-tab" onclick="showPage('public',this)"><span class="nav-full">Guest View</span><span class="nav-short">Guest</span></div>
   <button id="install-btn" onclick="installPWA()" style="display:none;margin-left:auto;margin-right:4px;padding:5px 12px;background:#F5C518;border:1.5px solid #D4A017;color:#7A5C00;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;align-items:center;gap:5px;white-space:nowrap;font-family:'DM Sans',sans-serif">
     ⬇ Install App
   </button>
