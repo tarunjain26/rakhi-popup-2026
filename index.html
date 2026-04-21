@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rakhi Pop-Up 2026 · Kota</title>
+
+<!-- PWA Meta Tags -->
+<meta name="theme-color" content="#F5C518">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Rakhi Pop-Up">
+<meta name="description" content="Exhibition management for Rakhi Pop-Up 2026, Hotel Swan, Kota">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, onSnapshot, addDoc, setDoc, deleteDoc, doc, serverTimestamp }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  // ── PASTE YOUR FIREBASE CONFIG HERE ──
+  const firebaseConfig = {
+  apiKey: "AIzaSyB2bbBYqsp3G0Oh8afYvhdmzvGCV827jLc",
+  authDomain: "rakhi-popup-2026.firebaseapp.com",
+  projectId: "rakhi-popup-2026",
+  storageBucket: "rakhi-popup-2026.firebasestorage.app",
+  messagingSenderId: "922846238407",
+  appId: "1:922846238407:web:9934924466cd1d6d6990e2"
+};
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getFirestore(app);
+
+  // Expose db + helpers to global scope
+  window._db = db;
+  window._col = (name) => collection(db, name);
+  window._doc = (col, id) => doc(db, col, id);
+  window._add = (col, data) => addDoc(collection(db, col), { ...data, _ts: serverTimestamp() });
+  window._set = (col, id, data) => setDoc(doc(db, col, id), { ...data, _ts: serverTimestamp() });
+  window._del = (col, id) => deleteDoc(doc(db, col, id));
+  window._listen = (col, cb) => onSnapshot(collection(db, col), snap => {
+    cb(snap.docs.map(d => ({ _id: d.id, ...d.data() })));
+  });
+
+  window._firebaseReady = true;
+  document.dispatchEvent(new Event('firebase-ready'));
+</script>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --y1:#FFF8DC;--y2:#FFF0A0;--y3:#F5C518;--y4:#D4A017;--y5:#7A5C00;
+  --g1:#E8F5E0;--g2:#A8D878;--g3:#5A9E28;--g4:#2D5A10;
+  --bg:#FFFDF0;--surface:#FFFFFF;--border:#EDE8C0;
+  --text:#2A2200;--muted:#7A6E30;--light:#FFF9E0;
+  --radius:10px;--shadow:0 2px 8px rgba(180,150,0,0.10);
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:14px;min-height:100vh}
+nav{background:linear-gradient(135deg,#FFF8A0,#FFF0C0,#FFF8A0);border-bottom:2px solid var(--y3);display:flex;align-items:stretch;padding:0 1rem;position:sticky;top:0;z-index:100;overflow-x:auto}
+.nav-brand{display:flex;flex-direction:column;justify-content:center;padding:0.5rem 1rem 0.5rem 0;margin-right:0.75rem;border-right:1.5px solid var(--y3);white-space:nowrap;flex-shrink:0}
+.nav-brand-title{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;color:var(--y5)}
+.nav-brand-sub{font-size:10px;color:var(--muted);margin-top:1px}
+.nav-tab{padding:0 0.85rem;font-size:12.5px;cursor:pointer;color:var(--muted);border-bottom:3px solid transparent;white-space:nowrap;transition:all 0.15s;display:flex;align-items:center}
+.nav-tab:hover{color:var(--y5);background:rgba(245,197,24,0.08)}
+.nav-tab.active{color:var(--y5);border-bottom-color:var(--y3);font-weight:500;background:rgba(245,197,24,0.12)}
+.ticker{background:linear-gradient(90deg,var(--y2),var(--y1));padding:5px 1rem;border-bottom:1px solid var(--border);font-size:11px;color:var(--muted);letter-spacing:0.05em;overflow:hidden;white-space:nowrap;display:flex;gap:14px;align-items:center}
+.page{display:none;padding:1.25rem 1rem;max-width:980px;margin:0 auto;width:100%}
+.page.active{display:block}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem;box-shadow:var(--shadow)}
+h2{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--y5)}
+h3{font-size:14px;font-weight:500;margin-bottom:.75rem}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:3px;margin-top:10px;text-transform:uppercase;letter-spacing:.05em;font-weight:500}
+label:first-child{margin-top:0}
+input,select,textarea{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--light);color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;transition:border .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--y3);background:#fff;box-shadow:0 0 0 3px rgba(245,197,24,.15)}
+textarea{resize:vertical;min-height:60px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.btn{padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s}
+.btn:hover{background:var(--y1);border-color:var(--y3)}
+.btn-primary{background:var(--y3);border-color:var(--y4);color:var(--y5);font-weight:500}
+.btn-primary:hover{background:var(--y4);color:#fff}
+.btn-sm{padding:5px 11px;font-size:11.5px}
+.btn-wa{background:#25D366;border-color:#1da851;color:#fff;display:flex;align-items:center;gap:6px}
+.btn-wa:hover{background:#1da851}
+.btn-danger{border-color:#f5c0c0;color:#c0392b;background:#fff}
+.btn-danger:hover{background:#fff5f5}
+.btn-green{background:var(--g1);border-color:var(--g2);color:var(--g4)}
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:10.5px;font-weight:500}
+.badge-paid{background:#EAF3DE;color:#3B6D11}
+.badge-partial{background:#FFF3CD;color:#8A5700}
+.badge-pending{background:#FFE5E5;color:#A32D2D}
+.badge-cat{background:var(--y2);color:var(--y5)}
+.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem}
+.metric{background:var(--y1);border:1px solid var(--y3);border-radius:var(--radius);padding:1rem;text-align:center}
+.metric-val{font-size:22px;font-weight:600;font-family:'Cormorant Garamond',serif;color:var(--y5)}
+.metric-lbl{font-size:10px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:.05em}
+.ex-row{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--border);transition:background .15s;border-radius:4px}
+.ex-row:last-child{border-bottom:none}
+.ex-row.drag-over{background:var(--y2);border-radius:8px}
+.stall-badge{width:36px;height:36px;border-radius:8px;background:var(--y3);color:var(--y5);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;border:1.5px solid var(--y4)}
+.ex-info{flex:1;min-width:0}
+.ex-name{font-size:13.5px;font-weight:500}
+.ex-meta{font-size:11px;color:var(--muted);margin-top:2px}
+.vis-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.vis-row:last-child{border-bottom:none}
+.vis-num{width:26px;height:26px;border-radius:50%;background:var(--y2);color:var(--y5);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0}
+.tabs-sub{display:flex;gap:6px;margin-bottom:1rem}
+.tab-sub{padding:6px 14px;border-radius:20px;font-size:12px;cursor:pointer;background:var(--light);color:var(--muted);border:1px solid var(--border)}
+.tab-sub.active{background:var(--y3);color:var(--y5);border-color:var(--y4);font-weight:500}
+.pub-hero{background:linear-gradient(135deg,#FFFDE0,#FFF5A0,#FFFDE0);border:2px solid var(--y3);border-radius:14px;padding:2.5rem 1.5rem;text-align:center;margin-bottom:1.25rem;position:relative;overflow:hidden}
+.pub-hero::before{content:'🍋';font-size:90px;position:absolute;top:-20px;left:-20px;opacity:.1;transform:rotate(-20deg);pointer-events:none}
+.pub-hero::after{content:'🍃';font-size:70px;position:absolute;bottom:-10px;right:-10px;opacity:.12;transform:rotate(15deg);pointer-events:none}
+.pub-hero h1{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:600;color:var(--y5);line-height:1.2}
+.pub-hero .dates{font-size:13px;color:var(--y4);margin-top:6px;font-weight:500}
+.pub-hero .venue{font-size:12px;color:var(--muted);margin-top:4px}
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin-bottom:1.25rem}
+.cat-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.85rem;text-align:center;transition:all .15s}
+.cat-card:hover{border-color:var(--y3);background:var(--y1)}
+.brand-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.brand-item{background:var(--light);border:1px solid var(--border);border-radius:8px;padding:10px;display:flex;align-items:center;gap:8px}
+.cost-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1rem}
+.cost-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.cost-row:last-child{border-bottom:none}
+.cost-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.revenue-bar{height:7px;border-radius:4px;background:var(--border);overflow:hidden;margin:6px 0}
+.revenue-fill{height:100%;border-radius:4px;transition:width .5s ease}
+.floor-wrap{background:#cdc8bc;border-radius:10px;padding:10px}
+.modal-overlay{position:fixed;inset:0;background:rgba(42,34,0,.35);z-index:200;display:none;align-items:center;justify-content:center;padding:1rem}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border-radius:12px;padding:1.5rem;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(180,150,0,.18);border:1px solid var(--border)}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);flex-wrap:wrap}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--y5);color:#FFF8DC;padding:10px 20px;border-radius:8px;font-size:13px;z-index:9999;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;margin-left:6px;vertical-align:middle}
+.sync-dot.live{background:#4CAF50;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@media(max-width:600px){.metric-grid{grid-template-columns:1fr 1fr}.row2,.row3{grid-template-columns:1fr}.brand-grid{grid-template-columns:1fr}.cost-metrics{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">
+    <div class="nav-brand-title">🍋 Rakhi Pop-Up <span class="sync-dot" id="sync-dot" title="Firebase sync status"></span></div>
+    <div class="nav-brand-sub">19–20 July 2026 · Kota</div>
+  </div>
+  <div class="nav-tab active" onclick="showPage('admin',this)">Exhibitors</div>
+  <div class="nav-tab" onclick="showPage('floor',this)">Floor Plan</div>
+  <div class="nav-tab" onclick="showPage('visitors',this)">Visitors</div>
+  <div class="nav-tab" onclick="showPage('costs',this)">Costs</div>
+  <div class="nav-tab" onclick="showPage('public',this)">Guest View</div>
+  <button id="install-btn" onclick="installPWA()" style="display:none;margin-left:auto;margin-right:4px;padding:5px 12px;background:#F5C518;border:1.5px solid #D4A017;color:#7A5C00;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;align-items:center;gap:5px;white-space:nowrap;font-family:'DM Sans',sans-serif">
+    ⬇ Install App
+  </button>
+</nav>
+<div class="ticker">
+  <span>🍋</span><span>HOTEL SWAN · AERODROME CIRCLE · KOTA</span>
+  <span>🌿</span><span>19–20 JULY 2026</span>
+  <span>🍃</span><span>A CURATED LIFESTYLE EXHIBITION</span>
+  <span>🍋</span><span>HOTEL SWAN · AERODROME CIRCLE · KOTA</span>
+  <span>🌿</span><span>19–20 JULY 2026</span>
+</div>
+
+<!-- ═══ EXHIBITORS ═══ -->
+<div id="page-admin" class="page active">
+  <div class="section-header">
+    <h2>Exhibitors</h2>
+    <button class="btn btn-primary btn-sm" onclick="openExModal()">+ Add Exhibitor</button>
+  </div>
+  <div class="metric-grid" id="ex-metrics"></div>
+  <div class="card" id="ex-list"></div>
+</div>
+
+<!-- ═══ FLOOR PLAN ═══ -->
+<div id="page-floor" class="page">
+  <h2 style="margin-bottom:1rem">Floor Plan</h2>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:.75rem">
+    <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)"><div style="width:11px;height:11px;border-radius:3px;background:#E8748A"></div>Wall stall (pink)</div>
+    <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)"><div style="width:11px;height:11px;border-radius:3px;background:#5B9BD5"></div>Blue stall</div>
+    <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)"><div style="width:11px;height:11px;border-radius:3px;background:#4CAF50"></div>Corner (green)</div>
+    <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)"><div style="width:11px;height:11px;border-radius:3px;background:#F5C518;border:1px solid #c9a020"></div>Food stall</div>
+    <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)"><div style="width:11px;height:11px;border-radius:3px;background:#ede8de;border:1px solid #bbb"></div>Table stall</div>
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:.75rem;align-items:center;flex-wrap:wrap" id="floor-stats"></div>
+  <div style="display:flex;gap:8px;margin-bottom:.75rem;flex-wrap:wrap">
+    <button class="btn btn-sm" style="background:#E8F0FF;border-color:#99B4F0;color:#1A3A8A;display:inline-flex;align-items:center;gap:5px" onclick="downloadFloorPlanJPG()">
+      ⬇ Download Floor Plan JPG
+    </button>
+    <button class="btn btn-sm" style="background:#E8F5E0;border-color:#A8D878;color:#2D5A10;display:inline-flex;align-items:center;gap:5px" onclick="shareFloorPlanWA()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.126.558 4.122 1.532 5.856L0 24l6.335-1.514A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.93 0-3.74-.516-5.295-1.415l-.38-.225-3.76.899.937-3.653-.247-.397A9.955 9.955 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+      Save JPG + Open WhatsApp
+    </button>
+  </div>
+  <div class="floor-wrap">
+    <svg id="floor-svg" style="display:block;width:100%;height:auto" viewBox="0 0 700 1300" xmlns="http://www.w3.org/2000/svg">
+    <defs><style>
+    .sl{font-family:sans-serif;font-size:12px;font-weight:700;text-anchor:middle;dominant-baseline:central;pointer-events:none}
+    .sn{font-family:sans-serif;font-size:7px;font-weight:500;text-anchor:middle;pointer-events:none}
+    .lbl{font-family:sans-serif;font-size:9px;fill:#666;font-weight:600;letter-spacing:.04em;text-anchor:middle}
+    .fs{cursor:pointer}.fs:hover rect{filter:brightness(.85)}
+    </style></defs>
+
+    <!-- ── COORDINATE SYSTEM ──
+         Total canvas: 700 × 1300
+         Right wall band: x=602..700
+         Left wall band: x=0..132 (upper section y=0..720)
+         Top wall band: y=0..95, x=132..700
+         Open floor: x=132..602, y=95..1050
+         Lower open area (TS/entry/food): y=860..1300
+    -->
+
+    <!-- Floor background -->
+    <rect x="0" y="0" width="700" height="1300" fill="#e8e3d8" rx="6"/>
+
+    <!-- Wall bands -->
+    <rect x="132" y="0" width="568" height="95" fill="#cdc8bc"/>
+    <rect x="602" y="0" width="98" height="960" fill="#cdc8bc"/>
+    <rect x="0" y="0" width="132" height="95" fill="#cdc8bc"/>
+    <rect x="0" y="95" width="132" height="625" fill="#cdc8bc"/>
+    <!-- Open floor area -->
+    <rect x="132" y="95" width="470" height="820" fill="#e8e3d8"/>
+    <!-- Lower open area (below left wall, for TS/entry/food) -->
+    <rect x="0" y="720" width="700" height="580" fill="#e8e3d8"/>
+
+    <!-- Food area background -->
+    <rect x="132" y="1170" width="380" height="110" fill="#d4cbb8"/>
+    <text x="322" y="1295" class="lbl" style="font-size:11px">FOOD STALL</text>
+
+    <!-- Entry — bottom right, below stall 1, clear of food stalls -->
+    <rect x="480" y="1090" width="120" height="32" fill="#e8e3d8" stroke="#999" stroke-width="1.5" stroke-dasharray="5,3" rx="3"/>
+    <text x="540" y="1108" class="lbl">ENTRY</text>
+
+    <!-- ══ TOP WALL: 17,16,15,14,13,12 left→right (each 72w × 88h) ══ -->
+    <g class="fs" onclick="floorClick('17')"><rect id="fr17" x="134" y="3" width="72" height="88" fill="#E8748A" rx="4"/><text class="sl" x="170" y="44" fill="#fff">17</text><text id="fn17" class="sn" x="170" y="60" fill="#fff"></text></g>
+    <g class="fs" onclick="floorClick('16')"><rect id="fr16" x="208" y="3" width="72" height="88" fill="#E8748A" rx="4"/><text class="sl" x="244" y="44" fill="#fff">16</text><text id="fn16" class="sn" x="244" y="60" fill="#fff"></text></g>
+    <g class="fs" onclick="floorClick('15')"><rect id="fr15" x="282" y="3" width="72" height="88" fill="#E8748A" rx="4"/><text class="sl" x="318" y="44" fill="#fff">15</text><text id="fn15" class="sn" x="318" y="60" fill="#fff"></text></g>
+    <g class="fs" onclick="floorClick('14')"><rect id="fr14" x="356" y="3" width="72" height="88" fill="#E8748A" rx="4"/><text class="sl" x="392" y="44" fill="#fff">14</text><text id="fn14" class="sn" x="392" y="60" fill="#fff"></text></g>
+    <g class="fs" onclick="floorClick('13')"><rect id="fr13" x="430" y="3" width="72" height="88" fill="#E8748A" rx="4"/><text class="sl" x="466" y="44" fill="#fff">13</text><text id="fn13" class="sn" x="466" y="60" fill="#fff"></text></g>
+    <g class="fs" onclick="floorClick('12')"><rect id="fr12" x="504" y="3" width="72" height="88" fill="#E8748A" rx="4"/><text class="sl" x="540" y="44" fill="#fff">12</text><text id="fn12" class="sn" x="540" y="60" fill="#fff"></text></g>
+
+    <!-- ══ STALL 11 — GREEN corner block top-right, tall ══ -->
+    <g class="fs" onclick="floorClick('11')"><rect id="fr11" x="578" y="3" width="118" height="185" fill="#4CAF50" rx="4"/><text class="sl" x="637" y="95" fill="#fff">11</text><text id="fn11" class="sn" x="637" y="112" fill="#fff"></text></g>
+
+    <!-- ══ RIGHT WALL: 10→2, top to bottom ══ -->
+    <!-- Stall 11 bottom = y=188. Stall 10 starts there. Each stall h=72 flush -->
+    <g class="fs" onclick="floorClick('10')"><rect id="fr10" x="604" y="192" width="92" height="72" fill="#E8748A" rx="4"/><text class="sl" x="650" y="228" fill="#fff">10</text><text id="fn10" class="sn" x="650" y="243" fill="#fff"></text></g>
+    <g class="fs" onclick="floorClick('9')"> <rect id="fr9"  x="604" y="266" width="92" height="72" fill="#E8748A" rx="4"/><text class="sl" x="650" y="302" fill="#fff">9</text> <text id="fn9"  class="sn" x="650" y="317" fill="#fff"></text></g>
+    <g class="fs" onclick="floorClick('8')"> <rect id="fr8"  x="604" y="340" width="92" height="72" fill="#E8748A" rx="4"/><text class="sl" x="650" y="376" fill="#fff">8</text> <text id="fn8"  class="sn" x="650" y="391" fill="#fff"></text></g>
+    <g class="fs" onclick="floorClick('7')"> <rect id="fr7"  x="604" y="414" width="92" height="72" fill="#E8748A" rx="4"/><text class="sl" x="650" y="450" fill="#fff">7</text> <text id="fn7"  class="sn" x="650" y="465" fill="#fff"></text></g>
+    <!-- Stall 6: BLUE, taller -->
+    <g class="fs" onclick="floorClick('6')"> <rect id="fr6"  x="604" y="488" width="92" height="100" fill="#5B9BD5" rx="4"/><text class="sl" x="650" y="538" fill="#fff">6</text> <text id="fn6"  class="sn" x="650" y="553" fill="#fff"></text></g>
+    <!-- Stall 5: BLUE — gap then stall 5 -->
+    <g class="fs" onclick="floorClick('5')"> <rect id="fr5"  x="604" y="606" width="92" height="72" fill="#5B9BD5" rx="4"/><text class="sl" x="650" y="642" fill="#fff">5</text> <text id="fn5"  class="sn" x="650" y="657" fill="#fff"></text></g>
+    <!-- Stalls 4,3,2 — flush below 5, aligned so stall 4 is at island 34/35 level (y~767) -->
+    <g class="fs" onclick="floorClick('4')"> <rect id="fr4"  x="604" y="700" width="92" height="72" fill="#E8748A" rx="4"/><text class="sl" x="650" y="736" fill="#fff">4</text> <text id="fn4"  class="sn" x="650" y="751" fill="#fff"></text></g>
+    <g class="fs" onclick="floorClick('3')"> <rect id="fr3"  x="604" y="774" width="92" height="72" fill="#E8748A" rx="4"/><text class="sl" x="650" y="810" fill="#fff">3</text> <text id="fn3"  class="sn" x="650" y="825" fill="#fff"></text></g>
+    <g class="fs" onclick="floorClick('2')"> <rect id="fr2"  x="604" y="848" width="92" height="72" fill="#E8748A" rx="4"/><text class="sl" x="650" y="884" fill="#fff">2</text> <text id="fn2"  class="sn" x="650" y="899" fill="#fff"></text></g>
+    <!-- Stall 1: GREEN corner, wider horizontally, flush below 2 -->
+    <g class="fs" onclick="floorClick('1')"> <rect id="fr1"  x="510" y="922" width="186" height="68" fill="#4CAF50" rx="4"/><text class="sl" x="603" y="956" fill="#fff">1</text> <text id="fn1"  class="sn" x="603" y="972" fill="#fff"></text></g>
+
+    <!-- ══ LEFT WALL: 18→23, top to bottom (each 125w × 94h) ══ -->
+    <g class="fs" onclick="floorClick('18')"><rect id="fr18" x="3" y="98"  width="125" height="94" fill="#E8748A" rx="4"/><text class="sl" x="65" y="145" fill="#fff">18</text><text id="fn18" class="sn" x="65" y="161" fill="#fff"></text></g>
+    <g class="fs" onclick="floorClick('19')"><rect id="fr19" x="3" y="194" width="125" height="94" fill="#E8748A" rx="4"/><text class="sl" x="65" y="241" fill="#fff">19</text><text id="fn19" class="sn" x="65" y="257" fill="#fff"></text></g>
+    <g class="fs" onclick="floorClick('20')"><rect id="fr20" x="3" y="290" width="125" height="94" fill="#E8748A" rx="4"/><text class="sl" x="65" y="337" fill="#fff">20</text><text id="fn20" class="sn" x="65" y="353" fill="#fff"></text></g>
+    <g class="fs" onclick="floorClick('21')"><rect id="fr21" x="3" y="386" width="125" height="94" fill="#E8748A" rx="4"/><text class="sl" x="65" y="433" fill="#fff">21</text><text id="fn21" class="sn" x="65" y="449" fill="#fff"></text></g>
+    <g class="fs" onclick="floorClick('22')"><rect id="fr22" x="3" y="482" width="125" height="94" fill="#E8748A" rx="4"/><text class="sl" x="65" y="529" fill="#fff">22</text><text id="fn22" class="sn" x="65" y="545" fill="#fff"></text></g>
+    <g class="fs" onclick="floorClick('23')"><rect id="fr23" x="3" y="578" width="125" height="94" fill="#E8748A" rx="4"/><text class="sl" x="65" y="625" fill="#fff">23</text><text id="fn23" class="sn" x="65" y="641" fill="#fff"></text></g>
+
+    <!-- ══ CENTRE ISLAND TOP: image shows left=25, right=24 (top); left=27, right=26 (bottom) ══ -->
+    <rect x="240" y="185" width="310" height="210" fill="#c4d6ec" rx="8" stroke="#9ab4d4" stroke-width="1.5"/>
+    <g class="fs" onclick="floorClick('25')"><rect id="fr25" x="247" y="192" width="143" height="95" fill="#5B9BD5" rx="4"/><text class="sl" x="318" y="239" fill="#fff">25</text><text id="fn25" class="sn" x="318" y="255" fill="#fff"></text></g>
+    <g class="fs" onclick="floorClick('24')"><rect id="fr24" x="400" y="192" width="143" height="95" fill="#5B9BD5" rx="4"/><text class="sl" x="471" y="239" fill="#fff">24</text><text id="fn24" class="sn" x="471" y="255" fill="#fff"></text></g>
+    <g class="fs" onclick="floorClick('27')"><rect id="fr27" x="247" y="293" width="143" height="95" fill="#5B9BD5" rx="4"/><text class="sl" x="318" y="340" fill="#fff">27</text><text id="fn27" class="sn" x="318" y="356" fill="#fff"></text></g>
+    <g class="fs" onclick="floorClick('26')"><rect id="fr26" x="400" y="293" width="143" height="95" fill="#5B9BD5" rx="4"/><text class="sl" x="471" y="340" fill="#fff">26</text><text id="fn26" class="sn" x="471" y="356" fill="#fff"></text></g>
+
+    <!-- ══ CENTRE ISLAND MIDDLE: left=29,right=28 / left=31,right=30 / left=33,right=32 ══ -->
+    <rect x="240" y="430" width="310" height="300" fill="#c4d6ec" rx="8" stroke="#9ab4d4" stroke-width="1.5"/>
+    <g class="fs" onclick="floorClick('29')"><rect id="fr29" x="247" y="437" width="143" height="88" fill="#5B9BD5" rx="4"/><text class="sl" x="318" y="481" fill="#fff">29</text><text id="fn29" class="sn" x="318" y="496" fill="#fff"></text></g>
+    <g class="fs" onclick="floorClick('28')"><rect id="fr28" x="400" y="437" width="143" height="88" fill="#5B9BD5" rx="4"/><text class="sl" x="471" y="481" fill="#fff">28</text><text id="fn28" class="sn" x="471" y="496" fill="#fff"></text></g>
+    <g class="fs" onclick="floorClick('31')"><rect id="fr31" x="247" y="531" width="143" height="88" fill="#E8748A" rx="4"/><text class="sl" x="318" y="575" fill="#fff">31</text><text id="fn31" class="sn" x="318" y="590" fill="#fff"></text></g>
+    <g class="fs" onclick="floorClick('30')"><rect id="fr30" x="400" y="531" width="143" height="88" fill="#E8748A" rx="4"/><text class="sl" x="471" y="575" fill="#fff">30</text><text id="fn30" class="sn" x="471" y="590" fill="#fff"></text></g>
+    <g class="fs" onclick="floorClick('33')"><rect id="fr33" x="247" y="625" width="143" height="98" fill="#5B9BD5" rx="4"/><text class="sl" x="318" y="674" fill="#fff">33</text><text id="fn33" class="sn" x="318" y="689" fill="#fff"></text></g>
+    <g class="fs" onclick="floorClick('32')"><rect id="fr32" x="400" y="625" width="143" height="98" fill="#5B9BD5" rx="4"/><text class="sl" x="471" y="674" fill="#fff">32</text><text id="fn32" class="sn" x="471" y="689" fill="#fff"></text></g>
+
+    <!-- ══ CENTRE ISLAND BOTTOM: left=35, right=34 ══ -->
+    <rect x="240" y="760" width="310" height="120" fill="#c4d6ec" rx="8" stroke="#9ab4d4" stroke-width="1.5"/>
+    <g class="fs" onclick="floorClick('35')"><rect id="fr35" x="247" y="767" width="143" height="106" fill="#5B9BD5" rx="4"/><text class="sl" x="318" y="820" fill="#fff">35</text><text id="fn35" class="sn" x="318" y="836" fill="#fff"></text></g>
+    <g class="fs" onclick="floorClick('34')"><rect id="fr34" x="400" y="767" width="143" height="106" fill="#5B9BD5" rx="4"/><text class="sl" x="471" y="820" fill="#fff">34</text><text id="fn34" class="sn" x="471" y="836" fill="#fff"></text></g>
+
+    <!-- ══ TABLE STALLS ══ -->
+    <!-- TS1, TS2, TS3 — vertical column LEFT, level with stalls 34/35 -->
+    <text x="185" y="758" class="lbl" style="font-size:8px;fill:#999">TABLE STALL</text>
+    <g class="fs" onclick="floorClick('TS1')"><rect id="frTS1" x="134" y="764" width="60" height="44" fill="#ede8de" rx="3" stroke="#bbb" stroke-width="1"/><text class="sl" x="164" y="786" fill="#777" style="font-size:10px">TS1</text><text id="fnTS1" class="sn" x="164" y="798" fill="#777"></text></g>
+    <g class="fs" onclick="floorClick('TS2')"><rect id="frTS2" x="134" y="810" width="60" height="44" fill="#ede8de" rx="3" stroke="#bbb" stroke-width="1"/><text class="sl" x="164" y="832" fill="#777" style="font-size:10px">TS2</text><text id="fnTS2" class="sn" x="164" y="844" fill="#777"></text></g>
+    <g class="fs" onclick="floorClick('TS3')"><rect id="frTS3" x="134" y="856" width="60" height="44" fill="#ede8de" rx="3" stroke="#bbb" stroke-width="1"/><text class="sl" x="164" y="878" fill="#777" style="font-size:10px">TS3</text><text id="fnTS3" class="sn" x="164" y="890" fill="#777"></text></g>
+
+    <!-- TS5 — touches bottom of island 34/35 (island bottom = y=767+106=873), so TS5 y=873 -->
+    <g class="fs" onclick="floorClick('TS5')"><rect id="frTS5" x="247" y="875" width="60" height="50" fill="#ede8de" rx="3" stroke="#bbb" stroke-width="1"/><text class="sl" x="277" y="900" fill="#777" style="font-size:10px">TS5</text><text id="fnTS5" class="sn" x="277" y="913" fill="#777"></text></g>
+    <!-- TS6 — touches bottom of TS5 (y=875+50=925) -->
+    <g class="fs" onclick="floorClick('TS6')"><rect id="frTS6" x="247" y="927" width="60" height="50" fill="#ede8de" rx="3" stroke="#bbb" stroke-width="1"/><text class="sl" x="277" y="952" fill="#777" style="font-size:10px">TS6</text><text id="fnTS6" class="sn" x="277" y="965" fill="#777"></text></g>
+
+    <!-- TS7 — standalone, shifted slightly left, same vertical zone as TS5/6, below island -->
+    <g class="fs" onclick="floorClick('TS7')"><rect id="frTS7" x="330" y="940" width="70" height="50" fill="#ede8de" rx="3" stroke="#bbb" stroke-width="1"/><text class="sl" x="365" y="965" fill="#777" style="font-size:10px">TS7</text><text id="fnTS7" class="sn" x="365" y="978" fill="#777"></text></g>
+
+    <!-- TS4 — isolated, further down left side -->
+    <g class="fs" onclick="floorClick('TS4')"><rect id="frTS4" x="134" y="1000" width="60" height="50" fill="#ede8de" rx="3" stroke="#bbb" stroke-width="1"/><text class="sl" x="164" y="1025" fill="#777" style="font-size:10px">TS4</text><text id="fnTS4" class="sn" x="164" y="1038" fill="#777"></text></g>
+
+    <!-- ══ FOOD STALLS FS3, FS2, FS1 left→right ══ -->
+    <g class="fs" onclick="floorClick('FS3')"><rect id="frFS3" x="134" y="1177" width="112" height="84" fill="#F5C518" rx="4" stroke="#c9a020" stroke-width="1.5"/><text class="sl" x="190" y="1219" fill="#5a3e00">FS3</text><text id="fnFS3" class="sn" x="190" y="1234" fill="#5a3e00"></text></g>
+    <g class="fs" onclick="floorClick('FS2')"><rect id="frFS2" x="252" y="1177" width="112" height="84" fill="#F5C518" rx="4" stroke="#c9a020" stroke-width="1.5"/><text class="sl" x="308" y="1219" fill="#5a3e00">FS2</text><text id="fnFS2" class="sn" x="308" y="1234" fill="#5a3e00"></text></g>
+    <g class="fs" onclick="floorClick('FS1')"><rect id="frFS1" x="370" y="1177" width="112" height="84" fill="#F5C518" rx="4" stroke="#c9a020" stroke-width="1.5"/><text class="sl" x="426" y="1219" fill="#5a3e00">FS1</text><text id="fnFS1" class="sn" x="426" y="1234" fill="#5a3e00"></text></g>
+
+    </svg>
+  </div>
+  <div style="margin-top:8px;font-size:11px;color:var(--muted)">Click any stall to view details.</div>
+</div>
+
+<!-- ═══ VISITORS ═══ -->
+<div id="page-visitors" class="page">
+  <div class="section-header"><h2>Visitor Check-In</h2></div>
+  <div class="tabs-sub">
+    <div class="tab-sub active" onclick="setVisDay(1,this)">Day 1 — 19 July</div>
+    <div class="tab-sub" onclick="setVisDay(2,this)">Day 2 — 20 July</div>
+  </div>
+  <div class="card">
+    <h3>Register Visitor</h3>
+    <div class="row2">
+      <div><label>Name</label><input id="v-name" placeholder="Visitor name"></div>
+      <div><label>Phone</label><input id="v-phone" placeholder="Phone number" type="tel"></div>
+    </div>
+    <div style="margin-top:12px"><button class="btn btn-primary" onclick="addVisitor()">Check In ✓</button></div>
+  </div>
+  <div class="card" id="vis-list"></div>
+</div>
+
+<!-- ═══ COSTS ═══ -->
+<div id="page-costs" class="page">
+  <div class="section-header"><h2>Costs & Revenue</h2><button class="btn btn-primary btn-sm" onclick="openCostModal()">+ Add Entry</button></div>
+  <div class="cost-metrics" id="cost-metrics"></div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+      <span style="font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Revenue Coverage</span>
+      <span id="coverage-pct" style="font-size:13px;font-weight:600;color:var(--y5)"></span>
+    </div>
+    <div class="revenue-bar"><div class="revenue-fill" id="coverage-bar" style="width:0%"></div></div>
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted)"><span id="bar-rev"></span><span id="bar-cost"></span></div>
+  </div>
+  <div id="cost-list"></div>
+</div>
+
+<!-- ═══ GUEST VIEW ═══ -->
+<div id="page-public" class="page">
+  <div class="pub-hero">
+    <div style="font-size:11px;font-weight:600;color:var(--y4);margin-bottom:10px;letter-spacing:.1em">🍃 YOU'RE INVITED 🍃</div>
+    <h1>Rakhi Pop-Up</h1>
+    <div class="dates">📅 19 – 20 July 2026</div>
+    <div class="venue">🏨 Hotel Swan, Aerodrome Circle, Kota</div>
+    <div style="margin-top:12px;font-size:13px;color:var(--muted)">A curated lifestyle exhibition celebrating the spirit of Raksha Bandhan</div>
+  </div>
+  <div class="cat-grid" id="pub-cats"></div>
+  <div class="card"><h3 style="margin-bottom:1rem">🗺 Exhibition Map</h3>
+    <div style="background:#d6d0c4;border-radius:8px;padding:8px;overflow-x:auto" id="pub-map"></div>
+  </div>
+  <div class="card" style="margin-top:1rem"><h3 style="margin-bottom:1rem">🛍 Brands at the Show</h3>
+    <div class="brand-grid" id="pub-brands"></div>
+    <div id="pub-brands-empty" style="text-align:center;color:var(--muted);font-size:13px;padding:1rem">Details appear once stalls are booked.</div>
+  </div>
+</div>
+
+<!-- ═══ EXHIBITOR MODAL ═══ -->
+<div id="ex-modal" class="modal-overlay" onclick="closeMBg(event,'ex-modal')">
+  <div class="modal">
+    <h3 id="ex-modal-title" style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--y5);margin-bottom:1rem">Add Exhibitor</h3>
+    <div class="row2">
+      <div><label>Brand / Name *</label><input id="m-name" placeholder="e.g. Aakriti Crafts"></div>
+      <div><label>City</label><input id="m-city" placeholder="e.g. Kota, Jaipur"></div>
+    </div>
+    <div class="row2">
+      <div><label>Category *</label>
+        <select id="m-cat">
+          <option value="">Select category</option>
+          <option>Jewellery</option><option>Clothing & Apparel</option><option>Rakhi & Gifting</option>
+          <option>Home Decor</option><option>Food & Mithai</option><option>Beauty & Wellness</option>
+          <option>Accessories</option><option>Art & Prints</option><option>Kids & Toys</option>
+          <option>Plants & Nature</option><option>Other</option>
+        </select>
+      </div>
+      <div><label>Stall Number *</label><input id="m-stall" placeholder="e.g. 1, TS1, FS1" style="text-transform:uppercase"></div>
+    </div>
+    <div><label>WhatsApp Number *</label>
+      <div style="display:flex;gap:8px">
+        <input id="m-wa" type="tel" placeholder="10-digit mobile number" style="flex:1">
+        <span style="padding:8px 6px;font-size:12px;color:var(--muted);white-space:nowrap;align-self:flex-end">Used to send booking confirmation</span>
+      </div>
+    </div>
+    <div class="row3">
+      <div><label>Stall Fee (₹)</label><input id="m-fee" type="number" placeholder="0"></div>
+      <div><label>Advance Received (₹)</label><input id="m-adv" type="number" placeholder="0"></div>
+      <div><label>Payment Status</label>
+        <select id="m-pay"><option value="pending">Pending</option><option value="partial">Partial</option><option value="paid">Paid</option></select>
+      </div>
+    </div>
+    <div><label>Additional Requirements</label><textarea id="m-req" placeholder="Power outlet, extra table, hanging rod..."></textarea></div>
+    <div><label>Notes</label><textarea id="m-notes" placeholder="Internal notes..."></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" onclick="closeModal('ex-modal')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="saveExhibitor(false)">Save</button>
+      <button class="btn btn-wa btn-sm" onclick="saveExhibitor(true)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.126.558 4.122 1.532 5.856L0 24l6.335-1.514A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.93 0-3.74-.516-5.295-1.415l-.38-.225-3.76.899.937-3.653-.247-.397A9.955 9.955 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+        Save & Send WhatsApp
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FLOOR DETAIL MODAL ═══ -->
+<div id="floor-modal" class="modal-overlay" onclick="closeMBg(event,'floor-modal')">
+  <div class="modal" style="max-width:380px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+      <span id="fm-title" style="font-size:18px;font-weight:600;font-family:'Cormorant Garamond',serif;color:var(--y5)"></span>
+      <button onclick="closeModal('floor-modal')" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted)">×</button>
+    </div>
+    <div id="fm-body" style="font-size:13px;line-height:2.2;color:var(--muted)"></div>
+    <div class="modal-footer" id="fm-footer"></div>
+  </div>
+</div>
+
+<!-- ═══ REASSIGN MODAL ═══ -->
+<div id="reassign-modal" class="modal-overlay" onclick="closeMBg(event,'reassign-modal')">
+  <div class="modal" style="max-width:360px">
+    <h3 style="font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--y5);margin-bottom:1rem">Reassign Stall</h3>
+    <p id="reassign-info" style="font-size:13px;color:var(--muted);margin-bottom:1rem"></p>
+    <label>New Stall Number</label>
+    <input id="reassign-stall" placeholder="e.g. 5, TS2, FS1" style="text-transform:uppercase;font-size:16px;font-weight:600;text-align:center">
+    <div class="modal-footer">
+      <button class="btn btn-sm" onclick="closeModal('reassign-modal')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="confirmReassign()">Reassign</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ COST MODAL ═══ -->
+<div id="cost-modal" class="modal-overlay" onclick="closeMBg(event,'cost-modal')">
+  <div class="modal">
+    <h3 id="cost-modal-title" style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--y5);margin-bottom:1rem">Add Entry</h3>
+    <div class="row2">
+      <div><label>Description *</label><input id="c-desc" placeholder="e.g. Venue rent..."></div>
+      <div><label>Category</label>
+        <select id="c-cat"><option>Venue</option><option>Decoration</option><option>Marketing</option><option>Logistics</option><option>Staffing</option><option>Food & Beverage</option><option>Technology</option><option>Miscellaneous</option><option>Revenue</option></select>
+      </div>
+    </div>
+    <div class="row2">
+      <div><label>Amount (₹) *</label><input id="c-amt" type="number" placeholder="0"></div>
+      <div><label>Type</label><select id="c-type"><option value="expense">Expense</option><option value="revenue">Revenue / Income</option></select></div>
+    </div>
+    <div class="row2">
+      <div><label>Status</label><select id="c-status"><option value="estimated">Estimated</option><option value="confirmed">Confirmed</option><option value="paid">Paid</option><option value="received">Received</option></select></div>
+      <div><label>Date</label><input id="c-date" type="date"></div>
+    </div>
+    <div><label>Notes</label><textarea id="c-notes" placeholder="Any details..." style="min-height:48px"></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" onclick="closeModal('cost-modal')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="saveCost()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+const CATS={'Jewellery':'💎','Clothing & Apparel':'👗','Rakhi & Gifting':'🎁','Home Decor':'🏡','Food & Mithai':'🍡','Beauty & Wellness':'💄','Accessories':'👜','Art & Prints':'🖼','Kids & Toys':'🧸','Plants & Nature':'🌿','Other':'✨'};
+const COST_ICONS={'Venue':'🏛','Decoration':'🎀','Marketing':'📣','Logistics':'🚚','Staffing':'👥','Food & Beverage':'🍽','Technology':'💻','Miscellaneous':'📦','Revenue':'💰'};
+
+// ── State (fallback to localStorage if Firebase not ready) ──
+let exhibitors=[], visitors={'1':[],'2':[]}, costs=[];
+let editExId=null, editCostId=null, visDay=1, dragIdx=null, reassignIdx=null;
+let fbReady=false;
+
+// ── Firebase listeners ──
+document.addEventListener('firebase-ready', () => {
+  fbReady=true;
+  document.getElementById('sync-dot').classList.add('live');
+  window._listen('exhibitors', data => { exhibitors=data.sort((a,b)=>(a._order||0)-(b._order||0)); renderAdmin(); renderFloor(); });
+  window._listen('visitors',   data => { visitors={'1':[],'2':[]}; data.forEach(v=>{ if(!visitors[v.day])visitors[v.day]=[]; visitors[v.day].push(v); }); renderVisitors(); });
+  window._listen('costs',      data => { costs=data; renderCosts(); });
+});
+
+// Fallback localStorage
+function lsLoad(){ exhibitors=JSON.parse(localStorage.getItem('rp_ex')||'[]'); visitors=JSON.parse(localStorage.getItem('rp_vis')||'{"1":[],"2":[]}'); costs=JSON.parse(localStorage.getItem('rp_costs')||'[]'); }
+function lsSave(){ localStorage.setItem('rp_ex',JSON.stringify(exhibitors)); localStorage.setItem('rp_vis',JSON.stringify(visitors)); localStorage.setItem('rp_costs',JSON.stringify(costs)); }
+
+function showPage(id,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active'); el.classList.add('active');
+  ({admin:renderAdmin,floor:renderFloor,visitors:renderVisitors,costs:renderCosts,public:renderPublic})[id]?.();
+}
+
+/* ── WHATSAPP ── */
+function buildWAMessage(e){
+  const payLabel = e.pay==='paid'?'✅ Fully Paid': e.pay==='partial'?'⏳ Partial Payment Received':'🔴 Payment Pending';
+  return encodeURIComponent(
+`🎀 *Rakhi Pop-Up 2026 — Booking Confirmation*
+
+Hello *${e.name}*! 🌟
+
+We're thrilled to confirm your participation at *Rakhi Pop-Up 2026*.
+
+📋 *Your Details:*
+• Brand: ${e.name}
+• Category: ${e.cat||'—'}
+• City: ${e.city||'—'}
+• Stall No.: *${e.stall||'TBD'}*
+
+📅 *Event:* 19–20 July 2026
+🏨 *Venue:* Hotel Swan, Aerodrome Circle, Kota
+
+💰 *Payment:*
+• Stall Fee: ₹${e.fee?Number(e.fee).toLocaleString():'—'}
+• Advance Paid: ₹${e.adv?Number(e.adv).toLocaleString():'0'}
+• Status: ${payLabel}
+${e.adv&&e.fee&&(+e.fee-(+e.adv||0))>0?`• Balance Due: ₹${(+e.fee-(+e.adv||0)).toLocaleString()}`:''}
+
+${e.req?`📌 *Your Requirements:*\n${e.req}\n\nWe have noted your requirements and will ensure they are arranged.\n`:''}
+For any queries, please reach out to us.
+
+Looking forward to seeing you at the exhibition! 🍋✨
+
+*Team Rakhi Pop-Up, Kota*`);
+}
+
+function sendWhatsApp(e){
+  const num = (e.wa||'').replace(/\D/g,'');
+  if(!num||num.length<10){toast('Please add a valid WhatsApp number first.');return;}
+  const fullNum = num.startsWith('91')?num:'91'+num;
+  const msg = buildWAMessage(e);
+  window.open(`https://wa.me/${fullNum}?text=${msg}`,'_blank');
+}
+
+/* ── EXHIBITORS ── */
+function renderAdmin(){
+  const total=exhibitors.length, paid=exhibitors.filter(e=>e.pay==='paid').length;
+  const partial=exhibitors.filter(e=>e.pay==='partial').length;
+  const rev=exhibitors.reduce((s,e)=>s+(+e.adv||0),0);
+  document.getElementById('ex-metrics').innerHTML=`
+    <div class="metric"><div class="metric-val">${total}</div><div class="metric-lbl">Exhibitors</div></div>
+    <div class="metric"><div class="metric-val" style="color:var(--g3)">${paid}</div><div class="metric-lbl">Fully Paid</div></div>
+    <div class="metric"><div class="metric-val" style="color:var(--y4)">${partial}</div><div class="metric-lbl">Partial</div></div>
+    <div class="metric"><div class="metric-val">₹${fmt(rev)}</div><div class="metric-lbl">Advance In</div></div>`;
+  if(!exhibitors.length){
+    document.getElementById('ex-list').innerHTML='<p style="text-align:center;color:var(--muted);padding:2rem;font-size:13px">No exhibitors yet. Click "+ Add Exhibitor" to get started.</p>';
+    return;
+  }
+  document.getElementById('ex-list').innerHTML=exhibitors.map((e,i)=>`
+    <div class="ex-row" draggable="true" data-idx="${i}"
+      ondragstart="dragStart(event,${i})" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropOn(event,${i})">
+      <div style="cursor:grab;color:var(--muted);font-size:16px;flex-shrink:0">⠿</div>
+      <div class="stall-badge">${e.stall||'?'}</div>
+      <div class="ex-info">
+        <div class="ex-name">${e.name} <span class="badge badge-cat">${e.cat||'—'}</span></div>
+        <div class="ex-meta">${[e.city,e.fee?'Fee ₹'+Number(e.fee).toLocaleString():'',e.adv?'Adv ₹'+Number(e.adv).toLocaleString():''].filter(Boolean).join(' · ')}</div>
+        ${e.req?`<div class="ex-meta">📌 ${e.req}</div>`:''}
+      </div>
+      <span class="badge badge-${e.pay||'pending'}">${e.pay==='paid'?'Paid':e.pay==='partial'?'Partial':'Pending'}</span>
+      <button class="btn btn-sm" style="background:#E8F5E0;border-color:#A8D878;color:#2D5A10;font-size:12px" onclick="sendWhatsApp(exhibitors[${i}])" title="Send WhatsApp">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.126.558 4.122 1.532 5.856L0 24l6.335-1.514A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.93 0-3.74-.516-5.295-1.415l-.38-.225-3.76.899.937-3.653-.247-.397A9.955 9.955 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+        WA
+      </button>
+      <button class="btn btn-sm btn-green" onclick="openReassign(${i})" title="Change stall">⇄</button>
+      <button class="btn btn-sm" onclick="openExModal(${i})">Edit</button>
+      <button class="btn btn-sm btn-danger" onclick="deleteEx(${i})">✕</button>
+    </div>`).join('');
+}
+
+function openExModal(idx=null){
+  editExId=idx;
+  document.getElementById('ex-modal-title').textContent=idx===null?'Add Exhibitor':'Edit Exhibitor';
+  const e=idx!==null?exhibitors[idx]:{};
+  ['name','city','stall','fee','adv','req','notes','wa'].forEach(f=>{ const el=document.getElementById('m-'+f); if(el)el.value=e[f]||''; });
+  document.getElementById('m-cat').value=e.cat||'';
+  document.getElementById('m-pay').value=e.pay||'pending';
+  document.getElementById('ex-modal').classList.add('open');
+}
+
+async function saveExhibitor(sendWA=false){
+  const name=document.getElementById('m-name').value.trim();
+  const stall=document.getElementById('m-stall').value.trim().toUpperCase();
+  if(!name){toast('Please enter a name.');return;}
+  const dup=exhibitors.find((e,i)=>e.stall&&e.stall===stall&&(editExId===null||i!==editExId));
+  if(stall&&dup){toast('Stall '+stall+' is already assigned to '+dup.name);return;}
+  const obj={name,city:document.getElementById('m-city').value.trim(),cat:document.getElementById('m-cat').value,
+    stall,fee:document.getElementById('m-fee').value,adv:document.getElementById('m-adv').value,
+    pay:document.getElementById('m-pay').value,req:document.getElementById('m-req').value.trim(),
+    notes:document.getElementById('m-notes').value.trim(),wa:document.getElementById('m-wa').value.trim(),
+    _order:editExId!==null?(exhibitors[editExId]._order||editExId):exhibitors.length};
+
+  if(fbReady){
+    if(editExId!==null){ await window._set('exhibitors', exhibitors[editExId]._id, obj); }
+    else { await window._add('exhibitors', obj); }
+  } else {
+    if(editExId!==null) exhibitors[editExId]=obj; else exhibitors.push(obj);
+    lsSave(); renderAdmin();
+  }
+  closeModal('ex-modal');
+  toast(editExId!==null?'✓ Exhibitor updated':'✓ Exhibitor added');
+  if(sendWA) sendWhatsApp(obj);
+}
+
+async function deleteEx(i){
+  if(!confirm('Remove '+exhibitors[i].name+'?'))return;
+  if(fbReady) await window._del('exhibitors', exhibitors[i]._id);
+  else { exhibitors.splice(i,1); lsSave(); renderAdmin(); }
+  toast('Removed.');
+}
+
+/* ── DRAG & DROP ── */
+function dragStart(e,idx){ dragIdx=idx; e.dataTransfer.effectAllowed='move'; setTimeout(()=>e.target.style.opacity='0.5',0); }
+function dragOver(e){ e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
+function dragLeave(e){ e.currentTarget.classList.remove('drag-over'); }
+async function dropOn(e,targetIdx){
+  e.preventDefault(); e.currentTarget.classList.remove('drag-over');
+  document.querySelectorAll('.ex-row').forEach(r=>r.style.opacity='1');
+  if(dragIdx===null||dragIdx===targetIdx)return;
+  const moved=exhibitors.splice(dragIdx,1)[0];
+  exhibitors.splice(targetIdx,0,moved);
+  // Update order
+  if(fbReady){ exhibitors.forEach((ex,i)=>window._set('exhibitors',ex._id,{...ex,_order:i})); }
+  else { lsSave(); }
+  dragIdx=null; renderAdmin(); toast('✓ Order updated');
+}
+
+/* ── STALL REASSIGN ── */
+function openReassign(idx){ reassignIdx=idx; document.getElementById('reassign-info').textContent=`Reassigning: ${exhibitors[idx].name} (currently Stall ${exhibitors[idx].stall||'unassigned'})`; document.getElementById('reassign-stall').value=''; document.getElementById('reassign-modal').classList.add('open'); }
+async function confirmReassign(){
+  const newStall=document.getElementById('reassign-stall').value.trim().toUpperCase();
+  if(!newStall){toast('Please enter a stall number.');return;}
+  const dup=exhibitors.find((e,i)=>e.stall===newStall&&i!==reassignIdx);
+  if(dup){toast('Stall '+newStall+' is already assigned to '+dup.name+'.');return;}
+  exhibitors[reassignIdx].stall=newStall;
+  if(fbReady) await window._set('exhibitors',exhibitors[reassignIdx]._id,exhibitors[reassignIdx]);
+  else { lsSave(); renderAdmin(); }
+  const name=exhibitors[reassignIdx].name;
+  closeModal('reassign-modal'); toast(`✓ ${name} moved to Stall ${newStall}`);
+}
+
+/* ── FLOOR PLAN → JPG DOWNLOAD + WHATSAPP ── */
+function shareFloorPlanWA(){
+  // Step 1: render SVG → Canvas → JPG → download
+  const svg = document.getElementById('floor-svg');
+  const svgData = new XMLSerializer().serializeToString(svg);
+  const vb = svg.getAttribute('viewBox').split(' ');
+  const vbW = +vb[2], vbH = +vb[3];
+  const scale = 2; // 2× for crisp JPG
+
+  const canvas = document.createElement('canvas');
+  canvas.width  = vbW * scale;
+  canvas.height = vbH * scale;
+  const ctx = canvas.getContext('2d');
+
+  // White background
+  ctx.fillStyle = '#FFF9E0';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Add event title overlay at top of image
+  ctx.fillStyle = '#7A5C00';
+  ctx.font = `bold ${28*scale}px serif`;
+  ctx.textAlign = 'center';
+
+  const img = new Image();
+  const blob = new Blob([svgData], {type:'image/svg+xml;charset=utf-8'});
+  const url  = URL.createObjectURL(blob);
+
+  img.onload = function(){
+    ctx.scale(scale, scale);
+    ctx.drawImage(img, 0, 0, vbW, vbH);
+    URL.revokeObjectURL(url);
+
+    // Add a header banner
+    ctx.fillStyle = 'rgba(255,248,160,0.92)';
+    ctx.fillRect(0, 0, vbW, 44);
+    ctx.fillStyle = '#7A5C00';
+    ctx.font = 'bold 14px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('🎀 Rakhi Pop-Up 2026  ·  19–20 July  ·  Hotel Swan, Kota', vbW/2, 28);
+
+    // Download as JPG
+    const jpgUrl = canvas.toDataURL('image/jpeg', 0.92);
+    const a = document.createElement('a');
+    a.href = jpgUrl;
+    a.download = 'RakhiPopUp_FloorPlan.jpg';
+    a.click();
+
+    // After short delay open WhatsApp with instructions
+    setTimeout(()=>{
+      const booked = exhibitors.filter(e=>e.stall);
+      let msg = `🎀 *Rakhi Pop-Up 2026 — Floor Plan*\n📅 19–20 July 2026\n🏨 Hotel Swan, Aerodrome Circle, Kota\n\n`;
+      msg += `📊 *${booked.length} stalls booked*\n\n`;
+      if(booked.length){
+        msg += `*Booked Stalls:*\n`;
+        booked.forEach(e=>{ msg += `• Stall ${e.stall} — ${e.name} (${e.cat||'—'})\n`; });
+      }
+      msg += `\n_(Floor plan JPG has been saved to your device — attach it to this chat)_`;
+      window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+      toast('📥 JPG saved! Attach it in WhatsApp.');
+    }, 800);
+  };
+
+  img.onerror = function(){
+    // Fallback: just open WhatsApp with text
+    toast('Could not generate image — opening WhatsApp with text summary.');
+    const booked = exhibitors.filter(e=>e.stall);
+    let msg = `🎀 *Rakhi Pop-Up 2026 — Floor Plan*\n📅 19–20 July 2026\n🏨 Hotel Swan, Aerodrome Circle, Kota\n\n`;
+    booked.forEach(e=>{ msg += `• Stall ${e.stall} — ${e.name}\n`; });
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+  };
+
+  img.src = url;
+}
+
+function downloadFloorPlanJPG(){
+  const svg = document.getElementById('floor-svg');
+  const svgData = new XMLSerializer().serializeToString(svg);
+  const vb = svg.getAttribute('viewBox').split(' ');
+  const vbW = +vb[2], vbH = +vb[3];
+  const scale = 2;
+  const canvas = document.createElement('canvas');
+  canvas.width = vbW * scale;
+  canvas.height = vbH * scale;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#FFF9E0';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  const img = new Image();
+  const blob = new Blob([svgData], {type:'image/svg+xml;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  img.onload = function(){
+    ctx.scale(scale, scale);
+    ctx.drawImage(img, 0, 0, vbW, vbH);
+    ctx.fillStyle = 'rgba(255,248,160,0.92)';
+    ctx.fillRect(0, 0, vbW, 44);
+    ctx.fillStyle = '#7A5C00';
+    ctx.font = 'bold 14px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('🎀 Rakhi Pop-Up 2026  ·  19–20 July  ·  Hotel Swan, Kota', vbW/2, 28);
+    URL.revokeObjectURL(url);
+    const a = document.createElement('a');
+    a.href = canvas.toDataURL('image/jpeg', 0.92);
+    a.download = 'RakhiPopUp_FloorPlan.jpg';
+    a.click();
+    toast('✓ Floor plan JPG downloaded!');
+  };
+  img.src = url;
+}
+
+
+function renderFloor(){
+  const exMap={};exhibitors.forEach(e=>{if(e.stall)exMap[e.stall.toUpperCase()]=e;});
+  const all=['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31','32','33','34','35','TS1','TS2','TS3','TS4','TS5','TS6','TS7','FS1','FS2','FS3'];
+  const booked=all.filter(s=>exMap[s]).length;
+  document.getElementById('floor-stats').innerHTML=`
+    <div class="card" style="padding:6px 12px;font-size:12px;margin:0"><b>${booked}</b> / ${all.length} stalls booked</div>
+    <div class="card" style="padding:6px 12px;font-size:12px;margin:0;color:var(--g3)"><b>${all.length-booked}</b> available</div>`;
+  all.forEach(s=>{
+    const r=document.getElementById('fr'+s), n=document.getElementById('fn'+s);
+    if(!r)return; const ex=exMap[s];
+    r.setAttribute('opacity',ex?'1':'0.42');
+    if(n)n.textContent=ex?(ex.name.length>9?ex.name.slice(0,8)+'…':ex.name):'';
+  });
+}
+
+function floorClick(id){
+  const exMap={};exhibitors.forEach(e=>{if(e.stall)exMap[e.stall.toUpperCase()]=e;});
+  const ex=exMap[id];
+  document.getElementById('fm-title').textContent='Stall '+id;
+  let body='';
+  if(ex){
+    body=`<span style="color:var(--text);font-weight:500;font-size:15px">${ex.name}</span><br>
+    <b>Category:</b> ${ex.cat||'—'}<br><b>City:</b> ${ex.city||'—'}<br>
+    <b>Payment:</b> <span style="font-weight:500;color:${ex.pay==='paid'?'#3B6D11':ex.pay==='partial'?'#8A5700':'#A32D2D'}">${ex.pay==='paid'?'✓ Paid':ex.pay==='partial'?'◑ Partial':'○ Pending'}</span>`;
+    if(ex.adv)body+=`<br><b>Advance:</b> ₹${Number(ex.adv).toLocaleString()}`;
+    if(ex.req)body+=`<br><b>Needs:</b> ${ex.req}`;
+  }else{ body='<span style="color:var(--muted)">Available — not yet assigned.</span>'; }
+  document.getElementById('fm-body').innerHTML=body;
+  const fi=exhibitors.findIndex(e=>e.stall&&e.stall.toUpperCase()===id);
+  document.getElementById('fm-footer').innerHTML=`<button class="btn btn-sm" onclick="closeModal('floor-modal')">Close</button>`+
+    (ex?`<button class="btn btn-sm btn-green" onclick="closeModal('floor-modal');openReassign(${fi})">⇄ Reassign</button>
+    <button class="btn btn-sm btn-primary" onclick="closeModal('floor-modal');openExModal(${fi})">Edit</button>
+    <button class="btn btn-sm" style="background:#E8F5E0;border-color:#A8D878;color:#2D5A10" onclick="sendWhatsApp(exhibitors[${fi}])">WA</button>`:'');
+  document.getElementById('floor-modal').classList.add('open');
+}
+
+/* ── VISITORS ── */
+function renderVisitors(){
+  const list=visitors[visDay]||[];
+  if(!list.length){document.getElementById('vis-list').innerHTML=`<p style="text-align:center;color:var(--muted);font-size:13px;padding:1.5rem">No visitors checked in yet for Day ${visDay}.</p>`;return;}
+  document.getElementById('vis-list').innerHTML=`<div style="font-size:13px;font-weight:500;margin-bottom:10px;color:var(--y5)">${list.length} visitor${list.length!==1?'s':''} — Day ${visDay}</div>`+
+    list.map((v,i)=>`<div class="vis-row"><div class="vis-num">${i+1}</div><div style="flex:1"><div style="font-size:14px;font-weight:500">${v.name}</div><div style="font-size:11px;color:var(--muted)">${v.phone} · ${v.time}</div></div></div>`).join('');
+}
+function setVisDay(day,el){visDay=day;document.querySelectorAll('.tab-sub').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderVisitors();}
+async function addVisitor(){
+  const name=document.getElementById('v-name').value.trim(), phone=document.getElementById('v-phone').value.trim();
+  if(!name||!phone){toast('Please enter name and phone.');return;}
+  const entry={name,phone,day:String(visDay),time:new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})};
+  if(fbReady) await window._add('visitors',entry);
+  else{ if(!visitors[visDay])visitors[visDay]=[]; visitors[visDay].push(entry); lsSave(); renderVisitors(); }
+  document.getElementById('v-name').value=''; document.getElementById('v-phone').value='';
+  toast(`✓ ${name} checked in — Day ${visDay}`);
+}
+
+/* ── COSTS ── */
+function renderCosts(){
+  const exp=costs.filter(c=>c.type==='expense').reduce((s,c)=>s+(+c.amt||0),0);
+  const rev=costs.filter(c=>c.type==='revenue').reduce((s,c)=>s+(+c.amt||0),0);
+  const stallRev=exhibitors.reduce((s,e)=>s+(+e.adv||0),0);
+  const grandRev=rev+stallRev, profit=grandRev-exp;
+  document.getElementById('cost-metrics').innerHTML=`
+    <div class="metric" style="background:#FFF0F0;border-color:#FFCDD2"><div class="metric-val" style="color:#A32D2D">₹${fmt(exp)}</div><div class="metric-lbl">Total Costs</div></div>
+    <div class="metric" style="background:#F0FFF4;border-color:#A8D8A8"><div class="metric-val" style="color:#2E7D32">₹${fmt(grandRev)}</div><div class="metric-lbl">Total Revenue</div></div>
+    <div class="metric" style="background:${profit>=0?'#F0FFF4':'#FFF0F0'};border-color:${profit>=0?'#A8D8A8':'#FFCDD2'}"><div class="metric-val" style="color:${profit>=0?'#2E7D32':'#A32D2D'}">${profit>=0?'+':'−'}₹${fmt(Math.abs(profit))}</div><div class="metric-lbl">${profit>=0?'Net Profit':'Net Loss'}</div></div>`;
+  const pct=grandRev>0?Math.min(100,Math.round(grandRev/Math.max(grandRev,exp)*100)):0;
+  document.getElementById('coverage-pct').textContent=pct+'%';
+  document.getElementById('coverage-bar').style.cssText=`width:${pct}%;background:${pct>=100?'#4CAF50':pct>=60?'#F5A623':'#E8748A'}`;
+  document.getElementById('bar-rev').textContent='Revenue ₹'+fmt(grandRev);
+  document.getElementById('bar-cost').textContent='Costs ₹'+fmt(exp);
+  if(!costs.length){document.getElementById('cost-list').innerHTML='<div class="card"><p style="text-align:center;color:var(--muted);font-size:13px;padding:1rem">No entries yet.</p></div>';return;}
+  const groups={};costs.forEach(c=>{if(!groups[c.cat])groups[c.cat]=[];groups[c.cat].push(c);});
+  document.getElementById('cost-list').innerHTML=Object.entries(groups).map(([cat,items])=>`
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0 8px;border-bottom:1px solid var(--border);margin-bottom:4px">
+        <span style="font-size:11.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">${COST_ICONS[cat]||'📦'} ${cat}</span>
+        <span style="font-size:12px;font-weight:500">₹${fmt(items.reduce((s,c)=>s+(+c.amt||0),0))}</span>
+      </div>
+      ${items.map(c=>{const gi=costs.indexOf(c);return `<div class="cost-row">
+        <div class="cost-icon" style="background:var(--y1)">${c.type==='revenue'?'💰':'💸'}</div>
+        <div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500">${c.desc}</div><div style="font-size:11px;color:var(--muted)">${[c.status,c.date,c.notes].filter(Boolean).join(' · ')}</div></div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-size:14px;font-weight:600;color:${c.type==='revenue'?'#2E7D32':'#A32D2D'}">${c.type==='revenue'?'+':'−'}₹${fmt(+c.amt)}</div>
+          <div style="display:flex;gap:4px;margin-top:4px"><button class="btn btn-sm" onclick="openCostModal(${gi})">Edit</button><button class="btn btn-sm btn-danger" onclick="deleteCost(${gi})">✕</button></div>
+        </div></div>`;}).join('')}
+    </div>`).join('');
+}
+function openCostModal(idx=null){
+  editCostId=idx; document.getElementById('cost-modal-title').textContent=idx===null?'Add Entry':'Edit Entry';
+  const c=idx!==null?costs[idx]:{};
+  document.getElementById('c-desc').value=c.desc||''; document.getElementById('c-cat').value=c.cat||'Venue';
+  document.getElementById('c-amt').value=c.amt||''; document.getElementById('c-type').value=c.type||'expense';
+  document.getElementById('c-status').value=c.status||'estimated'; document.getElementById('c-date').value=c.date||new Date().toISOString().split('T')[0];
+  document.getElementById('c-notes').value=c.notes||''; document.getElementById('cost-modal').classList.add('open');
+}
+async function saveCost(){
+  const desc=document.getElementById('c-desc').value.trim(), amt=document.getElementById('c-amt').value;
+  if(!desc||!amt){toast('Please enter description and amount.');return;}
+  const obj={desc,cat:document.getElementById('c-cat').value,amt:+amt,type:document.getElementById('c-type').value,status:document.getElementById('c-status').value,date:document.getElementById('c-date').value,notes:document.getElementById('c-notes').value.trim()};
+  if(fbReady){ if(editCostId!==null) await window._set('costs',costs[editCostId]._id,obj); else await window._add('costs',obj); }
+  else { if(editCostId!==null)costs[editCostId]=obj;else costs.push(obj); lsSave(); renderCosts(); }
+  closeModal('cost-modal'); toast(editCostId!==null?'✓ Entry updated':'✓ Entry added');
+}
+async function deleteCost(i){ if(!confirm('Remove?'))return; if(fbReady) await window._del('costs',costs[i]._id); else{costs.splice(i,1);lsSave();renderCosts();} toast('Removed.');}
+
+/* ── PUBLIC ── */
+function renderPublic(){
+  const catCounts={};exhibitors.forEach(e=>{if(e.cat)catCounts[e.cat]=(catCounts[e.cat]||0)+1;});
+  document.getElementById('pub-cats').innerHTML=Object.entries(catCounts).length
+    ?Object.entries(catCounts).map(([c,n])=>`<div class="cat-card"><div style="font-size:20px;margin-bottom:4px">${CATS[c]||'✨'}</div><div style="font-size:11.5px;font-weight:500">${c}</div><div style="font-size:10.5px;color:var(--muted);margin-top:2px">${n} brand${n!==1?'s':''}</div></div>`).join('')
+    :'<div style="color:var(--muted);font-size:13px">Categories appear once exhibitors are added.</div>';
+  document.getElementById('pub-map').innerHTML='<svg viewBox="0 0 700 1300" style="width:100%;height:auto">'+document.getElementById('floor-svg').innerHTML+'</svg>';
+  const booked=exhibitors.filter(e=>e.stall);
+  document.getElementById('pub-brands-empty').style.display=booked.length?'none':'block';
+  document.getElementById('pub-brands').innerHTML=booked.map(e=>`<div class="brand-item"><div class="stall-badge">${e.stall}</div><div><div style="font-size:13px;font-weight:500">${e.name}</div><div style="font-size:11px;color:var(--muted)">${CATS[e.cat]||'✨'} ${e.cat||'—'}</div></div></div>`).join('');
+}
+
+/* ── HELPERS ── */
+function fmt(n){return n>=1000?(n/1000).toFixed(1)+'k':Math.round(n).toString();}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function closeMBg(e,id){if(e.target.id===id)closeModal(id);}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600);}
+
+// Init fallback
+lsLoad(); renderAdmin();
+document.getElementById('c-date').value=new Date().toISOString().split('T')[0];
+</script>
+<!-- ── UPDATE BANNER (shown when new version available) ── -->
+<div id="update-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#2A2200;color:#FFF8DC;padding:12px 1rem;z-index:9999;display:none;align-items:center;justify-content:space-between;gap:12px;font-size:13px;font-family:'DM Sans',sans-serif">
+  <span>🎀 New version available!</span>
+  <button onclick="applyUpdate()" style="background:#F5C518;color:#2A2200;border:none;padding:7px 16px;border-radius:8px;font-weight:600;cursor:pointer;font-size:13px">Update Now</button>
+</div>
+
+<script>
+// ── SERVICE WORKER + AUTO-UPDATE ──
+let newWorker;
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').then(reg => {
+      console.log('[PWA] SW registered:', reg.scope);
+
+      // Check for updates every 60 seconds
+      setInterval(() => reg.update(), 60000);
+
+      // New SW found waiting
+      reg.addEventListener('updatefound', () => {
+        newWorker = reg.installing;
+        newWorker.addEventListener('statechange', () => {
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            // New version ready — show banner
+            document.getElementById('update-banner').style.display = 'flex';
+          }
+        });
+      });
+    }).catch(err => console.log('[PWA] SW registration failed:', err));
+
+    // When SW takes control (after update), reload the page
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      window.location.reload();
+    });
+  });
+}
+
+function applyUpdate() {
+  if (newWorker) {
+    newWorker.postMessage('SKIP_WAITING');
+  } else {
+    window.location.reload();
+  }
+}
+
+// ── INSTALL PROMPT (Add to Home Screen) ──
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // Show install button in nav if available
+  const btn = document.getElementById('install-btn');
+  if (btn) btn.style.display = 'flex';
+});
+
+function installPWA() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(choice => {
+      if (choice.outcome === 'accepted') {
+        toast('✓ App installed to home screen!');
+        const btn = document.getElementById('install-btn');
+        if (btn) btn.style.display = 'none';
+      }
+      deferredPrompt = null;
+    });
+  }
+}
+</script>
+</body>
+</html>
