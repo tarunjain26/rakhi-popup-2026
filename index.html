@@ -604,18 +604,20 @@ let exhibitors=[], visitors={'1':[],'2':[]}, costs=[];
 let editExId=null, editCostId=null, visDay=1, dragIdx=null, reassignIdx=null;
 let fbReady=false;
 
-// ── Firebase listeners ──
+// ── Firebase listeners — single consolidated listener ──
 document.addEventListener('firebase-ready', () => {
   fbReady=true;
   document.getElementById('sync-dot').classList.add('live');
   window._listen('exhibitors', data => { exhibitors=data.sort((a,b)=>(a._order||0)-(b._order||0)); renderAdmin(); renderFloor(); });
   window._listen('visitors',   data => { visitors={'1':[],'2':[]}; data.forEach(v=>{ if(!visitors[v.day])visitors[v.day]=[]; visitors[v.day].push(v); }); renderVisitors(); });
   window._listen('costs',      data => { costs=data; renderCosts(); });
+  window._listen('sponsors',   data => { sponsors=data; renderSponsors(); renderCosts(); });
 });
 
 // Fallback localStorage
 function lsLoad(){ exhibitors=JSON.parse(localStorage.getItem('rp_ex')||'[]'); visitors=JSON.parse(localStorage.getItem('rp_vis')||'{"1":[],"2":[]}'); costs=JSON.parse(localStorage.getItem('rp_costs')||'[]'); sponsors=JSON.parse(localStorage.getItem('rp_sponsors')||'[]'); }
 function lsSave(){ localStorage.setItem('rp_ex',JSON.stringify(exhibitors)); localStorage.setItem('rp_vis',JSON.stringify(visitors)); localStorage.setItem('rp_costs',JSON.stringify(costs)); localStorage.setItem('rp_sponsors',JSON.stringify(sponsors)); }
+
 
 function showPage(id,el){
   const adminPages = ['admin','floor','visitors','costs','sponsors'];
@@ -634,15 +636,6 @@ let sponsors = JSON.parse(localStorage.getItem('rp_sponsors')||'[]');
 let editSpId = null;
 let editDelSpId = null;
 let editDelIdx = null;
-
-// Firebase listener for sponsors
-document.addEventListener('firebase-ready', () => {
-  window._listen('sponsors', data => {
-    sponsors = data;
-    renderSponsors();
-    renderCosts(); // refresh costs to include sponsor income
-  });
-});
 
 function renderSponsors(){
   const totalAmt  = sponsors.reduce((s,sp)=>s+(+sp.amt||0),0);
