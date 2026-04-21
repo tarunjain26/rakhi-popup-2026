@@ -121,7 +121,7 @@ textarea{resize:vertical;min-height:60px}
 .cat-card:hover{border-color:var(--y3);background:var(--y1)}
 .brand-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .brand-item{background:var(--light);border:1px solid var(--border);border-radius:8px;padding:10px;display:flex;align-items:center;gap:8px}
-.cost-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1rem}
+.cost-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1rem}
 .cost-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
 .cost-row:last-child{border-bottom:none}
 .cost-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
@@ -902,30 +902,53 @@ async function addVisitor(){
 
 /* ── COSTS ── */
 function renderCosts(){
-  const exp=costs.filter(c=>c.type==='expense').reduce((s,c)=>s+(+c.amt||0),0);
-  const rev=costs.filter(c=>c.type==='revenue').reduce((s,c)=>s+(+c.amt||0),0);
-  const stallRev=exhibitors.reduce((s,e)=>s+(+e.adv||0),0);
-  const spRev=sponsors.reduce((s,sp)=>s+(+sp.recv||0),0);
-  const grandRev=rev+stallRev+spRev, profit=grandRev-exp;
-  document.getElementById('cost-metrics').innerHTML=`
-    <div class="metric" style="background:#FFF0F0;border-color:#FFCDD2"><div class="metric-val" style="color:#A32D2D">₹${fmt(exp)}</div><div class="metric-lbl">Total Costs</div></div>
-    <div class="metric" style="background:#F0FFF4;border-color:#A8D8A8"><div class="metric-val" style="color:#2E7D32">₹${fmt(grandRev)}</div><div class="metric-lbl">Total Revenue</div></div>
-    <div class="metric" style="background:${profit>=0?'#F0FFF4':'#FFF0F0'};border-color:${profit>=0?'#A8D8A8':'#FFCDD2'}"><div class="metric-val" style="color:${profit>=0?'#2E7D32':'#A32D2D'}">${profit>=0?'+':'−'}₹${fmt(Math.abs(profit))}</div><div class="metric-lbl">${profit>=0?'Net Profit':'Net Loss'}</div></div>`;
-  const pct=grandRev>0?Math.min(100,Math.round(grandRev/Math.max(grandRev,exp)*100)):0;
-  document.getElementById('coverage-pct').textContent=pct+'%';
-  document.getElementById('coverage-bar').style.cssText=`width:${pct}%;background:${pct>=100?'#4CAF50':pct>=60?'#F5A623':'#E8748A'}`;
-  document.getElementById('bar-rev').textContent='Revenue ₹'+fmt(grandRev);
-  document.getElementById('bar-cost').textContent='Costs ₹'+fmt(exp);
+  const exp        = costs.filter(c=>c.type==='expense').reduce((s,c)=>s+(+c.amt||0),0);
+  const otherRev   = costs.filter(c=>c.type==='revenue').reduce((s,c)=>s+(+c.amt||0),0);
 
-  // Revenue breakdown note
-  let breakdown = '';
-  if(stallRev>0) breakdown += `🛖 Stall advances: ₹${fmt(stallRev)}`;
-  if(spRev>0)    breakdown += `${breakdown?' &nbsp;·&nbsp; ':''}🤝 Sponsorships: ₹${fmt(spRev)}`;
-  if(rev>0)      breakdown += `${breakdown?' &nbsp;·&nbsp; ':''}💰 Other income: ₹${fmt(rev)}`;
-  if(breakdown){
-    const el = document.getElementById('cost-breakdown');
-    if(el) el.innerHTML = breakdown;
-  }
+  // Use FULL committed amounts (not just received) for revenue
+  const stallTotal    = exhibitors.reduce((s,e)=>s+(+e.fee||0),0);
+  const stallReceived = exhibitors.reduce((s,e)=>s+(+e.adv||0),0);
+  const spTotal       = sponsors.reduce((s,sp)=>s+(+sp.amt||0),0);
+  const spReceived    = sponsors.reduce((s,sp)=>s+(+sp.recv||0),0);
+
+  const grandRev   = otherRev + stallTotal + spTotal;
+  const totalRecvd = otherRev + stallReceived + spReceived;
+  const receivable = (stallTotal - stallReceived) + (spTotal - spReceived);
+  const profit     = grandRev - exp;
+
+  // 4-box metrics: Costs | Total Revenue | Receivables | Net
+  document.getElementById('cost-metrics').innerHTML=`
+    <div class="metric" style="background:#FFF0F0;border-color:#FFCDD2">
+      <div class="metric-val" style="color:#A32D2D">₹${fmt(exp)}</div>
+      <div class="metric-lbl">Total Costs</div>
+    </div>
+    <div class="metric" style="background:#F0FFF4;border-color:#A8D8A8">
+      <div class="metric-val" style="color:#2E7D32">₹${fmt(grandRev)}</div>
+      <div class="metric-lbl">Total Revenue</div>
+    </div>
+    <div class="metric" style="background:#FFF8E0;border-color:var(--y3)">
+      <div class="metric-val" style="color:var(--y5)">₹${fmt(receivable)}</div>
+      <div class="metric-lbl">Receivables</div>
+    </div>
+    <div class="metric" style="background:${profit>=0?'#F0FFF4':'#FFF0F0'};border-color:${profit>=0?'#A8D8A8':'#FFCDD2'}">
+      <div class="metric-val" style="color:${profit>=0?'#2E7D32':'#A32D2D'}">${profit>=0?'+':'−'}₹${fmt(Math.abs(profit))}</div>
+      <div class="metric-lbl">${profit>=0?'Net Profit':'Net Loss'}</div>
+    </div>`;
+
+  // Progress bar shows % collected of total committed
+  const pct = grandRev>0 ? Math.min(100,Math.round(totalRecvd/grandRev*100)) : 0;
+  document.getElementById('coverage-pct').textContent = pct+'% collected';
+  document.getElementById('coverage-bar').style.cssText = `width:${pct}%;background:${pct>=100?'#4CAF50':pct>=60?'#F5A623':'#E8748A'}`;
+  document.getElementById('bar-rev').textContent  = `Collected ₹${fmt(totalRecvd)}`;
+  document.getElementById('bar-cost').textContent = `Committed ₹${fmt(grandRev)}`;
+
+  // Breakdown line
+  let bd = '';
+  if(stallTotal>0) bd += `🛖 Stalls ₹${fmt(stallTotal)} (rcvd ₹${fmt(stallReceived)})`;
+  if(spTotal>0)    bd += `${bd?' &nbsp;·&nbsp; ':''}🤝 Sponsors ₹${fmt(spTotal)} (rcvd ₹${fmt(spReceived)})`;
+  if(otherRev>0)   bd += `${bd?' &nbsp;·&nbsp; ':''}💰 Other ₹${fmt(otherRev)}`;
+  const bdEl = document.getElementById('cost-breakdown');
+  if(bdEl) bdEl.innerHTML = bd;
 
   if(!costs.length){
     document.getElementById('cost-list').innerHTML='<div class="card"><p style="text-align:center;color:var(--muted);font-size:13px;padding:1rem">No cost entries yet. Click "+ Add Entry" to start tracking.</p></div>';
