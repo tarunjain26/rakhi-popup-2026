@@ -403,14 +403,17 @@ textarea{resize:vertical;min-height:60px}
       <div><label>City</label><input id="m-city" placeholder="e.g. Kota, Jaipur"></div>
     </div>
     <div class="row2">
-      <div><label>Category *</label>
-        <select id="m-cat">
-          <option value="">Select category</option>
-          <option>Jewellery</option><option>Clothing & Apparel</option><option>Rakhi & Gifting</option>
-          <option>Home Decor</option><option>Food & Mithai</option><option>Beauty & Wellness</option>
-          <option>Accessories</option><option>Art & Prints</option><option>Kids & Toys</option>
-          <option>Plants & Nature</option><option>Other</option>
-        </select>
+      <div><label>Category</label>
+        <div style="display:flex;gap:6px">
+          <select id="m-cat" style="flex:1">
+            <option value="">Select category</option>
+            <option>Jewellery</option><option>Clothing & Apparel</option><option>Rakhi & Gifting</option>
+            <option>Home Decor</option><option>Food & Mithai</option><option>Beauty & Wellness</option>
+            <option>Accessories</option><option>Art & Prints</option><option>Kids & Toys</option>
+            <option>Plants & Nature</option><option>Other</option>
+          </select>
+          <button type="button" class="btn btn-sm" onclick="openCatManager()" style="flex-shrink:0;font-size:16px;padding:0 12px" title="Add / remove categories">⚙</button>
+        </div>
       </div>
       <div><label>Stall Number *</label><input id="m-stall" placeholder="e.g. 1, TS1, FS1" style="text-transform:uppercase"></div>
     </div>
@@ -558,6 +561,24 @@ textarea{resize:vertical;min-height:60px}
   </div>
 </div>
 
+<!-- ═══ CATEGORY MANAGER ═══ -->
+<div id="cat-modal" class="modal-overlay" onclick="if(event.target.id==='cat-modal')closeModal('cat-modal')">
+  <div class="modal" style="max-width:380px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+      <span style="font-size:17px;font-weight:600;font-family:'Cormorant Garamond',serif;color:var(--y5)">Manage Categories</span>
+      <button onclick="closeModal('cat-modal')" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted)">×</button>
+    </div>
+    <div id="cat-list" style="margin-bottom:1rem;max-height:300px;overflow-y:auto"></div>
+    <div style="display:flex;gap:8px">
+      <input id="cat-new-input" placeholder="New category name..." style="flex:1" onkeydown="if(event.key==='Enter')addCategory()">
+      <button class="btn btn-primary btn-sm" onclick="addCategory()">Add</button>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sm btn-primary" onclick="closeModal('cat-modal')">Done</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast" class="toast"></div>
 
 <script>
@@ -672,6 +693,7 @@ function openExModal(idx=null){
   document.getElementById('ex-modal-title').textContent=idx===null?'Add Exhibitor':'Edit Exhibitor';
   const e=idx!==null?exhibitors[idx]:{};
   ['name','city','stall','fee','adv','req','notes','wa'].forEach(f=>{ const el=document.getElementById('m-'+f); if(el)el.value=e[f]||''; });
+  refreshCatDropdown();
   document.getElementById('m-cat').value=e.cat||'';
   document.getElementById('m-pay').value=e.pay||'pending';
   openModal('ex-modal');
@@ -1276,7 +1298,66 @@ function sendSpWA(i){
   window.open(`https://wa.me/91${num}?text=${encodeURIComponent(msg)}`,'_blank');
 }
 
+/* ── CATEGORY MANAGER ── */
+const DEFAULT_CATS=['Jewellery','Clothing & Apparel','Rakhi & Gifting','Home Decor','Food & Mithai','Beauty & Wellness','Accessories','Art & Prints','Kids & Toys','Plants & Nature','Other'];
+
+function getCategories(){
+  try{ const s=localStorage.getItem('rp_cats'); return s?JSON.parse(s):[...DEFAULT_CATS]; }
+  catch(e){ return [...DEFAULT_CATS]; }
+}
+function saveCategories(cats){ localStorage.setItem('rp_cats',JSON.stringify(cats)); }
+
+function refreshCatDropdown(){
+  const cats=getCategories();
+  const sel=document.getElementById('m-cat');
+  if(!sel)return;
+  const cur=sel.value;
+  sel.innerHTML='<option value="">Select category</option>'+cats.map(c=>`<option${c===cur?' selected':''}>${c}</option>`).join('');
+}
+
+function openCatManager(){
+  renderCatList();
+  openModal('cat-modal');
+}
+
+function renderCatList(){
+  const cats=getCategories();
+  document.getElementById('cat-list').innerHTML=cats.map((c,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)">
+      <span style="flex:1;font-size:13px">${c}</span>
+      ${i<DEFAULT_CATS.length
+        ?`<span style="font-size:10px;color:var(--muted);padding:2px 8px;background:var(--y1);border-radius:20px">default</span>`
+        :`<button class="btn btn-sm btn-danger" style="padding:4px 10px" onclick="deleteCategory(${i})">✕</button>`}
+    </div>`).join('');
+}
+
+function addCategory(){
+  const inp=document.getElementById('cat-new-input');
+  const name=inp.value.trim();
+  if(!name){toast('Please enter a category name.');return;}
+  const cats=getCategories();
+  if(cats.map(c=>c.toLowerCase()).includes(name.toLowerCase())){toast('Category already exists.');return;}
+  cats.push(name);
+  saveCategories(cats);
+  inp.value='';
+  renderCatList();
+  refreshCatDropdown();
+  toast(`✓ "${name}" added`);
+}
+
+function deleteCategory(i){
+  const cats=getCategories();
+  if(i<DEFAULT_CATS.length){toast('Default categories cannot be removed.');return;}
+  if(!confirm(`Remove "${cats[i]}"?`))return;
+  cats.splice(i,1);
+  saveCategories(cats);
+  renderCatList();
+  refreshCatDropdown();
+  toast('Category removed.');
+}
+
 lsLoad(); renderAdmin();
+refreshCatDropdown();
 document.getElementById('c-date').value=new Date().toISOString().split('T')[0];
 </script>
 <div id="update-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#2A2200;color:#FFF8DC;padding:12px 1rem;z-index:9999;align-items:center;justify-content:space-between;gap:12px;font-size:13px">
