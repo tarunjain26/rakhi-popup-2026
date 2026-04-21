@@ -667,11 +667,12 @@ function renderAdmin(){
     document.getElementById('ex-list').innerHTML='<p style="text-align:center;color:var(--muted);padding:2rem;font-size:13px">No exhibitors yet. Click "+ Add Exhibitor" to get started.</p>';
     return;
   }
-  document.getElementById('ex-list').innerHTML=exhibitors.map((e,i)=>`
-    <div class="ex-row" draggable="true" data-idx="${i}"
+  document.getElementById('ex-list').innerHTML=exhibitors.map((e,i)=>{
+    const sc=stallColor(e.stall);
+    return `<div class="ex-row" draggable="true" data-idx="${i}"
       ondragstart="dragStart(event,${i})" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropOn(event,${i})">
       <div style="cursor:grab;color:var(--muted);font-size:16px;flex-shrink:0">⠿</div>
-      <div class="stall-badge">${e.stall||'?'}</div>
+      <div class="stall-badge" style="background:${sc.bg};border-color:${sc.border};color:${sc.text}">${e.stall||'?'}</div>
       <div class="ex-info">
         <div class="ex-name">${e.name} <span class="badge badge-cat">${e.cat||'—'}</span></div>
         <div class="ex-meta">${[e.city, e.fee?'Fee ₹'+Number(e.fee).toLocaleString():'', e.adv?'Adv ₹'+Number(e.adv).toLocaleString():''].filter(Boolean).join(' · ')}</div>
@@ -685,7 +686,8 @@ function renderAdmin(){
           <button class="btn btn-sm btn-danger" onclick="deleteEx(${i})">✕</button>
         </div>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 function openExModal(idx=null){
@@ -1093,11 +1095,34 @@ function renderPublic(){
   document.getElementById('pub-map').innerHTML='<svg viewBox="0 0 700 1300" style="width:100%;height:auto">'+document.getElementById('floor-svg').innerHTML+'</svg>';
   const booked=exhibitors.filter(e=>e.stall);
   document.getElementById('pub-brands-empty').style.display=booked.length?'none':'block';
-  document.getElementById('pub-brands').innerHTML=booked.map(e=>`<div class="brand-item"><div class="stall-badge">${e.stall}</div><div><div style="font-size:13px;font-weight:500">${e.name}</div><div style="font-size:11px;color:var(--muted)">${CATS[e.cat]||'✨'} ${e.cat||'—'}</div></div></div>`).join('');
+  document.getElementById('pub-brands').innerHTML=booked.map(e=>{
+    const sc=stallColor(e.stall);
+    return `<div class="brand-item"><div class="stall-badge" style="background:${sc.bg};border-color:${sc.border};color:${sc.text}">${e.stall}</div><div><div style="font-size:13px;font-weight:500">${e.name}</div><div style="font-size:11px;color:var(--muted)">${CATS[e.cat]||'✨'} ${e.cat||'—'}</div></div></div>`;
+  }).join('');
 }
 
 /* ── HELPERS ── */
 function fmt(n){return n>=1000?(n/1000).toFixed(1)+'k':Math.round(n).toString();}
+
+function stallColor(stall){
+  if(!stall) return {bg:'var(--y3)',border:'var(--y4)',text:'var(--y5)'};
+  const s = stall.toUpperCase();
+  const num = parseInt(s);
+  // Green corner stalls
+  if(s==='1'||s==='11') return {bg:'#4CAF50',border:'#388E3C',text:'#fff'};
+  // Food stalls
+  if(s.startsWith('FS'))  return {bg:'#F5C518',border:'#c9a020',text:'#5a3e00'};
+  // Table stalls
+  if(s.startsWith('TS'))  return {bg:'#ede8de',border:'#bbb',text:'#555'};
+  // Blue island stalls 24–35
+  if(num>=24&&num<=35)     return {bg:'#5B9BD5',border:'#3a7ab8',text:'#fff'};
+  // Blue wall stalls 5, 6
+  if(s==='5'||s==='6')    return {bg:'#5B9BD5',border:'#3a7ab8',text:'#fff'};
+  // Pink wall stalls (everything else numbered)
+  if(num>=2&&num<=23)      return {bg:'#E8748A',border:'#c25570',text:'#fff'};
+  // Default yellow
+  return {bg:'var(--y3)',border:'var(--y4)',text:'var(--y5)'};
+}
 function closeModal(id){
   const el=document.getElementById(id);
   if(!el)return;
