@@ -218,6 +218,16 @@ textarea{resize:vertical;min-height:60px}
   .nav-tab{padding:0 0.45rem;font-size:10.5px}
   .metric-grid{grid-template-columns:1fr 1fr;gap:6px}
 }
+/* PIN keypad */
+.pin-key{padding:0;height:56px;border-radius:50%;width:56px;border:1.5px solid var(--border);background:var(--surface);font-size:20px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--text);transition:all .15s;display:flex;align-items:center;justify-content:center;margin:0 auto}
+.pin-key:hover{background:var(--y2);border-color:var(--y3)}
+.pin-key:active{transform:scale(0.92);background:var(--y3)}
+.pin-key-clear{font-size:18px;color:var(--muted)}
+.pin-key-ok{background:var(--y3);border-color:var(--y4);color:var(--y5);font-size:14px;font-weight:600}
+.pin-key-ok:hover{background:var(--y4);color:#fff}
+.pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--y3);background:transparent;transition:background .15s}
+.pin-dot.filled{background:var(--y3)}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
 </style>
 </head>
 <body>
@@ -227,13 +237,16 @@ textarea{resize:vertical;min-height:60px}
     <div class="nav-brand-title">🍋 Rakhi Pop-Up <span class="sync-dot" id="sync-dot" title="Firebase sync status"></span></div>
     <div class="nav-brand-sub">19–20 July 2026 · Kota</div>
   </div>
-  <div class="nav-tab active" onclick="showPage('admin',this)"><span class="nav-full">Exhibitors</span><span class="nav-short">Stalls</span></div>
-  <div class="nav-tab" onclick="showPage('floor',this)"><span class="nav-full">Floor Plan</span><span class="nav-short">Map</span></div>
-  <div class="nav-tab" onclick="showPage('visitors',this)"><span class="nav-full">Visitors</span><span class="nav-short">Visitors</span></div>
-  <div class="nav-tab" onclick="showPage('costs',this)"><span class="nav-full">Costs</span><span class="nav-short">Costs</span></div>
-  <div class="nav-tab" onclick="showPage('public',this)"><span class="nav-full">Guest View</span><span class="nav-short">Guest</span></div>
-  <button id="install-btn" onclick="installPWA()" style="display:none;margin-left:auto;margin-right:4px;padding:5px 12px;background:#F5C518;border:1.5px solid #D4A017;color:#7A5C00;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;align-items:center;gap:5px;white-space:nowrap;font-family:'DM Sans',sans-serif">
-    ⬇ Install App
+  <div class="nav-tab admin-only" id="tab-admin" onclick="showPage('admin',this)" style="display:none"><span class="nav-full">Exhibitors</span><span class="nav-short">Stalls</span></div>
+  <div class="nav-tab admin-only" id="tab-floor" onclick="showPage('floor',this)" style="display:none"><span class="nav-full">Floor Plan</span><span class="nav-short">Map</span></div>
+  <div class="nav-tab admin-only" id="tab-visitors" onclick="showPage('visitors',this)" style="display:none"><span class="nav-full">Visitors</span><span class="nav-short">Visitors</span></div>
+  <div class="nav-tab admin-only" id="tab-costs" onclick="showPage('costs',this)" style="display:none"><span class="nav-full">Costs</span><span class="nav-short">Costs</span></div>
+  <div class="nav-tab active" id="tab-public" onclick="showPage('public',this)"><span class="nav-full">Guest View</span><span class="nav-short">Guest</span></div>
+  <button id="admin-lock-btn" onclick="toggleAdminLock()" style="margin-left:auto;flex-shrink:0;padding:5px 12px;background:var(--light);border:1.5px solid var(--border);color:var(--muted);border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;font-family:'DM Sans',sans-serif">
+    🔒 Admin
+  </button>
+  <button id="install-btn" onclick="installPWA()" style="display:none;margin-left:4px;flex-shrink:0;padding:5px 12px;background:#F5C518;border:1.5px solid #D4A017;color:#7A5C00;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;align-items:center;gap:5px;white-space:nowrap;font-family:'DM Sans',sans-serif">
+    ⬇ Install
   </button>
 </nav>
 <div class="ticker">
@@ -459,22 +472,23 @@ textarea{resize:vertical;min-height:60px}
       <div><label>City</label><input id="m-city" placeholder="e.g. Kota, Jaipur"></div>
     </div>
     <div class="row2">
-      <div><label>Category *</label>
-        <select id="m-cat">
-          <option value="">Select category</option>
-          <option>Jewellery</option><option>Clothing & Apparel</option><option>Rakhi & Gifting</option>
-          <option>Home Decor</option><option>Food & Mithai</option><option>Beauty & Wellness</option>
-          <option>Accessories</option><option>Art & Prints</option><option>Kids & Toys</option>
-          <option>Plants & Nature</option><option>Other</option>
-        </select>
+      <div>
+        <label>Category</label>
+        <div style="display:flex;gap:6px">
+          <select id="m-cat" style="flex:1">
+            <option value="">Select category</option>
+            <option>Jewellery</option><option>Clothing & Apparel</option><option>Rakhi & Gifting</option>
+            <option>Home Decor</option><option>Food & Mithai</option><option>Beauty & Wellness</option>
+            <option>Accessories</option><option>Art & Prints</option><option>Kids & Toys</option>
+            <option>Plants & Nature</option><option>Other</option>
+          </select>
+          <button type="button" class="btn btn-sm" onclick="manageCats()" title="Add / remove categories" style="flex-shrink:0;padding:0 10px;font-size:16px">⚙</button>
+        </div>
       </div>
       <div><label>Stall Number *</label><input id="m-stall" placeholder="e.g. 1, TS1, FS1" style="text-transform:uppercase"></div>
     </div>
-    <div><label>WhatsApp Number *</label>
-      <div style="display:flex;gap:8px">
-        <input id="m-wa" type="tel" placeholder="10-digit mobile number" style="flex:1">
-        <span style="padding:8px 6px;font-size:12px;color:var(--muted);white-space:nowrap;align-self:flex-end">Used to send booking confirmation</span>
-      </div>
+    <div><label>WhatsApp Number <span style="font-size:10px;color:var(--muted);font-weight:400">(optional)</span></label>
+      <input id="m-wa" type="tel" placeholder="10-digit mobile number — leave blank to skip">
     </div>
     <div class="row3">
       <div><label>Stall Fee (₹)</label><input id="m-fee" type="number" placeholder="0"></div>
@@ -573,13 +587,180 @@ function lsLoad(){ exhibitors=JSON.parse(localStorage.getItem('rp_ex')||'[]'); v
 function lsSave(){ localStorage.setItem('rp_ex',JSON.stringify(exhibitors)); localStorage.setItem('rp_vis',JSON.stringify(visitors)); localStorage.setItem('rp_costs',JSON.stringify(costs)); }
 
 function showPage(id,el){
+  const adminPages = ['admin','floor','visitors','costs'];
+  if(adminPages.includes(id) && !isAdmin){
+    toast('🔒 Enter admin PIN to access this page.');
+    return;
+  }
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active'); el.classList.add('active');
   ({admin:renderAdmin,floor:renderFloor,visitors:renderVisitors,costs:renderCosts,public:renderPublic})[id]?.();
 }
 
-/* ── WHATSAPP ── */
+/* ── ADMIN PIN SYSTEM ── */
+const ADMIN_PIN = '2026'; // Change this to your preferred PIN
+let pinBuffer = '';
+let isAdmin = sessionStorage.getItem('rp_admin') === 'true';
+
+function initAuthState(){
+  if(isAdmin){
+    unlockAdmin(false);
+  } else {
+    lockAdmin(false);
+  }
+}
+
+function lockAdmin(navigate=true){
+  isAdmin = false;
+  sessionStorage.removeItem('rp_admin');
+  // Hide admin tabs
+  document.querySelectorAll('.admin-only').forEach(el=>el.style.display='none');
+  // Update lock button
+  const btn = document.getElementById('admin-lock-btn');
+  btn.innerHTML = '🔒 Admin';
+  btn.style.background = 'var(--light)';
+  btn.style.color = 'var(--muted)';
+  btn.style.borderColor = 'var(--border)';
+  // Show guest view
+  if(navigate){
+    const guestTab = document.getElementById('tab-public');
+    showPage('public', guestTab);
+  }
+}
+
+function unlockAdmin(navigate=true){
+  isAdmin = true;
+  sessionStorage.setItem('rp_admin','true');
+  // Show admin tabs
+  document.querySelectorAll('.admin-only').forEach(el=>el.style.display='flex');
+  // Update lock button
+  const btn = document.getElementById('admin-lock-btn');
+  btn.innerHTML = '🔓 Admin';
+  btn.style.background = '#EAF3DE';
+  btn.style.color = '#2D5A10';
+  btn.style.borderColor = '#A8D878';
+  // Go to exhibitors
+  if(navigate){
+    const adminTab = document.getElementById('tab-admin');
+    showPage('admin', adminTab);
+  }
+}
+
+function toggleAdminLock(){
+  if(isAdmin){
+    // Already admin — lock it
+    if(confirm('Log out of admin mode?')){
+      lockAdmin();
+      toast('🔒 Admin mode off');
+    }
+  } else {
+    // Show PIN entry
+    pinBuffer = '';
+    document.getElementById('pin-error').textContent = '';
+    updatePinDots();
+    document.getElementById('pin-modal').classList.add('open');
+  }
+}
+
+function pinKey(k){
+  if(pinBuffer.length >= 4) return;
+  pinBuffer += k;
+  updatePinDots();
+  if(pinBuffer.length === 4) setTimeout(pinSubmit, 200);
+}
+
+function pinClear(){
+  pinBuffer = pinBuffer.slice(0,-1);
+  updatePinDots();
+  document.getElementById('pin-error').textContent = '';
+}
+
+function updatePinDots(){
+  const dots = document.getElementById('pin-dots');
+  dots.innerHTML = [0,1,2,3].map(i=>
+    `<div class="pin-dot ${i < pinBuffer.length ? 'filled' : ''}"></div>`
+  ).join('');
+}
+
+function pinSubmit(){
+  if(pinBuffer === ADMIN_PIN){
+    closeModal('pin-modal');
+    unlockAdmin();
+    toast('🔓 Admin mode unlocked!');
+  } else {
+    document.getElementById('pin-error').textContent = 'Incorrect PIN. Try again.';
+    // Shake animation
+    const dots = document.getElementById('pin-dots');
+    dots.style.animation = 'shake .3s ease';
+    setTimeout(()=>{ dots.style.animation=''; pinBuffer=''; updatePinDots(); }, 400);
+  }
+}
+
+
+const DEFAULT_CATS = ['Jewellery','Clothing & Apparel','Rakhi & Gifting','Home Decor','Food & Mithai','Beauty & Wellness','Accessories','Art & Prints','Kids & Toys','Plants & Nature','Other'];
+
+function getCategories(){
+  const stored = localStorage.getItem('rp_cats');
+  return stored ? JSON.parse(stored) : [...DEFAULT_CATS];
+}
+
+function saveCategories(cats){
+  localStorage.setItem('rp_cats', JSON.stringify(cats));
+}
+
+function refreshCatDropdown(){
+  const cats = getCategories();
+  const sel = document.getElementById('m-cat');
+  if(!sel) return;
+  const current = sel.value;
+  sel.innerHTML = '<option value="">Select category</option>' +
+    cats.map(c=>`<option${c===current?' selected':''}>${c}</option>`).join('');
+}
+
+function manageCats(){
+  renderCatList();
+  document.getElementById('cat-modal').classList.add('open');
+}
+
+function renderCatList(){
+  const cats = getCategories();
+  document.getElementById('cat-list').innerHTML = cats.map((c,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)">
+      <span style="flex:1;font-size:13px">${c}</span>
+      ${i >= DEFAULT_CATS.length
+        ? `<button class="btn btn-sm btn-danger" onclick="deleteCat(${i})">✕</button>`
+        : `<span style="font-size:10px;color:var(--muted);padding:3px 8px;background:var(--y1);border-radius:20px">default</span>`
+      }
+    </div>`).join('');
+}
+
+function addCat(){
+  const inp = document.getElementById('cat-new-input');
+  const name = inp.value.trim();
+  if(!name){ toast('Please enter a category name.'); return; }
+  const cats = getCategories();
+  if(cats.includes(name)){ toast('Category already exists.'); return; }
+  cats.push(name);
+  saveCategories(cats);
+  inp.value = '';
+  renderCatList();
+  refreshCatDropdown();
+  toast(`✓ "${name}" added`);
+}
+
+function deleteCat(i){
+  const cats = getCategories();
+  const name = cats[i];
+  if(!confirm(`Remove "${name}"?`)) return;
+  cats.splice(i,1);
+  saveCategories(cats);
+  renderCatList();
+  refreshCatDropdown();
+  toast(`Removed "${name}"`);
+}
+
+
 function buildWAMessage(e){
   const payLabel = e.pay==='paid'?'✅ Fully Paid': e.pay==='partial'?'⏳ Partial Payment Received':'🔴 Payment Pending';
   return encodeURIComponent(
@@ -614,7 +795,10 @@ Looking forward to seeing you at the exhibition! 🍋✨
 
 function sendWhatsApp(e){
   const num = (e.wa||'').replace(/\D/g,'');
-  if(!num||num.length<10){toast('Please add a valid WhatsApp number first.');return;}
+  if(!num||num.length<10){
+    toast('No WhatsApp number saved for this exhibitor.');
+    return;
+  }
   const fullNum = num.startsWith('91')?num:'91'+num;
   const msg = buildWAMessage(e);
   window.open(`https://wa.me/${fullNum}?text=${msg}`,'_blank');
@@ -660,6 +844,7 @@ function openExModal(idx=null){
   document.getElementById('ex-modal-title').textContent=idx===null?'Add Exhibitor':'Edit Exhibitor';
   const e=idx!==null?exhibitors[idx]:{};
   ['name','city','stall','fee','adv','req','notes','wa'].forEach(f=>{ const el=document.getElementById('m-'+f); if(el)el.value=e[f]||''; });
+  refreshCatDropdown();
   document.getElementById('m-cat').value=e.cat||'';
   document.getElementById('m-pay').value=e.pay||'pending';
   document.getElementById('ex-modal').classList.add('open');
@@ -957,11 +1142,60 @@ function closeModal(id){document.getElementById(id).classList.remove('open');}
 function closeMBg(e,id){if(e.target.id===id)closeModal(id);}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600);}
 
-// Init fallback
+// Init — refresh cats on load
+refreshCatDropdown();
 lsLoad(); renderAdmin();
 document.getElementById('c-date').value=new Date().toISOString().split('T')[0];
+// Init auth state — show/hide admin based on session
+initAuthState();
 </script>
-<!-- ── UPDATE BANNER (shown when new version available) ── -->
+<!-- ═══ PIN MODAL ═══ -->
+<div id="pin-modal" class="modal-overlay" onclick="closeMBg(event,'pin-modal')">
+  <div class="modal" style="max-width:320px;text-align:center">
+    <div style="font-size:36px;margin-bottom:0.5rem">🔐</div>
+    <h3 style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--y5);margin-bottom:0.5rem" id="pin-title">Admin Login</h3>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:1.25rem" id="pin-subtitle">Enter your PIN to access admin features</p>
+    <!-- PIN dots display -->
+    <div style="display:flex;justify-content:center;gap:12px;margin-bottom:1.5rem" id="pin-dots"></div>
+    <!-- PIN keypad -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:220px;margin:0 auto 1rem">
+      <button class="pin-key" onclick="pinKey('1')">1</button>
+      <button class="pin-key" onclick="pinKey('2')">2</button>
+      <button class="pin-key" onclick="pinKey('3')">3</button>
+      <button class="pin-key" onclick="pinKey('4')">4</button>
+      <button class="pin-key" onclick="pinKey('5')">5</button>
+      <button class="pin-key" onclick="pinKey('6')">6</button>
+      <button class="pin-key" onclick="pinKey('7')">7</button>
+      <button class="pin-key" onclick="pinKey('8')">8</button>
+      <button class="pin-key" onclick="pinKey('9')">9</button>
+      <button class="pin-key pin-key-clear" onclick="pinClear()">⌫</button>
+      <button class="pin-key" onclick="pinKey('0')">0</button>
+      <button class="pin-key pin-key-ok" onclick="pinSubmit()">OK</button>
+    </div>
+    <p id="pin-error" style="font-size:12px;color:#A32D2D;min-height:18px"></p>
+    <button class="btn btn-sm" onclick="closeModal('pin-modal')" style="margin-top:8px">Cancel</button>
+  </div>
+</div>
+
+<!-- ═══ CATEGORY MANAGER MODAL ═══ -->
+<div id="cat-modal" class="modal-overlay" onclick="closeMBg(event,'cat-modal')">
+  <div class="modal" style="max-width:380px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+      <span style="font-size:17px;font-weight:600;font-family:'Cormorant Garamond',serif;color:var(--y5)">Manage Categories</span>
+      <button onclick="closeModal('cat-modal')" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted)">×</button>
+    </div>
+    <div id="cat-list" style="margin-bottom:1rem"></div>
+    <div style="display:flex;gap:8px">
+      <input id="cat-new-input" placeholder="New category name..." style="flex:1" onkeydown="if(event.key==='Enter')addCat()">
+      <button class="btn btn-primary btn-sm" onclick="addCat()">Add</button>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sm btn-primary" onclick="closeModal('cat-modal')">Done</button>
+    </div>
+  </div>
+</div>
+
+
 <div id="update-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#2A2200;color:#FFF8DC;padding:12px 1rem;z-index:9999;display:none;align-items:center;justify-content:space-between;gap:12px;font-size:13px;font-family:'DM Sans',sans-serif">
   <span>🎀 New version available!</span>
   <button onclick="applyUpdate()" style="background:#F5C518;color:#2A2200;border:none;padding:7px 16px;border-radius:8px;font-weight:600;cursor:pointer;font-size:13px">Update Now</button>
