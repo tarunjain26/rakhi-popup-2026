@@ -4,13 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Rakhi Pop-Up 2026 · Kota</title>
-
-<!-- PWA Meta Tags -->
 <meta name="theme-color" content="#F5C518">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Rakhi Pop-Up">
-<meta name="description" content="Exhibition management for Rakhi Pop-Up 2026, Hotel Swan, Kota">
 <link rel="manifest" href="/manifest.json">
 <link rel="apple-touch-icon" href="/icon-192.png">
 <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
@@ -22,6 +19,7 @@
   import { getFirestore, collection, onSnapshot, addDoc, setDoc, deleteDoc, doc, serverTimestamp }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
+  // ── PASTE YOUR FIREBASE CONFIG HERE ──
   const firebaseConfig = {
     apiKey: "AIzaSyB2bbBYqsp3G0Oh8afYvhdmzvGCV827jLc",
     authDomain: "rakhi-popup-2026.firebaseapp.com",
@@ -66,12 +64,6 @@ nav{background:linear-gradient(135deg,#FFF8A0,#FFF0C0,#FFF8A0);border-bottom:2px
 .nav-tab{padding:0 0.85rem;font-size:12.5px;cursor:pointer;color:var(--muted);border-bottom:3px solid transparent;white-space:nowrap;transition:all 0.15s;display:flex;align-items:center}
 .nav-tab:hover{color:var(--y5);background:rgba(245,197,24,0.08)}
 .nav-tab.active{color:var(--y5);border-bottom-color:var(--y3);font-weight:500;background:rgba(245,197,24,0.12)}
-.nav-short{display:none}
-.nav-full{display:inline}
-@media(max-width:480px){.nav-short{display:inline}.nav-full{display:none}}
-/* Admin tabs hidden by default, shown when unlocked */
-.admin-only{display:none !important}
-body.admin-unlocked .admin-only{display:flex !important}
 .ticker{background:linear-gradient(90deg,var(--y2),var(--y1));padding:5px 1rem;border-bottom:1px solid var(--border);font-size:11px;color:var(--muted);letter-spacing:0.05em;overflow:hidden;white-space:nowrap;display:flex;gap:14px;align-items:center}
 .page{display:none;padding:1.25rem 1rem;max-width:980px;margin:0 auto;width:100%}
 .page.active{display:block}
@@ -81,7 +73,7 @@ h3{font-size:14px;font-weight:500;margin-bottom:.75rem}
 .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
 label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:3px;margin-top:10px;text-transform:uppercase;letter-spacing:.05em;font-weight:500}
 label:first-child{margin-top:0}
-input,select,textarea{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--light);color:var(--text);font-size:16px;font-family:'DM Sans',sans-serif;outline:none;transition:border .15s;-webkit-appearance:none;appearance:none}
+input,select,textarea{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--light);color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;transition:border .15s}
 input:focus,select:focus,textarea:focus{border-color:var(--y3);background:#fff;box-shadow:0 0 0 3px rgba(245,197,24,.15)}
 textarea{resize:vertical;min-height:60px}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -145,110 +137,21 @@ textarea{resize:vertical;min-height:60px}
 .sync-dot{width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;margin-left:6px;vertical-align:middle}
 .sync-dot.live{background:#4CAF50;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-/* ── MOBILE RESPONSIVE ── */
-@media(max-width:640px){
-  /* Nav — scrollable, smaller text */
-  nav{padding:0 0.5rem;gap:0}
-  .nav-brand{padding:0.5rem 0.75rem 0.5rem 0;margin-right:0.5rem}
-  .nav-brand-title{font-size:14px}
-  .nav-brand-sub{font-size:9px}
-  .nav-tab{padding:0 0.6rem;font-size:11.5px}
-  #install-btn{padding:4px 8px;font-size:11px}
-
-  /* Pages — tighter padding */
-  .page{padding:1rem 0.75rem}
-
-  /* Typography */
-  h2{font-size:18px}
-  h3{font-size:13px}
-
-  /* Metrics — 2 col */
-  .metric-grid{grid-template-columns:1fr 1fr}
-  .metric-val{font-size:18px}
-  .metric-lbl{font-size:9px}
-  .cost-metrics{grid-template-columns:1fr 1fr}
-
-  /* Forms — single col */
-  .row2,.row3{grid-template-columns:1fr}
-
-  /* Exhibitor rows — stack on tiny screens */
-  .ex-row{flex-wrap:wrap;gap:8px}
-  .ex-info{width:100%;min-width:0;order:2}
-  .stall-badge{order:1}
-
-  /* Buttons — better touch targets */
-  .btn{padding:9px 14px;font-size:13px}
-  .btn-sm{padding:7px 11px;font-size:12px;min-height:36px}
-
-  /* Cards */
-  .card{padding:1rem}
-
-  /* Modal — full width on mobile */
-  .modal{padding:1.25rem;border-radius:12px 12px 0 0;position:fixed;bottom:0;left:0;right:0;max-width:100%;max-height:85vh;margin:0}
-  .modal-overlay.open{align-items:flex-end;padding:0}
-
-  /* Floor plan — scrollable */
-  .floor-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-
-  /* Brands */
-  .brand-grid{grid-template-columns:1fr}
-
-  /* Public hero */
-  .pub-hero{padding:1.5rem 1rem}
-  .pub-hero h1{font-size:26px}
-
-  /* Ticker — hide on very small */
-  .ticker{font-size:10px;padding:4px 0.75rem}
-
-  /* Action buttons row on exhibitor — wrap nicely */
-  .ex-row .badge{order:3}
-
-  /* Cost row */
-  .cost-row{flex-wrap:wrap}
-
-  /* Update banner */
-  #update-banner{font-size:12px;padding:10px 0.75rem}
-
-  /* Input/select touch-friendly */
-  input,select,textarea{font-size:16px !important;padding:10px 12px}
-
-  /* Floor plan download buttons stack */
-  #floor-stats{flex-direction:column;align-items:flex-start}
-}
-
-/* Extra small phones */
-@media(max-width:380px){
-  .nav-tab{padding:0 0.45rem;font-size:10.5px}
-  .metric-grid{grid-template-columns:1fr 1fr;gap:6px}
-}
 /* ── SPONSORS ── */
 .sp-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem;box-shadow:var(--shadow)}
-.sp-card.title-sponsor{border-left:4px solid var(--y3);background:linear-gradient(135deg,var(--y1),var(--surface))}
-.sp-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:1rem}
-.sp-avatar{width:44px;height:44px;border-radius:10px;background:var(--y3);color:var(--y5);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0;font-family:'Cormorant Garamond',serif}
-.sp-info{flex:1;min-width:0}
-.sp-name{font-size:15px;font-weight:600}
-.sp-meta{font-size:11px;color:var(--muted);margin-top:2px}
-.sp-amounts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:1rem}
-.sp-amt-box{background:var(--light);border-radius:8px;padding:8px 10px;text-align:center}
-.sp-amt-val{font-size:15px;font-weight:600;font-family:'Cormorant Garamond',serif}
-.sp-amt-lbl{font-size:10px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.04em}
-.del-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.sp-card.title{border-left:4px solid var(--y3)}
+.sp-avatar{width:42px;height:42px;border-radius:10px;background:var(--y3);color:var(--y5);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0;font-family:'Cormorant Garamond',serif}
+.sp-amt-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:12px 0}
+.sp-amt-box{background:var(--light);border-radius:8px;padding:8px;text-align:center}
+.sp-amt-val{font-size:14px;font-weight:600;font-family:'Cormorant Garamond',serif}
+.sp-amt-lbl{font-size:9px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.04em}
+.del-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)}
 .del-row:last-child{border-bottom:none}
-.del-status-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.del-status-dot.pending{background:#FFB300}
-.del-status-dot.in-progress{background:#2196F3}
-.del-status-dot.done{background:#4CAF50}
-/* PIN keypad */
-.pin-key{padding:0;height:56px;border-radius:50%;width:56px;border:1.5px solid var(--border);background:var(--surface);font-size:20px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--text);transition:all .15s;display:flex;align-items:center;justify-content:center;margin:0 auto}
-.pin-key:hover{background:var(--y2);border-color:var(--y3)}
-.pin-key:active{transform:scale(0.92);background:var(--y3)}
-.pin-key-clear{font-size:18px;color:var(--muted)}
-.pin-key-ok{background:var(--y3);border-color:var(--y4);color:var(--y5);font-size:14px;font-weight:600}
-.pin-key-ok:hover{background:var(--y4);color:#fff}
-.pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--y3);background:transparent;transition:background .15s}
-.pin-dot.filled{background:var(--y3)}
-@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.del-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.del-dot.pending{background:#FFB300}
+.del-dot.in-progress{background:#2196F3}
+.del-dot.done{background:#4CAF50}
+@media(max-width:600px){.metric-grid{grid-template-columns:1fr 1fr}.row2,.row3{grid-template-columns:1fr}.brand-grid{grid-template-columns:1fr}.cost-metrics{grid-template-columns:1fr 1fr}.page{padding:1rem 0.75rem}h2{font-size:18px}.modal{border-radius:12px 12px 0 0;position:fixed;bottom:0;left:0;right:0;max-width:100%;max-height:85vh;margin:0}input,select,textarea{font-size:16px !important}.btn-sm{min-height:36px}.floor-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}nav{padding:0 0.5rem}.nav-tab{padding:0 0.6rem;font-size:11.5px}.ticker{font-size:10px}}
 </style>
 </head>
 <body>
@@ -258,18 +161,12 @@ textarea{resize:vertical;min-height:60px}
     <div class="nav-brand-title">🍋 Rakhi Pop-Up <span class="sync-dot" id="sync-dot" title="Firebase sync status"></span></div>
     <div class="nav-brand-sub">19–20 July 2026 · Kota</div>
   </div>
-  <div class="nav-tab admin-only" id="tab-admin" onclick="showPage('admin',this)"><span class="nav-full">Exhibitors</span><span class="nav-short">Stalls</span></div>
-  <div class="nav-tab admin-only" id="tab-floor" onclick="showPage('floor',this)"><span class="nav-full">Floor Plan</span><span class="nav-short">Map</span></div>
-  <div class="nav-tab admin-only" id="tab-visitors" onclick="showPage('visitors',this)"><span class="nav-full">Visitors</span><span class="nav-short">Visitors</span></div>
-  <div class="nav-tab admin-only" id="tab-sponsors" onclick="showPage('sponsors',this)"><span class="nav-full">Sponsors</span><span class="nav-short">Sponsors</span></div>
-  <div class="nav-tab admin-only" id="tab-costs" onclick="showPage('costs',this)"><span class="nav-full">Costs</span><span class="nav-short">Costs</span></div>
-  <div class="nav-tab active" id="tab-public" onclick="showPage('public',this)"><span class="nav-full">Guest View</span><span class="nav-short">Guest</span></div>
-  <button id="admin-lock-btn" onclick="toggleAdminLock()" style="margin-left:auto;flex-shrink:0;padding:5px 12px;background:var(--light);border:1.5px solid var(--border);color:var(--muted);border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;font-family:'DM Sans',sans-serif">
-    🔒 Admin
-  </button>
-  <button id="install-btn" onclick="installPWA()" style="display:none;margin-left:4px;flex-shrink:0;padding:5px 12px;background:#F5C518;border:1.5px solid #D4A017;color:#7A5C00;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;align-items:center;gap:5px;white-space:nowrap;font-family:'DM Sans',sans-serif">
-    ⬇ Install
-  </button>
+  <div class="nav-tab active" onclick="showPage('admin',this)">Exhibitors</div>
+  <div class="nav-tab" onclick="showPage('floor',this)">Floor Plan</div>
+  <div class="nav-tab" onclick="showPage('visitors',this)">Visitors</div>
+  <div class="nav-tab" onclick="showPage('costs',this)">Costs</div>
+  <div class="nav-tab" onclick="showPage('sponsors',this)">Sponsors</div>
+  <div class="nav-tab" onclick="showPage('public',this)">Guest View</div>
 </nav>
 <div class="ticker">
   <span>🍋</span><span>HOTEL SWAN · AERODROME CIRCLE · KOTA</span>
@@ -451,18 +348,6 @@ textarea{resize:vertical;min-height:60px}
   <div class="card" id="vis-list"></div>
 </div>
 
-<!-- ═══ SPONSORS ═══ -->
-<div id="page-sponsors" class="page">
-  <div class="section-header">
-    <h2>Sponsors</h2>
-    <button class="btn btn-primary btn-sm" onclick="openSponsorModal()">+ Add Sponsor</button>
-  </div>
-  <!-- Summary metrics -->
-  <div class="metric-grid" id="sp-metrics"></div>
-  <!-- Sponsor list -->
-  <div id="sp-list"></div>
-</div>
-
 <!-- ═══ COSTS ═══ -->
 <div id="page-costs" class="page">
   <div class="section-header"><h2>Costs & Revenue</h2><button class="btn btn-primary btn-sm" onclick="openCostModal()">+ Add Entry</button></div>
@@ -476,6 +361,16 @@ textarea{resize:vertical;min-height:60px}
     <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted)"><span id="bar-rev"></span><span id="bar-cost"></span></div>
   </div>
   <div id="cost-list"></div>
+</div>
+
+<!-- ═══ SPONSORS ═══ -->
+<div id="page-sponsors" class="page">
+  <div class="section-header">
+    <h2>Sponsors</h2>
+    <button class="btn btn-primary btn-sm" onclick="openSpModal()">+ Add Sponsor</button>
+  </div>
+  <div class="metric-grid" id="sp-metrics"></div>
+  <div id="sp-list"></div>
 </div>
 
 <!-- ═══ GUEST VIEW ═══ -->
@@ -506,23 +401,22 @@ textarea{resize:vertical;min-height:60px}
       <div><label>City</label><input id="m-city" placeholder="e.g. Kota, Jaipur"></div>
     </div>
     <div class="row2">
-      <div>
-        <label>Category</label>
-        <div style="display:flex;gap:6px">
-          <select id="m-cat" style="flex:1">
-            <option value="">Select category</option>
-            <option>Jewellery</option><option>Clothing & Apparel</option><option>Rakhi & Gifting</option>
-            <option>Home Decor</option><option>Food & Mithai</option><option>Beauty & Wellness</option>
-            <option>Accessories</option><option>Art & Prints</option><option>Kids & Toys</option>
-            <option>Plants & Nature</option><option>Other</option>
-          </select>
-          <button type="button" class="btn btn-sm" onclick="manageCats()" title="Add / remove categories" style="flex-shrink:0;padding:0 10px;font-size:16px">⚙</button>
-        </div>
+      <div><label>Category *</label>
+        <select id="m-cat">
+          <option value="">Select category</option>
+          <option>Jewellery</option><option>Clothing & Apparel</option><option>Rakhi & Gifting</option>
+          <option>Home Decor</option><option>Food & Mithai</option><option>Beauty & Wellness</option>
+          <option>Accessories</option><option>Art & Prints</option><option>Kids & Toys</option>
+          <option>Plants & Nature</option><option>Other</option>
+        </select>
       </div>
       <div><label>Stall Number *</label><input id="m-stall" placeholder="e.g. 1, TS1, FS1" style="text-transform:uppercase"></div>
     </div>
-    <div><label>WhatsApp Number <span style="font-size:10px;color:var(--muted);font-weight:400">(optional)</span></label>
-      <input id="m-wa" type="tel" placeholder="10-digit mobile number — leave blank to skip">
+    <div><label>WhatsApp Number *</label>
+      <div style="display:flex;gap:8px">
+        <input id="m-wa" type="tel" placeholder="10-digit mobile number" style="flex:1">
+        <span style="padding:8px 6px;font-size:12px;color:var(--muted);white-space:nowrap;align-self:flex-end">Used to send booking confirmation</span>
+      </div>
     </div>
     <div class="row3">
       <div><label>Stall Fee (₹)</label><input id="m-fee" type="number" placeholder="0"></div>
@@ -596,6 +490,72 @@ textarea{resize:vertical;min-height:60px}
   </div>
 </div>
 
+<!-- ═══ SPONSOR MODAL ═══ -->
+<div id="sp-modal" class="modal-overlay" onclick="if(event.target.id==='sp-modal')closeModal('sp-modal')">
+  <div class="modal">
+    <h3 id="sp-modal-title" style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--y5);margin-bottom:1rem">Add Sponsor</h3>
+    <div class="row2">
+      <div><label>Sponsor Name *</label><input id="sp-name" placeholder="e.g. Kota Sarees Co."></div>
+      <div><label>Contact Person</label><input id="sp-contact" placeholder="Name"></div>
+    </div>
+    <div class="row2">
+      <div><label>Phone / WhatsApp</label><input id="sp-phone" type="tel" placeholder="10-digit number"></div>
+      <div><label>Sponsorship Type</label>
+        <select id="sp-type">
+          <option>Title Sponsor</option><option>Co-Sponsor</option>
+          <option>Associate Sponsor</option><option>In-Kind Sponsor</option>
+          <option>Media Partner</option><option>Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="row2">
+      <div><label>Total Amount (₹)</label><input id="sp-amt" type="number" placeholder="0"></div>
+      <div><label>Amount Received (₹)</label><input id="sp-recv" type="number" placeholder="0"></div>
+    </div>
+    <div><label>Payment Status</label>
+      <select id="sp-pay"><option value="pending">Pending</option><option value="partial">Partial</option><option value="paid">Fully Received</option></select>
+    </div>
+    <div><label>Notes</label><textarea id="sp-notes" placeholder="Any details..."></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" onclick="closeModal('sp-modal')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="saveSponsor()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ DELIVERABLE MODAL ═══ -->
+<div id="del-modal" class="modal-overlay" onclick="if(event.target.id==='del-modal')closeModal('del-modal')">
+  <div class="modal" style="max-width:440px">
+    <h3 id="del-modal-title" style="font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--y5);margin-bottom:1rem">Add Deliverable</h3>
+    <div><label>Deliverable Type *</label>
+      <select id="del-type" onchange="document.getElementById('del-custom-wrap').style.display=this.value==='Custom'?'block':'none'">
+        <option>Logo on banners</option><option>Logo on stage backdrop</option>
+        <option>Social media shoutout</option><option>Stall at event</option>
+        <option>MC mention</option><option>Logo on invites</option>
+        <option>Logo on website / app</option><option>Product sampling</option>
+        <option>Sponsored segment</option><option>Gift hamper branding</option>
+        <option>Custom</option>
+      </select>
+    </div>
+    <div id="del-custom-wrap" style="display:none"><label>Describe Deliverable</label><input id="del-custom" placeholder="Custom deliverable..."></div>
+    <div class="row2">
+      <div><label>Quantity / Details</label><input id="del-qty" placeholder="e.g. 3 posts, 2 banners"></div>
+      <div><label>Status</label>
+        <select id="del-status">
+          <option value="pending">Pending</option>
+          <option value="in-progress">In Progress</option>
+          <option value="done">Done ✓</option>
+        </select>
+      </div>
+    </div>
+    <div><label>Notes / Deadline</label><input id="del-notes" placeholder="Any notes or deadline"></div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" onclick="closeModal('del-modal')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="saveDeliverable()">Save</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast" class="toast"></div>
 
 <script>
@@ -605,9 +565,10 @@ const COST_ICONS={'Venue':'🏛','Decoration':'🎀','Marketing':'📣','Logisti
 // ── State (fallback to localStorage if Firebase not ready) ──
 let exhibitors=[], visitors={'1':[],'2':[]}, costs=[];
 let editExId=null, editCostId=null, visDay=1, dragIdx=null, reassignIdx=null;
+let sponsors=[], editSpId=null, editDelSpId=null, editDelIdx=null;
 let fbReady=false;
 
-// ── Firebase listeners — single consolidated listener ──
+// ── Firebase listeners ──
 document.addEventListener('firebase-ready', () => {
   fbReady=true;
   document.getElementById('sync-dot').classList.add('live');
@@ -621,396 +582,14 @@ document.addEventListener('firebase-ready', () => {
 function lsLoad(){ exhibitors=JSON.parse(localStorage.getItem('rp_ex')||'[]'); visitors=JSON.parse(localStorage.getItem('rp_vis')||'{"1":[],"2":[]}'); costs=JSON.parse(localStorage.getItem('rp_costs')||'[]'); sponsors=JSON.parse(localStorage.getItem('rp_sponsors')||'[]'); }
 function lsSave(){ localStorage.setItem('rp_ex',JSON.stringify(exhibitors)); localStorage.setItem('rp_vis',JSON.stringify(visitors)); localStorage.setItem('rp_costs',JSON.stringify(costs)); localStorage.setItem('rp_sponsors',JSON.stringify(sponsors)); }
 
-
 function showPage(id,el){
-  const adminPages = ['admin','floor','visitors','costs','sponsors'];
-  if(adminPages.includes(id) && !isAdmin){
-    toast('🔒 Enter admin PIN to access this page.');
-    return;
-  }
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active'); el.classList.add('active');
   ({admin:renderAdmin,floor:renderFloor,visitors:renderVisitors,costs:renderCosts,sponsors:renderSponsors,public:renderPublic})[id]?.();
 }
 
-/* ── SPONSORS ── */
-let sponsors = JSON.parse(localStorage.getItem('rp_sponsors')||'[]');
-let editSpId = null;
-let editDelSpId = null;
-let editDelIdx = null;
-
-function renderSponsors(){
-  const totalAmt  = sponsors.reduce((s,sp)=>s+(+sp.amt||0),0);
-  const totalRcvd = sponsors.reduce((s,sp)=>s+(+sp.received||0),0);
-  const totalDels = sponsors.reduce((s,sp)=>s+(sp.deliverables||[]).length,0);
-  const doneDels  = sponsors.reduce((s,sp)=>s+(sp.deliverables||[]).filter(d=>d.status==='done').length,0);
-
-  document.getElementById('sp-metrics').innerHTML=`
-    <div class="metric"><div class="metric-val">${sponsors.length}</div><div class="metric-lbl">Sponsors</div></div>
-    <div class="metric"><div class="metric-val" style="color:#2E7D32">₹${fmt(totalRcvd)}</div><div class="metric-lbl">Received</div></div>
-    <div class="metric"><div class="metric-val" style="color:var(--y5)">₹${fmt(totalAmt-totalRcvd)}</div><div class="metric-lbl">Pending</div></div>
-    <div class="metric"><div class="metric-val">${doneDels}/${totalDels}</div><div class="metric-lbl">Deliverables</div></div>`;
-
-  if(!sponsors.length){
-    document.getElementById('sp-list').innerHTML=`<div class="sp-card" style="text-align:center;color:var(--muted);padding:2rem;font-size:13px">No sponsors yet. Click "+ Add Sponsor" to get started.</div>`;
-    return;
-  }
-
-  document.getElementById('sp-list').innerHTML = sponsors.map((sp,i)=>{
-    const initials = sp.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
-    const balance  = (+sp.amt||0) - (+sp.received||0);
-    const dels     = sp.deliverables||[];
-    const doneCnt  = dels.filter(d=>d.status==='done').length;
-    const spIdx    = i;
-
-    return `<div class="sp-card ${sp.type==='Title Sponsor'?'title-sponsor':''}">
-      <div class="sp-header">
-        <div class="sp-avatar">${initials}</div>
-        <div class="sp-info">
-          <div class="sp-name">${sp.name}
-            <span class="badge" style="background:var(--y2);color:var(--y5);margin-left:4px">${sp.type||'Sponsor'}</span>
-          </div>
-          <div class="sp-meta">${[sp.contact, sp.phone].filter(Boolean).join(' · ')}</div>
-          ${sp.notes?`<div class="sp-meta" style="margin-top:3px">${sp.notes}</div>`:''}
-        </div>
-        <span class="badge badge-${sp.pay==='paid'?'paid':sp.pay==='partial'?'partial':'pending'}">${sp.pay==='paid'?'Received':sp.pay==='partial'?'Partial':'Pending'}</span>
-      </div>
-
-      <!-- Amounts -->
-      <div class="sp-amounts">
-        <div class="sp-amt-box">
-          <div class="sp-amt-val">₹${fmt(+sp.amt||0)}</div>
-          <div class="sp-amt-lbl">Total Value</div>
-        </div>
-        <div class="sp-amt-box" style="background:#F0FFF4">
-          <div class="sp-amt-val" style="color:#2E7D32">₹${fmt(+sp.received||0)}</div>
-          <div class="sp-amt-lbl">Received</div>
-        </div>
-        <div class="sp-amt-box" style="background:${balance>0?'#FFF8E0':'#F0FFF4'}">
-          <div class="sp-amt-val" style="color:${balance>0?'var(--y5)':'#2E7D32'}">₹${fmt(balance)}</div>
-          <div class="sp-amt-lbl">Balance</div>
-        </div>
-      </div>
-
-      <!-- Deliverables -->
-      <div style="border-top:1px solid var(--border);padding-top:10px;margin-top:4px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-          <span style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em">
-            Deliverables ${dels.length?`<span style="color:var(--y5)">${doneCnt}/${dels.length}</span>`:''}
-          </span>
-          <button class="btn btn-sm" style="font-size:11px;padding:4px 10px" onclick="openDelModal(${spIdx})">+ Add</button>
-        </div>
-        ${dels.length ? dels.map((d,di)=>`
-          <div class="del-row">
-            <div class="del-status-dot ${d.status||'pending'}"></div>
-            <div style="flex:1;min-width:0">
-              <div style="font-size:13px;font-weight:500">${d.custom||d.type}</div>
-              <div style="font-size:11px;color:var(--muted)">${[d.qty,d.notes].filter(Boolean).join(' · ')}</div>
-            </div>
-            <select onchange="updateDelStatus(${spIdx},${di},this.value)" style="width:auto;font-size:11px;padding:4px 8px;background:${d.status==='done'?'#EAF3DE':d.status==='in-progress'?'#E6F1FB':'#FFF8E0'}">
-              <option value="pending" ${d.status==='pending'?'selected':''}>Pending</option>
-              <option value="in-progress" ${d.status==='in-progress'?'selected':''}>In Progress</option>
-              <option value="done" ${d.status==='done'?'selected':''}>Done ✓</option>
-            </select>
-            <button class="btn btn-sm btn-danger" style="font-size:11px;padding:4px 8px" onclick="deleteDel(${spIdx},${di})">✕</button>
-          </div>`).join('')
-        : `<div style="font-size:12px;color:var(--muted);padding:6px 0">No deliverables added yet.</div>`}
-      </div>
-
-      <!-- Actions -->
-      <div style="display:flex;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border);flex-wrap:wrap">
-        ${sp.phone?`<button class="btn btn-sm" style="background:#E8F5E0;border-color:#A8D878;color:#2D5A10" onclick="sendSponsorWA(${spIdx})">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin-right:3px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.126.558 4.122 1.532 5.856L0 24l6.335-1.514A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.93 0-3.74-.516-5.295-1.415l-.38-.225-3.76.899.937-3.653-.247-.397A9.955 9.955 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
-          WhatsApp
-        </button>`:''}
-        <button class="btn btn-sm" onclick="openSponsorModal(${spIdx})">Edit</button>
-        <button class="btn btn-sm btn-danger" onclick="deleteSponsor(${spIdx})">Remove</button>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function openSponsorModal(idx=null){
-  editSpId=idx;
-  document.getElementById('sp-modal-title').textContent = idx===null?'Add Sponsor':'Edit Sponsor';
-  const sp = idx!==null ? sponsors[idx] : {};
-  document.getElementById('sp-name').value    = sp.name||'';
-  document.getElementById('sp-contact').value = sp.contact||'';
-  document.getElementById('sp-phone').value   = sp.phone||'';
-  document.getElementById('sp-type').value    = sp.type||'Co-Sponsor';
-  document.getElementById('sp-amt').value     = sp.amt||'';
-  document.getElementById('sp-received').value= sp.received||'';
-  document.getElementById('sp-pay').value     = sp.pay||'pending';
-  document.getElementById('sp-notes').value   = sp.notes||'';
-  document.getElementById('sp-modal').style.display='flex';
-}
-
-async function saveSponsor(){
-  const name = document.getElementById('sp-name').value.trim();
-  if(!name){toast('Please enter a sponsor name.');return;}
-  const obj = {
-    name, contact:document.getElementById('sp-contact').value.trim(),
-    phone:document.getElementById('sp-phone').value.trim(),
-    type:document.getElementById('sp-type').value,
-    amt:document.getElementById('sp-amt').value,
-    received:document.getElementById('sp-received').value,
-    pay:document.getElementById('sp-pay').value,
-    notes:document.getElementById('sp-notes').value.trim(),
-    deliverables: editSpId!==null ? (sponsors[editSpId].deliverables||[]) : []
-  };
-  if(fbReady){
-    if(editSpId!==null) await window._set('sponsors', sponsors[editSpId]._id, obj);
-    else await window._add('sponsors', obj);
-  } else {
-    if(editSpId!==null) sponsors[editSpId]={...sponsors[editSpId],...obj};
-    else sponsors.push(obj);
-    localStorage.setItem('rp_sponsors',JSON.stringify(sponsors));
-    renderSponsors(); renderCosts();
-  }
-  closeModal('sp-modal');
-  toast(editSpId!==null?'✓ Sponsor updated':'✓ Sponsor added');
-}
-
-async function deleteSponsor(i){
-  if(!confirm(`Remove ${sponsors[i].name}?`))return;
-  if(fbReady) await window._del('sponsors', sponsors[i]._id);
-  else { sponsors.splice(i,1); localStorage.setItem('rp_sponsors',JSON.stringify(sponsors)); renderSponsors(); renderCosts(); }
-  toast('Removed.');
-}
-
-/* ── DELIVERABLES ── */
-function openDelModal(spIdx){
-  editDelSpId = spIdx;
-  editDelIdx  = null;
-  document.getElementById('del-modal-title').textContent = `Add Deliverable — ${sponsors[spIdx].name}`;
-  document.getElementById('del-type').value   = 'Logo on banners';
-  document.getElementById('del-custom').value = '';
-  document.getElementById('del-qty').value    = '';
-  document.getElementById('del-status').value = 'pending';
-  document.getElementById('del-notes').value  = '';
-  document.getElementById('del-custom-wrap').style.display = 'none';
-  document.getElementById('del-modal').style.display='flex';
-}
-
-document.addEventListener('DOMContentLoaded', ()=>{
-  const sel = document.getElementById('del-type');
-  if(sel) sel.addEventListener('change', ()=>{
-    document.getElementById('del-custom-wrap').style.display = sel.value==='Custom'?'block':'none';
-  });
-});
-
-async function saveDeliverable(){
-  const type   = document.getElementById('del-type').value;
-  const custom = document.getElementById('del-custom').value.trim();
-  if(type==='Custom'&&!custom){toast('Please describe the deliverable.');return;}
-  const del = {
-    type, custom: type==='Custom'?custom:'',
-    qty:  document.getElementById('del-qty').value.trim(),
-    status: document.getElementById('del-status').value,
-    notes:  document.getElementById('del-notes').value.trim()
-  };
-  const sp = sponsors[editDelSpId];
-  const dels = [...(sp.deliverables||[])];
-  if(editDelIdx!==null) dels[editDelIdx]=del; else dels.push(del);
-  const updated = {...sp, deliverables:dels};
-  if(fbReady) await window._set('sponsors', sp._id, updated);
-  else {
-    sponsors[editDelSpId] = updated;
-    localStorage.setItem('rp_sponsors',JSON.stringify(sponsors));
-    renderSponsors();
-  }
-  closeModal('del-modal');
-  toast('✓ Deliverable saved');
-}
-
-async function updateDelStatus(spIdx, delIdx, status){
-  const sp   = sponsors[spIdx];
-  const dels = [...(sp.deliverables||[])];
-  dels[delIdx] = {...dels[delIdx], status};
-  const updated = {...sp, deliverables:dels};
-  if(fbReady) await window._set('sponsors', sp._id, updated);
-  else { sponsors[spIdx]=updated; localStorage.setItem('rp_sponsors',JSON.stringify(sponsors)); renderSponsors(); }
-  toast(`✓ Marked as ${status}`);
-}
-
-async function deleteDel(spIdx, delIdx){
-  if(!confirm('Remove this deliverable?'))return;
-  const sp   = sponsors[spIdx];
-  const dels = [...(sp.deliverables||[])];
-  dels.splice(delIdx,1);
-  const updated = {...sp, deliverables:dels};
-  if(fbReady) await window._set('sponsors', sp._id, updated);
-  else { sponsors[spIdx]=updated; localStorage.setItem('rp_sponsors',JSON.stringify(sponsors)); renderSponsors(); }
-  toast('Removed.');
-}
-
-function sendSponsorWA(i){
-  const sp = sponsors[i];
-  const num = (sp.phone||'').replace(/\D/g,'');
-  if(!num||num.length<10){toast('No phone number saved.');return;}
-  const dels = (sp.deliverables||[]);
-  let msg = `🎀 *Rakhi Pop-Up 2026 — Sponsorship Confirmation*\n\nDear *${sp.contact||sp.name}*,\n\nThank you for sponsoring Rakhi Pop-Up 2026!\n\n`;
-  msg += `📋 *Sponsorship Details:*\n• Sponsor: ${sp.name}\n• Type: ${sp.type}\n• Amount: ₹${Number(sp.amt||0).toLocaleString()}\n• Received: ₹${Number(sp.received||0).toLocaleString()}\n`;
-  if((+sp.amt||0)-(+sp.received||0)>0) msg+=`• Balance Due: ₹${(+sp.amt-(+sp.received||0)).toLocaleString()}\n`;
-  if(dels.length){
-    msg += `\n📦 *Deliverables Promised:*\n`;
-    dels.forEach(d=>{ msg+=`• ${d.custom||d.type}${d.qty?' ('+d.qty+')':''}\n`; });
-  }
-  msg += `\n📅 19–20 July 2026\n🏨 Hotel Swan, Aerodrome Circle, Kota\n\nLooking forward to a successful partnership!\n\n*Team Rakhi Pop-Up, Kota*`;
-  window.open(`https://wa.me/91${num}?text=${encodeURIComponent(msg)}`,'_blank');
-}
-
-
-const ADMIN_PIN = '2026'; // Change this to your preferred PIN
-let pinBuffer = '';
-let isAdmin = sessionStorage.getItem('rp_admin') === 'true';
-
-function initAuthState(){
-  if(isAdmin){ unlockAdmin(false); } else { lockAdmin(false); }
-}
-
-function lockAdmin(navigate=true){
-  isAdmin = false;
-  sessionStorage.removeItem('rp_admin');
-  document.body.classList.remove('admin-unlocked');
-  const btn = document.getElementById('admin-lock-btn');
-  if(btn){ btn.innerHTML='🔒 Admin'; btn.style.background='var(--light)'; btn.style.color='var(--muted)'; btn.style.borderColor='var(--border)'; }
-  if(navigate){
-    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-    document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
-    const guestTab = document.getElementById('tab-public');
-    if(guestTab) guestTab.classList.add('active');
-    const guestPage = document.getElementById('page-public');
-    if(guestPage){ guestPage.classList.add('active'); renderPublic(); }
-  }
-}
-
-function unlockAdmin(navigate=true){
-  isAdmin = true;
-  sessionStorage.setItem('rp_admin','true');
-  document.body.classList.add('admin-unlocked');
-  const btn = document.getElementById('admin-lock-btn');
-  if(btn){ btn.innerHTML='🔓 Admin'; btn.style.background='#EAF3DE'; btn.style.color='#2D5A10'; btn.style.borderColor='#A8D878'; }
-  if(navigate){
-    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-    document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
-    const adminTab = document.getElementById('tab-admin');
-    if(adminTab) adminTab.classList.add('active');
-    const adminPage = document.getElementById('page-admin');
-    if(adminPage){ adminPage.classList.add('active'); renderAdmin(); }
-  }
-}
-
-function toggleAdminLock(){
-  if(isAdmin){
-    if(confirm('Log out of admin mode?')){ lockAdmin(); toast('🔒 Admin mode off'); }
-  } else {
-    pinBuffer = '';
-    const errEl = document.getElementById('pin-error');
-    if(errEl) errEl.textContent = '';
-    updatePinDots();
-    openModal('pin-modal');
-  }
-}
-
-function pinKey(k){
-  if(pinBuffer.length >= 4) return;
-  pinBuffer += k;
-  updatePinDots();
-  if(pinBuffer.length === 4) setTimeout(pinSubmit, 200);
-}
-
-function pinClear(){
-  pinBuffer = pinBuffer.slice(0,-1);
-  updatePinDots();
-  document.getElementById('pin-error').textContent = '';
-}
-
-function updatePinDots(){
-  const dots = document.getElementById('pin-dots');
-  dots.innerHTML = [0,1,2,3].map(i=>
-    `<div class="pin-dot ${i < pinBuffer.length ? 'filled' : ''}"></div>`
-  ).join('');
-}
-
-function pinSubmit(){
-  if(pinBuffer === ADMIN_PIN){
-    closeModal('pin-modal');
-    unlockAdmin();
-    toast('🔓 Admin mode unlocked!');
-  } else {
-    document.getElementById('pin-error').textContent = 'Incorrect PIN. Try again.';
-    const dots = document.getElementById('pin-dots');
-    dots.style.animation = 'shake .3s ease';
-    setTimeout(()=>{ dots.style.animation=''; pinBuffer=''; updatePinDots(); }, 400);
-  }
-}
-
-
-const DEFAULT_CATS = ['Jewellery','Clothing & Apparel','Rakhi & Gifting','Home Decor','Food & Mithai','Beauty & Wellness','Accessories','Art & Prints','Kids & Toys','Plants & Nature','Other'];
-
-function getCategories(){
-  const stored = localStorage.getItem('rp_cats');
-  return stored ? JSON.parse(stored) : [...DEFAULT_CATS];
-}
-
-function saveCategories(cats){
-  localStorage.setItem('rp_cats', JSON.stringify(cats));
-}
-
-function refreshCatDropdown(){
-  const cats = getCategories();
-  const sel = document.getElementById('m-cat');
-  if(!sel) return;
-  const current = sel.value;
-  sel.innerHTML = '<option value="">Select category</option>' +
-    cats.map(c=>`<option${c===current?' selected':''}>${c}</option>`).join('');
-}
-
-function manageCats(){
-  renderCatList();
-  document.getElementById('cat-modal').style.display='flex';
-}
-
-function renderCatList(){
-  const cats = getCategories();
-  document.getElementById('cat-list').innerHTML = cats.map((c,i)=>`
-    <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)">
-      <span style="flex:1;font-size:13px">${c}</span>
-      ${i >= DEFAULT_CATS.length
-        ? `<button class="btn btn-sm btn-danger" onclick="deleteCat(${i})">✕</button>`
-        : `<span style="font-size:10px;color:var(--muted);padding:3px 8px;background:var(--y1);border-radius:20px">default</span>`
-      }
-    </div>`).join('');
-}
-
-function addCat(){
-  const inp = document.getElementById('cat-new-input');
-  const name = inp.value.trim();
-  if(!name){ toast('Please enter a category name.'); return; }
-  const cats = getCategories();
-  if(cats.includes(name)){ toast('Category already exists.'); return; }
-  cats.push(name);
-  saveCategories(cats);
-  inp.value = '';
-  renderCatList();
-  refreshCatDropdown();
-  toast(`✓ "${name}" added`);
-}
-
-function deleteCat(i){
-  const cats = getCategories();
-  const name = cats[i];
-  if(!confirm(`Remove "${name}"?`)) return;
-  cats.splice(i,1);
-  saveCategories(cats);
-  renderCatList();
-  refreshCatDropdown();
-  toast(`Removed "${name}"`);
-}
-
-
+/* ── WHATSAPP ── */
 function buildWAMessage(e){
   const payLabel = e.pay==='paid'?'✅ Fully Paid': e.pay==='partial'?'⏳ Partial Payment Received':'🔴 Payment Pending';
   return encodeURIComponent(
@@ -1045,10 +624,7 @@ Looking forward to seeing you at the exhibition! 🍋✨
 
 function sendWhatsApp(e){
   const num = (e.wa||'').replace(/\D/g,'');
-  if(!num||num.length<10){
-    toast('No WhatsApp number saved for this exhibitor.');
-    return;
-  }
+  if(!num||num.length<10){toast('Please add a valid WhatsApp number first.');return;}
   const fullNum = num.startsWith('91')?num:'91'+num;
   const msg = buildWAMessage(e);
   window.open(`https://wa.me/${fullNum}?text=${msg}`,'_blank');
@@ -1094,10 +670,9 @@ function openExModal(idx=null){
   document.getElementById('ex-modal-title').textContent=idx===null?'Add Exhibitor':'Edit Exhibitor';
   const e=idx!==null?exhibitors[idx]:{};
   ['name','city','stall','fee','adv','req','notes','wa'].forEach(f=>{ const el=document.getElementById('m-'+f); if(el)el.value=e[f]||''; });
-  refreshCatDropdown();
   document.getElementById('m-cat').value=e.cat||'';
   document.getElementById('m-pay').value=e.pay||'pending';
-  document.getElementById('ex-modal').style.display='flex';
+  document.getElementById('ex-modal').classList.add('open');
 }
 
 async function saveExhibitor(sendWA=false){
@@ -1148,7 +723,7 @@ async function dropOn(e,targetIdx){
 }
 
 /* ── STALL REASSIGN ── */
-function openReassign(idx){ reassignIdx=idx; document.getElementById('reassign-info').textContent=`Reassigning: ${exhibitors[idx].name} (currently Stall ${exhibitors[idx].stall||'unassigned'})`; document.getElementById('reassign-stall').value=''; document.getElementById('reassign-modal').style.display='flex'; }
+function openReassign(idx){ reassignIdx=idx; document.getElementById('reassign-info').textContent=`Reassigning: ${exhibitors[idx].name} (currently Stall ${exhibitors[idx].stall||'unassigned'})`; document.getElementById('reassign-stall').value=''; document.getElementById('reassign-modal').classList.add('open'); }
 async function confirmReassign(){
   const newStall=document.getElementById('reassign-stall').value.trim().toUpperCase();
   if(!newStall){toast('Please enter a stall number.');return;}
@@ -1303,7 +878,7 @@ function floorClick(id){
     (ex?`<button class="btn btn-sm btn-green" onclick="closeModal('floor-modal');openReassign(${fi})">⇄ Reassign</button>
     <button class="btn btn-sm btn-primary" onclick="closeModal('floor-modal');openExModal(${fi})">Edit</button>
     <button class="btn btn-sm" style="background:#E8F5E0;border-color:#A8D878;color:#2D5A10" onclick="sendWhatsApp(exhibitors[${fi}])">WA</button>`:'');
-  document.getElementById('floor-modal').style.display='flex';
+  document.getElementById('floor-modal').classList.add('open');
 }
 
 /* ── VISITORS ── */
@@ -1329,8 +904,8 @@ function renderCosts(){
   const exp=costs.filter(c=>c.type==='expense').reduce((s,c)=>s+(+c.amt||0),0);
   const rev=costs.filter(c=>c.type==='revenue').reduce((s,c)=>s+(+c.amt||0),0);
   const stallRev=exhibitors.reduce((s,e)=>s+(+e.adv||0),0);
-  const sponsorRev=sponsors.reduce((s,sp)=>s+(+sp.received||0),0);
-  const grandRev=rev+stallRev+sponsorRev, profit=grandRev-exp;
+  const spRev=sponsors.reduce((s,sp)=>s+(+sp.recv||0),0);
+  const grandRev=rev+stallRev+spRev, profit=grandRev-exp;
   document.getElementById('cost-metrics').innerHTML=`
     <div class="metric" style="background:#FFF0F0;border-color:#FFCDD2"><div class="metric-val" style="color:#A32D2D">₹${fmt(exp)}</div><div class="metric-lbl">Total Costs</div></div>
     <div class="metric" style="background:#F0FFF4;border-color:#A8D8A8"><div class="metric-val" style="color:#2E7D32">₹${fmt(grandRev)}</div><div class="metric-lbl">Total Revenue</div></div>
@@ -1340,7 +915,7 @@ function renderCosts(){
   document.getElementById('coverage-bar').style.cssText=`width:${pct}%;background:${pct>=100?'#4CAF50':pct>=60?'#F5A623':'#E8748A'}`;
   document.getElementById('bar-rev').textContent='Revenue ₹'+fmt(grandRev);
   document.getElementById('bar-cost').textContent='Costs ₹'+fmt(exp);
-  if(!costs.length&&!stallRev&&!sponsorRev){document.getElementById('cost-list').innerHTML='<div class="card"><p style="text-align:center;color:var(--muted);font-size:13px;padding:1rem">No entries yet.</p></div>';return;}
+  if(!costs.length){document.getElementById('cost-list').innerHTML='<div class="card"><p style="text-align:center;color:var(--muted);font-size:13px;padding:1rem">No entries yet.</p></div>';return;}
   const groups={};costs.forEach(c=>{if(!groups[c.cat])groups[c.cat]=[];groups[c.cat].push(c);});
   document.getElementById('cost-list').innerHTML=Object.entries(groups).map(([cat,items])=>`
     <div class="card">
@@ -1356,18 +931,14 @@ function renderCosts(){
           <div style="display:flex;gap:4px;margin-top:4px"><button class="btn btn-sm" onclick="openCostModal(${gi})">Edit</button><button class="btn btn-sm btn-danger" onclick="deleteCost(${gi})">✕</button></div>
         </div></div>`;}).join('')}
     </div>`).join('');
-  // Append sponsor + stall income notes
-  let notes = '';
-  if(stallRev>0) notes+=`<div class="card" style="background:#F0FFF4;border-color:#A8D8A8;margin-top:8px"><div style="font-size:12px;color:#2E7D32">🛖 <b>₹${fmt(stallRev)}</b> stall advance from exhibitors included in revenue.</div></div>`;
-  if(sponsorRev>0) notes+=`<div class="card" style="background:#FFF8E0;border-color:var(--y3);margin-top:8px"><div style="font-size:12px;color:var(--y5)">🤝 <b>₹${fmt(sponsorRev)}</b> sponsor income included in revenue. <span style="cursor:pointer;text-decoration:underline" onclick="document.getElementById('tab-sponsors').click()">View Sponsors →</span></div></div>`;
-  document.getElementById('cost-list').innerHTML += notes;
-}(idx=null){
+}
+function openCostModal(idx=null){
   editCostId=idx; document.getElementById('cost-modal-title').textContent=idx===null?'Add Entry':'Edit Entry';
   const c=idx!==null?costs[idx]:{};
   document.getElementById('c-desc').value=c.desc||''; document.getElementById('c-cat').value=c.cat||'Venue';
   document.getElementById('c-amt').value=c.amt||''; document.getElementById('c-type').value=c.type||'expense';
   document.getElementById('c-status').value=c.status||'estimated'; document.getElementById('c-date').value=c.date||new Date().toISOString().split('T')[0];
-  document.getElementById('c-notes').value=c.notes||''; document.getElementById('cost-modal').style.display='flex';
+  document.getElementById('c-notes').value=c.notes||''; document.getElementById('cost-modal').classList.add('open');
 }
 async function saveCost(){
   const desc=document.getElementById('c-desc').value.trim(), amt=document.getElementById('c-amt').value;
@@ -1393,215 +964,210 @@ function renderPublic(){
 
 /* ── HELPERS ── */
 function fmt(n){return n>=1000?(n/1000).toFixed(1)+'k':Math.round(n).toString();}
-function closeModal(id){
-  const el = document.getElementById(id);
-  if(el) el.style.display='none';
-}
-function closeMBg(e,id){
-  if(e.target.id===id) closeModal(id);
-}
-function openModal(id){
-  const el = document.getElementById(id);
-  if(el) el.style.display='flex';
-}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function closeMBg(e,id){if(e.target.id===id)closeModal(id);}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600);}
 
-// Init — refresh cats on load
-refreshCatDropdown();
+// Init fallback
+/* ── SPONSORS ── */
+function renderSponsors(){
+  const totalAmt  = sponsors.reduce((s,sp)=>s+(+sp.amt||0),0);
+  const totalRecv = sponsors.reduce((s,sp)=>s+(+sp.recv||0),0);
+  const totalDels = sponsors.reduce((s,sp)=>s+(sp.deliverables||[]).length,0);
+  const doneDels  = sponsors.reduce((s,sp)=>s+(sp.deliverables||[]).filter(d=>d.status==='done').length,0);
+  document.getElementById('sp-metrics').innerHTML=`
+    <div class="metric"><div class="metric-val">${sponsors.length}</div><div class="metric-lbl">Sponsors</div></div>
+    <div class="metric"><div class="metric-val" style="color:#2E7D32">₹${fmt(totalRecv)}</div><div class="metric-lbl">Received</div></div>
+    <div class="metric"><div class="metric-val" style="color:var(--y5)">₹${fmt(totalAmt-totalRecv)}</div><div class="metric-lbl">Pending</div></div>
+    <div class="metric"><div class="metric-val">${doneDels}/${totalDels}</div><div class="metric-lbl">Deliverables</div></div>`;
+  if(!sponsors.length){
+    document.getElementById('sp-list').innerHTML='<div class="card" style="text-align:center;color:var(--muted);padding:2rem;font-size:13px">No sponsors yet. Click "+ Add Sponsor" to get started.</div>';
+    return;
+  }
+  document.getElementById('sp-list').innerHTML=sponsors.map((sp,i)=>{
+    const initials=(sp.name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    const balance=(+sp.amt||0)-(+sp.recv||0);
+    const dels=sp.deliverables||[];
+    const done=dels.filter(d=>d.status==='done').length;
+    return `<div class="sp-card ${sp.type==='Title Sponsor'?'title':''}">
+      <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:4px">
+        <div class="sp-avatar">${initials}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:15px;font-weight:500">${sp.name} <span class="badge badge-cat">${sp.type||'Sponsor'}</span></div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">${[sp.contact,sp.phone].filter(Boolean).join(' · ')}</div>
+          ${sp.notes?`<div style="font-size:11px;color:var(--muted);margin-top:2px">${sp.notes}</div>`:''}
+        </div>
+        <span class="badge badge-${sp.pay==='paid'?'paid':sp.pay==='partial'?'partial':'pending'}">${sp.pay==='paid'?'Received':sp.pay==='partial'?'Partial':'Pending'}</span>
+      </div>
+      <div class="sp-amt-grid">
+        <div class="sp-amt-box"><div class="sp-amt-val">₹${fmt(+sp.amt||0)}</div><div class="sp-amt-lbl">Total</div></div>
+        <div class="sp-amt-box" style="background:#F0FFF4"><div class="sp-amt-val" style="color:#2E7D32">₹${fmt(+sp.recv||0)}</div><div class="sp-amt-lbl">Received</div></div>
+        <div class="sp-amt-box" style="background:${balance>0?'var(--y1)':'#F0FFF4'}"><div class="sp-amt-val" style="color:${balance>0?'var(--y5)':'#2E7D32'}">₹${fmt(balance)}</div><div class="sp-amt-lbl">Balance</div></div>
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em">Deliverables ${dels.length?`(${done}/${dels.length} done)`:''}</span>
+          <button class="btn btn-sm" style="font-size:11px;padding:4px 10px" onclick="openDelModal(${i})">+ Add</button>
+        </div>
+        ${dels.length?dels.map((d,di)=>`
+          <div class="del-row">
+            <div class="del-dot ${d.status||'pending'}"></div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:13px;font-weight:500">${d.custom||d.type}</div>
+              <div style="font-size:11px;color:var(--muted)">${[d.qty,d.notes].filter(Boolean).join(' · ')}</div>
+            </div>
+            <select onchange="updateDelStatus(${i},${di},this.value)" style="width:auto;font-size:11px;padding:4px 6px;border-radius:6px;border:1px solid var(--border);background:var(--light)">
+              <option value="pending" ${d.status==='pending'?'selected':''}>Pending</option>
+              <option value="in-progress" ${d.status==='in-progress'?'selected':''}>In Progress</option>
+              <option value="done" ${d.status==='done'?'selected':''}>Done ✓</option>
+            </select>
+            <button class="btn btn-sm btn-danger" style="padding:4px 8px;font-size:11px" onclick="deleteDel(${i},${di})">✕</button>
+          </div>`).join('')
+        :'<div style="font-size:12px;color:var(--muted);padding:4px 0">No deliverables yet.</div>'}
+      </div>
+      <div style="display:flex;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border);flex-wrap:wrap">
+        ${sp.phone?`<button class="btn btn-sm" style="background:#E8F5E0;border-color:#A8D878;color:#2D5A10" onclick="sendSpWA(${i})">WA Confirm</button>`:''}
+        <button class="btn btn-sm" onclick="openSpModal(${i})">Edit</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteSponsor(${i})">Remove</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openSpModal(idx=null){
+  editSpId=idx;
+  document.getElementById('sp-modal-title').textContent=idx===null?'Add Sponsor':'Edit Sponsor';
+  const sp=idx!==null?sponsors[idx]:{};
+  document.getElementById('sp-name').value=sp.name||'';
+  document.getElementById('sp-contact').value=sp.contact||'';
+  document.getElementById('sp-phone').value=sp.phone||'';
+  document.getElementById('sp-type').value=sp.type||'Co-Sponsor';
+  document.getElementById('sp-amt').value=sp.amt||'';
+  document.getElementById('sp-recv').value=sp.recv||'';
+  document.getElementById('sp-pay').value=sp.pay||'pending';
+  document.getElementById('sp-notes').value=sp.notes||'';
+  document.getElementById('sp-modal').style.display='flex';
+}
+
+async function saveSponsor(){
+  const name=document.getElementById('sp-name').value.trim();
+  if(!name){toast('Please enter a sponsor name.');return;}
+  const obj={
+    name, contact:document.getElementById('sp-contact').value.trim(),
+    phone:document.getElementById('sp-phone').value.trim(),
+    type:document.getElementById('sp-type').value,
+    amt:document.getElementById('sp-amt').value,
+    recv:document.getElementById('sp-recv').value,
+    pay:document.getElementById('sp-pay').value,
+    notes:document.getElementById('sp-notes').value.trim(),
+    deliverables:editSpId!==null?(sponsors[editSpId].deliverables||[]):[]
+  };
+  if(fbReady){
+    if(editSpId!==null) await window._set('sponsors',sponsors[editSpId]._id,obj);
+    else await window._add('sponsors',obj);
+  } else {
+    if(editSpId!==null) sponsors[editSpId]={...sponsors[editSpId],...obj};
+    else sponsors.push(obj);
+    lsSave(); renderSponsors(); renderCosts();
+  }
+  closeModal('sp-modal');
+  toast(editSpId!==null?'✓ Sponsor updated':'✓ Sponsor added');
+}
+
+async function deleteSponsor(i){
+  if(!confirm(`Remove ${sponsors[i].name}?`))return;
+  if(fbReady) await window._del('sponsors',sponsors[i]._id);
+  else{ sponsors.splice(i,1); lsSave(); renderSponsors(); renderCosts(); }
+  toast('Removed.');
+}
+
+function openDelModal(spIdx){
+  editDelSpId=spIdx; editDelIdx=null;
+  document.getElementById('del-modal-title').textContent=`Add Deliverable — ${sponsors[spIdx].name}`;
+  document.getElementById('del-type').value='Logo on banners';
+  document.getElementById('del-custom').value='';
+  document.getElementById('del-custom-wrap').style.display='none';
+  document.getElementById('del-qty').value='';
+  document.getElementById('del-status').value='pending';
+  document.getElementById('del-notes').value='';
+  document.getElementById('del-modal').style.display='flex';
+}
+
+async function saveDeliverable(){
+  const type=document.getElementById('del-type').value;
+  const custom=document.getElementById('del-custom').value.trim();
+  if(type==='Custom'&&!custom){toast('Please describe the deliverable.');return;}
+  const del={type,custom:type==='Custom'?custom:'',qty:document.getElementById('del-qty').value.trim(),status:document.getElementById('del-status').value,notes:document.getElementById('del-notes').value.trim()};
+  const sp=sponsors[editDelSpId];
+  const dels=[...(sp.deliverables||[])];
+  dels.push(del);
+  const updated={...sp,deliverables:dels};
+  if(fbReady) await window._set('sponsors',sp._id,updated);
+  else{ sponsors[editDelSpId]=updated; lsSave(); renderSponsors(); }
+  closeModal('del-modal');
+  toast('✓ Deliverable added');
+}
+
+async function updateDelStatus(spIdx,delIdx,status){
+  const sp=sponsors[spIdx];
+  const dels=[...(sp.deliverables||[])];
+  dels[delIdx]={...dels[delIdx],status};
+  const updated={...sp,deliverables:dels};
+  if(fbReady) await window._set('sponsors',sp._id,updated);
+  else{ sponsors[spIdx]=updated; lsSave(); renderSponsors(); }
+  toast(`✓ Marked as ${status}`);
+}
+
+async function deleteDel(spIdx,delIdx){
+  if(!confirm('Remove this deliverable?'))return;
+  const sp=sponsors[spIdx];
+  const dels=[...(sp.deliverables||[])];
+  dels.splice(delIdx,1);
+  const updated={...sp,deliverables:dels};
+  if(fbReady) await window._set('sponsors',sp._id,updated);
+  else{ sponsors[spIdx]=updated; lsSave(); renderSponsors(); }
+  toast('Removed.');
+}
+
+function sendSpWA(i){
+  const sp=sponsors[i];
+  const num=(sp.phone||'').replace(/\D/g,'');
+  if(!num||num.length<10){toast('No phone number saved.');return;}
+  const dels=sp.deliverables||[];
+  let msg=`🎀 *Rakhi Pop-Up 2026 — Sponsorship Confirmation*\n\nDear *${sp.contact||sp.name}*,\n\nThank you for sponsoring Rakhi Pop-Up 2026!\n\n`;
+  msg+=`📋 *Details:*\n• Sponsor: ${sp.name}\n• Type: ${sp.type}\n• Amount: ₹${Number(sp.amt||0).toLocaleString()}\n• Received: ₹${Number(sp.recv||0).toLocaleString()}\n`;
+  if((+sp.amt||0)-(+sp.recv||0)>0) msg+=`• Balance Due: ₹${((+sp.amt||0)-(+sp.recv||0)).toLocaleString()}\n`;
+  if(dels.length){ msg+=`\n📦 *Deliverables:*\n`; dels.forEach(d=>{ msg+=`• ${d.custom||d.type}${d.qty?' ('+d.qty+')':''}\n`; }); }
+  msg+=`\n📅 19–20 July 2026\n🏨 Hotel Swan, Aerodrome Circle, Kota\n\n*Team Rakhi Pop-Up, Kota*`;
+  window.open(`https://wa.me/91${num}?text=${encodeURIComponent(msg)}`,'_blank');
+}
+
 lsLoad(); renderAdmin();
 document.getElementById('c-date').value=new Date().toISOString().split('T')[0];
-// Init auth state — show/hide admin based on session
-initAuthState();
 </script>
-<!-- ═══ SPONSOR MODAL ═══ -->
-<div id="sp-modal" class="modal-overlay" onclick="closeMBg(event,'sp-modal')">
-  <div class="modal">
-    <h3 id="sp-modal-title" style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--y5);margin-bottom:1rem">Add Sponsor</h3>
-    <div class="row2">
-      <div><label>Sponsor Name *</label><input id="sp-name" placeholder="e.g. Kota Sarees Co."></div>
-      <div><label>Contact Person</label><input id="sp-contact" placeholder="Name"></div>
-    </div>
-    <div class="row2">
-      <div><label>Phone / WhatsApp</label><input id="sp-phone" type="tel" placeholder="10-digit number"></div>
-      <div><label>Sponsorship Type</label>
-        <select id="sp-type">
-          <option>Title Sponsor</option>
-          <option>Co-Sponsor</option>
-          <option>Associate Sponsor</option>
-          <option>In-Kind Sponsor</option>
-          <option>Media Partner</option>
-          <option>Other</option>
-        </select>
-      </div>
-    </div>
-    <div class="row2">
-      <div><label>Sponsorship Amount (₹)</label><input id="sp-amt" type="number" placeholder="0"></div>
-      <div><label>Amount Received (₹)</label><input id="sp-received" type="number" placeholder="0"></div>
-    </div>
-    <div><label>Payment Status</label>
-      <select id="sp-pay"><option value="pending">Pending</option><option value="partial">Partial</option><option value="paid">Fully Received</option></select>
-    </div>
-    <div><label>Notes</label><textarea id="sp-notes" placeholder="Any details about the sponsorship..."></textarea></div>
-    <div class="modal-footer">
-      <button class="btn btn-sm" onclick="closeModal('sp-modal')">Cancel</button>
-      <button class="btn btn-primary btn-sm" onclick="saveSponsor()">Save</button>
-    </div>
-  </div>
-</div>
-
-<!-- ═══ DELIVERABLE MODAL ═══ -->
-<div id="del-modal" class="modal-overlay" onclick="closeMBg(event,'del-modal')">
-  <div class="modal" style="max-width:440px">
-    <h3 id="del-modal-title" style="font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--y5);margin-bottom:1rem">Add Deliverable</h3>
-    <div><label>Deliverable *</label>
-      <select id="del-type">
-        <option>Logo on banners</option>
-        <option>Logo on stage backdrop</option>
-        <option>Social media shoutout</option>
-        <option>Stall at event</option>
-        <option>MC mention</option>
-        <option>Logo on invites</option>
-        <option>Logo on website / app</option>
-        <option>Product sampling</option>
-        <option>Sponsored segment</option>
-        <option>Gift hamper branding</option>
-        <option>Email newsletter mention</option>
-        <option>Custom</option>
-      </select>
-    </div>
-    <div id="del-custom-wrap" style="display:none"><label>Custom Deliverable</label><input id="del-custom" placeholder="Describe the deliverable"></div>
-    <div class="row2">
-      <div><label>Quantity / Details</label><input id="del-qty" placeholder="e.g. 3 posts, 2 banners"></div>
-      <div><label>Status</label>
-        <select id="del-status">
-          <option value="pending">Pending</option>
-          <option value="in-progress">In Progress</option>
-          <option value="done">Done ✓</option>
-        </select>
-      </div>
-    </div>
-    <div><label>Due / Notes</label><input id="del-notes" placeholder="Deadline or any notes"></div>
-    <div class="modal-footer">
-      <button class="btn btn-sm" onclick="closeModal('del-modal')">Cancel</button>
-      <button class="btn btn-primary btn-sm" onclick="saveDeliverable()">Save</button>
-    </div>
-  </div>
-</div>
-
-<!-- ═══ PIN MODAL ═══ -->
-<div id="pin-modal" class="modal-overlay" onclick="closeMBg(event,'pin-modal')">
-  <div class="modal" style="max-width:320px;text-align:center">
-    <div style="font-size:36px;margin-bottom:0.5rem">🔐</div>
-    <h3 style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--y5);margin-bottom:0.5rem" id="pin-title">Admin Login</h3>
-    <p style="font-size:13px;color:var(--muted);margin-bottom:1.25rem" id="pin-subtitle">Enter your PIN to access admin features</p>
-    <!-- PIN dots display -->
-    <div style="display:flex;justify-content:center;gap:12px;margin-bottom:1.5rem" id="pin-dots"></div>
-    <!-- PIN keypad -->
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:220px;margin:0 auto 1rem">
-      <button class="pin-key" onclick="pinKey('1')">1</button>
-      <button class="pin-key" onclick="pinKey('2')">2</button>
-      <button class="pin-key" onclick="pinKey('3')">3</button>
-      <button class="pin-key" onclick="pinKey('4')">4</button>
-      <button class="pin-key" onclick="pinKey('5')">5</button>
-      <button class="pin-key" onclick="pinKey('6')">6</button>
-      <button class="pin-key" onclick="pinKey('7')">7</button>
-      <button class="pin-key" onclick="pinKey('8')">8</button>
-      <button class="pin-key" onclick="pinKey('9')">9</button>
-      <button class="pin-key pin-key-clear" onclick="pinClear()">⌫</button>
-      <button class="pin-key" onclick="pinKey('0')">0</button>
-      <button class="pin-key pin-key-ok" onclick="pinSubmit()">OK</button>
-    </div>
-    <p id="pin-error" style="font-size:12px;color:#A32D2D;min-height:18px"></p>
-    <button class="btn btn-sm" onclick="closeModal('pin-modal')" style="margin-top:8px">Cancel</button>
-  </div>
-</div>
-
-<!-- ═══ CATEGORY MANAGER MODAL ═══ -->
-<div id="cat-modal" class="modal-overlay" onclick="closeMBg(event,'cat-modal')">
-  <div class="modal" style="max-width:380px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
-      <span style="font-size:17px;font-weight:600;font-family:'Cormorant Garamond',serif;color:var(--y5)">Manage Categories</span>
-      <button onclick="closeModal('cat-modal')" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted)">×</button>
-    </div>
-    <div id="cat-list" style="margin-bottom:1rem"></div>
-    <div style="display:flex;gap:8px">
-      <input id="cat-new-input" placeholder="New category name..." style="flex:1" onkeydown="if(event.key==='Enter')addCat()">
-      <button class="btn btn-primary btn-sm" onclick="addCat()">Add</button>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-sm btn-primary" onclick="closeModal('cat-modal')">Done</button>
-    </div>
-  </div>
-</div>
-
-
-<div id="update-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#2A2200;color:#FFF8DC;padding:12px 1rem;z-index:9999;display:none;align-items:center;justify-content:space-between;gap:12px;font-size:13px;font-family:'DM Sans',sans-serif">
+<div id="update-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#2A2200;color:#FFF8DC;padding:12px 1rem;z-index:9999;align-items:center;justify-content:space-between;gap:12px;font-size:13px">
   <span>🎀 New version available!</span>
   <button onclick="applyUpdate()" style="background:#F5C518;color:#2A2200;border:none;padding:7px 16px;border-radius:8px;font-weight:600;cursor:pointer;font-size:13px">Update Now</button>
 </div>
-
 <script>
-// ── SERVICE WORKER + AUTO-UPDATE ──
 let newWorker;
-
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').then(reg => {
-      console.log('[PWA] SW registered:', reg.scope);
-
-      // Check for updates every 60 seconds
-      setInterval(() => reg.update(), 60000);
-
-      // New SW found waiting
-      reg.addEventListener('updatefound', () => {
-        newWorker = reg.installing;
-        newWorker.addEventListener('statechange', () => {
-          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            // New version ready — show banner
-            document.getElementById('update-banner').style.display = 'flex';
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('/sw.js').then(reg=>{
+      setInterval(()=>reg.update(),60000);
+      reg.addEventListener('updatefound',()=>{
+        newWorker=reg.installing;
+        newWorker.addEventListener('statechange',()=>{
+          if(newWorker.state==='installed'&&navigator.serviceWorker.controller){
+            document.getElementById('update-banner').style.display='flex';
           }
         });
       });
-    }).catch(err => console.log('[PWA] SW registration failed:', err));
-
-    // When SW takes control (after update), reload the page
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      window.location.reload();
     });
+    navigator.serviceWorker.addEventListener('controllerchange',()=>window.location.reload());
   });
 }
-
-function applyUpdate() {
-  if (newWorker) {
-    newWorker.postMessage('SKIP_WAITING');
-  } else {
-    window.location.reload();
-  }
-}
-
-// ── INSTALL PROMPT (Add to Home Screen) ──
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault();
-  deferredPrompt = e;
-  // Show install button in nav if available
-  const btn = document.getElementById('install-btn');
-  if (btn) btn.style.display = 'flex';
-});
-
-function installPWA() {
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    deferredPrompt.userChoice.then(choice => {
-      if (choice.outcome === 'accepted') {
-        toast('✓ App installed to home screen!');
-        const btn = document.getElementById('install-btn');
-        if (btn) btn.style.display = 'none';
-      }
-      deferredPrompt = null;
-    });
-  }
-}
+function applyUpdate(){if(newWorker)newWorker.postMessage('SKIP_WAITING');else window.location.reload();}
 </script>
 </body>
 </html>
