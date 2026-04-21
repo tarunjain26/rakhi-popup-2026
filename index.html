@@ -1102,7 +1102,11 @@ function renderPublic(){
 }
 
 /* ── HELPERS ── */
-function fmt(n){return n>=1000?(n/1000).toFixed(1)+'k':Math.round(n).toString();}
+function fmt(n){
+  const num = Math.round(n);
+  if(num === 0) return '0';
+  return num.toLocaleString('en-IN');
+}
 
 function stallColor(stall){
   if(!stall) return {bg:'var(--y3)',border:'var(--y4)',text:'var(--y5)'};
