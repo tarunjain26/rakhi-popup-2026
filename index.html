@@ -359,6 +359,7 @@ textarea{resize:vertical;min-height:60px}
     </div>
     <div class="revenue-bar"><div class="revenue-fill" id="coverage-bar" style="width:0%"></div></div>
     <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted)"><span id="bar-rev"></span><span id="bar-cost"></span></div>
+    <div id="cost-breakdown" style="font-size:11px;color:var(--muted);margin-top:6px;padding-top:6px;border-top:1px solid var(--border)"></div>
   </div>
   <div id="cost-list"></div>
 </div>
@@ -672,7 +673,7 @@ function openExModal(idx=null){
   ['name','city','stall','fee','adv','req','notes','wa'].forEach(f=>{ const el=document.getElementById('m-'+f); if(el)el.value=e[f]||''; });
   document.getElementById('m-cat').value=e.cat||'';
   document.getElementById('m-pay').value=e.pay||'pending';
-  document.getElementById('ex-modal').classList.add('open');
+  openModal('ex-modal');
 }
 
 async function saveExhibitor(sendWA=false){
@@ -723,7 +724,7 @@ async function dropOn(e,targetIdx){
 }
 
 /* ── STALL REASSIGN ── */
-function openReassign(idx){ reassignIdx=idx; document.getElementById('reassign-info').textContent=`Reassigning: ${exhibitors[idx].name} (currently Stall ${exhibitors[idx].stall||'unassigned'})`; document.getElementById('reassign-stall').value=''; document.getElementById('reassign-modal').classList.add('open'); }
+function openReassign(idx){ reassignIdx=idx; document.getElementById('reassign-info').textContent=`Reassigning: ${exhibitors[idx].name} (currently Stall ${exhibitors[idx].stall||'unassigned'})`; document.getElementById('reassign-stall').value=''; openModal('reassign-modal'); }
 async function confirmReassign(){
   const newStall=document.getElementById('reassign-stall').value.trim().toUpperCase();
   if(!newStall){toast('Please enter a stall number.');return;}
@@ -878,7 +879,7 @@ function floorClick(id){
     (ex?`<button class="btn btn-sm btn-green" onclick="closeModal('floor-modal');openReassign(${fi})">⇄ Reassign</button>
     <button class="btn btn-sm btn-primary" onclick="closeModal('floor-modal');openExModal(${fi})">Edit</button>
     <button class="btn btn-sm" style="background:#E8F5E0;border-color:#A8D878;color:#2D5A10" onclick="sendWhatsApp(exhibitors[${fi}])">WA</button>`:'');
-  document.getElementById('floor-modal').classList.add('open');
+  openModal('floor-modal');
 }
 
 /* ── VISITORS ── */
@@ -915,7 +916,21 @@ function renderCosts(){
   document.getElementById('coverage-bar').style.cssText=`width:${pct}%;background:${pct>=100?'#4CAF50':pct>=60?'#F5A623':'#E8748A'}`;
   document.getElementById('bar-rev').textContent='Revenue ₹'+fmt(grandRev);
   document.getElementById('bar-cost').textContent='Costs ₹'+fmt(exp);
-  if(!costs.length){document.getElementById('cost-list').innerHTML='<div class="card"><p style="text-align:center;color:var(--muted);font-size:13px;padding:1rem">No entries yet.</p></div>';return;}
+
+  // Revenue breakdown note
+  let breakdown = '';
+  if(stallRev>0) breakdown += `🛖 Stall advances: ₹${fmt(stallRev)}`;
+  if(spRev>0)    breakdown += `${breakdown?' &nbsp;·&nbsp; ':''}🤝 Sponsorships: ₹${fmt(spRev)}`;
+  if(rev>0)      breakdown += `${breakdown?' &nbsp;·&nbsp; ':''}💰 Other income: ₹${fmt(rev)}`;
+  if(breakdown){
+    const el = document.getElementById('cost-breakdown');
+    if(el) el.innerHTML = breakdown;
+  }
+
+  if(!costs.length){
+    document.getElementById('cost-list').innerHTML='<div class="card"><p style="text-align:center;color:var(--muted);font-size:13px;padding:1rem">No cost entries yet. Click "+ Add Entry" to start tracking.</p></div>';
+    return;
+  }
   const groups={};costs.forEach(c=>{if(!groups[c.cat])groups[c.cat]=[];groups[c.cat].push(c);});
   document.getElementById('cost-list').innerHTML=Object.entries(groups).map(([cat,items])=>`
     <div class="card">
@@ -938,7 +953,7 @@ function openCostModal(idx=null){
   document.getElementById('c-desc').value=c.desc||''; document.getElementById('c-cat').value=c.cat||'Venue';
   document.getElementById('c-amt').value=c.amt||''; document.getElementById('c-type').value=c.type||'expense';
   document.getElementById('c-status').value=c.status||'estimated'; document.getElementById('c-date').value=c.date||new Date().toISOString().split('T')[0];
-  document.getElementById('c-notes').value=c.notes||''; document.getElementById('cost-modal').classList.add('open');
+  document.getElementById('c-notes').value=c.notes||''; openModal('cost-modal');
 }
 async function saveCost(){
   const desc=document.getElementById('c-desc').value.trim(), amt=document.getElementById('c-amt').value;
@@ -964,7 +979,18 @@ function renderPublic(){
 
 /* ── HELPERS ── */
 function fmt(n){return n>=1000?(n/1000).toFixed(1)+'k':Math.round(n).toString();}
-function closeModal(id){document.getElementById(id).classList.remove('open');}
+function closeModal(id){
+  const el=document.getElementById(id);
+  if(!el)return;
+  el.classList.remove('open');
+  el.style.display='none';
+}
+function openModal(id){
+  const el=document.getElementById(id);
+  if(!el)return;
+  el.classList.add('open');
+  el.style.display='flex';
+}
 function closeMBg(e,id){if(e.target.id===id)closeModal(id);}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600);}
 
@@ -1046,7 +1072,7 @@ function openSpModal(idx=null){
   document.getElementById('sp-recv').value=sp.recv||'';
   document.getElementById('sp-pay').value=sp.pay||'pending';
   document.getElementById('sp-notes').value=sp.notes||'';
-  document.getElementById('sp-modal').style.display='flex';
+  openModal('sp-modal');
 }
 
 async function saveSponsor(){
@@ -1071,6 +1097,12 @@ async function saveSponsor(){
     lsSave(); renderSponsors(); renderCosts();
   }
   closeModal('sp-modal');
+  // Navigate back to sponsors page
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-sponsors').classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(t=>{ if(t.textContent.includes('Sponsors')) t.classList.add('active'); });
+  renderSponsors();
   toast(editSpId!==null?'✓ Sponsor updated':'✓ Sponsor added');
 }
 
@@ -1090,7 +1122,7 @@ function openDelModal(spIdx){
   document.getElementById('del-qty').value='';
   document.getElementById('del-status').value='pending';
   document.getElementById('del-notes').value='';
-  document.getElementById('del-modal').style.display='flex';
+  openModal('del-modal');
 }
 
 async function saveDeliverable(){
@@ -1105,6 +1137,11 @@ async function saveDeliverable(){
   if(fbReady) await window._set('sponsors',sp._id,updated);
   else{ sponsors[editDelSpId]=updated; lsSave(); renderSponsors(); }
   closeModal('del-modal');
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-sponsors').classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(t=>{ if(t.textContent.includes('Sponsors')) t.classList.add('active'); });
+  renderSponsors();
   toast('✓ Deliverable added');
 }
 
