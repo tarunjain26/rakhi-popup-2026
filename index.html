@@ -69,6 +69,9 @@ nav{background:linear-gradient(135deg,#FFF8A0,#FFF0C0,#FFF8A0);border-bottom:2px
 .nav-short{display:none}
 .nav-full{display:inline}
 @media(max-width:480px){.nav-short{display:inline}.nav-full{display:none}}
+/* Admin tabs hidden by default, shown when unlocked */
+.admin-only{display:none !important}
+body.admin-unlocked .admin-only{display:flex !important}
 .ticker{background:linear-gradient(90deg,var(--y2),var(--y1));padding:5px 1rem;border-bottom:1px solid var(--border);font-size:11px;color:var(--muted);letter-spacing:0.05em;overflow:hidden;white-space:nowrap;display:flex;gap:14px;align-items:center}
 .page{display:none;padding:1.25rem 1rem;max-width:980px;margin:0 auto;width:100%}
 .page.active{display:block}
@@ -255,11 +258,11 @@ textarea{resize:vertical;min-height:60px}
     <div class="nav-brand-title">🍋 Rakhi Pop-Up <span class="sync-dot" id="sync-dot" title="Firebase sync status"></span></div>
     <div class="nav-brand-sub">19–20 July 2026 · Kota</div>
   </div>
-  <div class="nav-tab admin-only" id="tab-admin" onclick="showPage('admin',this)" style="display:none"><span class="nav-full">Exhibitors</span><span class="nav-short">Stalls</span></div>
-  <div class="nav-tab admin-only" id="tab-floor" onclick="showPage('floor',this)" style="display:none"><span class="nav-full">Floor Plan</span><span class="nav-short">Map</span></div>
-  <div class="nav-tab admin-only" id="tab-visitors" onclick="showPage('visitors',this)" style="display:none"><span class="nav-full">Visitors</span><span class="nav-short">Visitors</span></div>
-  <div class="nav-tab admin-only" id="tab-sponsors" onclick="showPage('sponsors',this)" style="display:none"><span class="nav-full">Sponsors</span><span class="nav-short">Sponsors</span></div>
-  <div class="nav-tab admin-only" id="tab-costs" onclick="showPage('costs',this)" style="display:none"><span class="nav-full">Costs</span><span class="nav-short">Costs</span></div>
+  <div class="nav-tab admin-only" id="tab-admin" onclick="showPage('admin',this)"><span class="nav-full">Exhibitors</span><span class="nav-short">Stalls</span></div>
+  <div class="nav-tab admin-only" id="tab-floor" onclick="showPage('floor',this)"><span class="nav-full">Floor Plan</span><span class="nav-short">Map</span></div>
+  <div class="nav-tab admin-only" id="tab-visitors" onclick="showPage('visitors',this)"><span class="nav-full">Visitors</span><span class="nav-short">Visitors</span></div>
+  <div class="nav-tab admin-only" id="tab-sponsors" onclick="showPage('sponsors',this)"><span class="nav-full">Sponsors</span><span class="nav-short">Sponsors</span></div>
+  <div class="nav-tab admin-only" id="tab-costs" onclick="showPage('costs',this)"><span class="nav-full">Costs</span><span class="nav-short">Costs</span></div>
   <div class="nav-tab active" id="tab-public" onclick="showPage('public',this)"><span class="nav-full">Guest View</span><span class="nav-short">Guest</span></div>
   <button id="admin-lock-btn" onclick="toggleAdminLock()" style="margin-left:auto;flex-shrink:0;padding:5px 12px;background:var(--light);border:1.5px solid var(--border);color:var(--muted);border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;font-family:'DM Sans',sans-serif">
     🔒 Admin
@@ -740,7 +743,7 @@ function openSponsorModal(idx=null){
   document.getElementById('sp-received').value= sp.received||'';
   document.getElementById('sp-pay').value     = sp.pay||'pending';
   document.getElementById('sp-notes').value   = sp.notes||'';
-  document.getElementById('sp-modal').classList.add('open');
+  document.getElementById('sp-modal').style.display='flex';
 }
 
 async function saveSponsor(){
@@ -787,7 +790,7 @@ function openDelModal(spIdx){
   document.getElementById('del-status').value = 'pending';
   document.getElementById('del-notes').value  = '';
   document.getElementById('del-custom-wrap').style.display = 'none';
-  document.getElementById('del-modal').classList.add('open');
+  document.getElementById('del-modal').style.display='flex';
 }
 
 document.addEventListener('DOMContentLoaded', ()=>{
@@ -864,62 +867,50 @@ let pinBuffer = '';
 let isAdmin = sessionStorage.getItem('rp_admin') === 'true';
 
 function initAuthState(){
-  if(isAdmin){
-    unlockAdmin(false);
-  } else {
-    lockAdmin(false);
-  }
+  if(isAdmin){ unlockAdmin(false); } else { lockAdmin(false); }
 }
 
 function lockAdmin(navigate=true){
   isAdmin = false;
   sessionStorage.removeItem('rp_admin');
-  // Hide admin tabs
-  document.querySelectorAll('.admin-only').forEach(el=>el.style.display='none');
-  // Update lock button
+  document.body.classList.remove('admin-unlocked');
   const btn = document.getElementById('admin-lock-btn');
-  btn.innerHTML = '🔒 Admin';
-  btn.style.background = 'var(--light)';
-  btn.style.color = 'var(--muted)';
-  btn.style.borderColor = 'var(--border)';
-  // Show guest view
+  if(btn){ btn.innerHTML='🔒 Admin'; btn.style.background='var(--light)'; btn.style.color='var(--muted)'; btn.style.borderColor='var(--border)'; }
   if(navigate){
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
     const guestTab = document.getElementById('tab-public');
-    showPage('public', guestTab);
+    if(guestTab) guestTab.classList.add('active');
+    const guestPage = document.getElementById('page-public');
+    if(guestPage){ guestPage.classList.add('active'); renderPublic(); }
   }
 }
 
 function unlockAdmin(navigate=true){
   isAdmin = true;
   sessionStorage.setItem('rp_admin','true');
-  // Show admin tabs
-  document.querySelectorAll('.admin-only').forEach(el=>el.style.display='flex');
-  // Update lock button
+  document.body.classList.add('admin-unlocked');
   const btn = document.getElementById('admin-lock-btn');
-  btn.innerHTML = '🔓 Admin';
-  btn.style.background = '#EAF3DE';
-  btn.style.color = '#2D5A10';
-  btn.style.borderColor = '#A8D878';
-  // Go to exhibitors
+  if(btn){ btn.innerHTML='🔓 Admin'; btn.style.background='#EAF3DE'; btn.style.color='#2D5A10'; btn.style.borderColor='#A8D878'; }
   if(navigate){
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
     const adminTab = document.getElementById('tab-admin');
-    showPage('admin', adminTab);
+    if(adminTab) adminTab.classList.add('active');
+    const adminPage = document.getElementById('page-admin');
+    if(adminPage){ adminPage.classList.add('active'); renderAdmin(); }
   }
 }
 
 function toggleAdminLock(){
   if(isAdmin){
-    // Already admin — lock it
-    if(confirm('Log out of admin mode?')){
-      lockAdmin();
-      toast('🔒 Admin mode off');
-    }
+    if(confirm('Log out of admin mode?')){ lockAdmin(); toast('🔒 Admin mode off'); }
   } else {
-    // Show PIN entry
     pinBuffer = '';
-    document.getElementById('pin-error').textContent = '';
+    const errEl = document.getElementById('pin-error');
+    if(errEl) errEl.textContent = '';
     updatePinDots();
-    document.getElementById('pin-modal').classList.add('open');
+    openModal('pin-modal');
   }
 }
 
@@ -950,7 +941,6 @@ function pinSubmit(){
     toast('🔓 Admin mode unlocked!');
   } else {
     document.getElementById('pin-error').textContent = 'Incorrect PIN. Try again.';
-    // Shake animation
     const dots = document.getElementById('pin-dots');
     dots.style.animation = 'shake .3s ease';
     setTimeout(()=>{ dots.style.animation=''; pinBuffer=''; updatePinDots(); }, 400);
@@ -980,7 +970,7 @@ function refreshCatDropdown(){
 
 function manageCats(){
   renderCatList();
-  document.getElementById('cat-modal').classList.add('open');
+  document.getElementById('cat-modal').style.display='flex';
 }
 
 function renderCatList(){
@@ -1107,7 +1097,7 @@ function openExModal(idx=null){
   refreshCatDropdown();
   document.getElementById('m-cat').value=e.cat||'';
   document.getElementById('m-pay').value=e.pay||'pending';
-  document.getElementById('ex-modal').classList.add('open');
+  document.getElementById('ex-modal').style.display='flex';
 }
 
 async function saveExhibitor(sendWA=false){
@@ -1158,7 +1148,7 @@ async function dropOn(e,targetIdx){
 }
 
 /* ── STALL REASSIGN ── */
-function openReassign(idx){ reassignIdx=idx; document.getElementById('reassign-info').textContent=`Reassigning: ${exhibitors[idx].name} (currently Stall ${exhibitors[idx].stall||'unassigned'})`; document.getElementById('reassign-stall').value=''; document.getElementById('reassign-modal').classList.add('open'); }
+function openReassign(idx){ reassignIdx=idx; document.getElementById('reassign-info').textContent=`Reassigning: ${exhibitors[idx].name} (currently Stall ${exhibitors[idx].stall||'unassigned'})`; document.getElementById('reassign-stall').value=''; document.getElementById('reassign-modal').style.display='flex'; }
 async function confirmReassign(){
   const newStall=document.getElementById('reassign-stall').value.trim().toUpperCase();
   if(!newStall){toast('Please enter a stall number.');return;}
@@ -1313,7 +1303,7 @@ function floorClick(id){
     (ex?`<button class="btn btn-sm btn-green" onclick="closeModal('floor-modal');openReassign(${fi})">⇄ Reassign</button>
     <button class="btn btn-sm btn-primary" onclick="closeModal('floor-modal');openExModal(${fi})">Edit</button>
     <button class="btn btn-sm" style="background:#E8F5E0;border-color:#A8D878;color:#2D5A10" onclick="sendWhatsApp(exhibitors[${fi}])">WA</button>`:'');
-  document.getElementById('floor-modal').classList.add('open');
+  document.getElementById('floor-modal').style.display='flex';
 }
 
 /* ── VISITORS ── */
@@ -1377,7 +1367,7 @@ function renderCosts(){
   document.getElementById('c-desc').value=c.desc||''; document.getElementById('c-cat').value=c.cat||'Venue';
   document.getElementById('c-amt').value=c.amt||''; document.getElementById('c-type').value=c.type||'expense';
   document.getElementById('c-status').value=c.status||'estimated'; document.getElementById('c-date').value=c.date||new Date().toISOString().split('T')[0];
-  document.getElementById('c-notes').value=c.notes||''; document.getElementById('cost-modal').classList.add('open');
+  document.getElementById('c-notes').value=c.notes||''; document.getElementById('cost-modal').style.display='flex';
 }
 async function saveCost(){
   const desc=document.getElementById('c-desc').value.trim(), amt=document.getElementById('c-amt').value;
@@ -1403,8 +1393,17 @@ function renderPublic(){
 
 /* ── HELPERS ── */
 function fmt(n){return n>=1000?(n/1000).toFixed(1)+'k':Math.round(n).toString();}
-function closeModal(id){document.getElementById(id).classList.remove('open');}
-function closeMBg(e,id){if(e.target.id===id)closeModal(id);}
+function closeModal(id){
+  const el = document.getElementById(id);
+  if(el) el.style.display='none';
+}
+function closeMBg(e,id){
+  if(e.target.id===id) closeModal(id);
+}
+function openModal(id){
+  const el = document.getElementById(id);
+  if(el) el.style.display='flex';
+}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600);}
 
 // Init — refresh cats on load
