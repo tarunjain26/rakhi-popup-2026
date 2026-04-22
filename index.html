@@ -430,6 +430,17 @@ textarea{resize:vertical;min-height:60px}
         <select id="m-pay"><option value="pending">Pending</option><option value="partial">Partial</option><option value="paid">Paid</option></select>
       </div>
     </div>
+    <div><label>Payment Mode</label>
+      <select id="m-mode">
+        <option value="">— Not received yet —</option>
+        <option value="Cash">Cash</option>
+        <option value="UPI">UPI</option>
+        <option value="Bank Transfer">Bank Transfer</option>
+        <option value="Cheque">Cheque</option>
+        <option value="Card">Card</option>
+        <option value="Multiple">Multiple Modes</option>
+      </select>
+    </div>
     <div><label>Additional Requirements</label><textarea id="m-req" placeholder="Power outlet, extra table, hanging rod..."></textarea></div>
     <div><label>Notes</label><textarea id="m-notes" placeholder="Internal notes..."></textarea></div>
     <div class="modal-footer">
@@ -517,8 +528,21 @@ textarea{resize:vertical;min-height:60px}
       <div><label>Total Amount (₹)</label><input id="sp-amt" type="number" placeholder="0"></div>
       <div><label>Amount Received (₹)</label><input id="sp-recv" type="number" placeholder="0"></div>
     </div>
-    <div><label>Payment Status</label>
-      <select id="sp-pay"><option value="pending">Pending</option><option value="partial">Partial</option><option value="paid">Fully Received</option></select>
+    <div class="row2">
+      <div><label>Payment Status</label>
+        <select id="sp-pay"><option value="pending">Pending</option><option value="partial">Partial</option><option value="paid">Fully Received</option></select>
+      </div>
+      <div><label>Payment Mode</label>
+        <select id="sp-mode">
+          <option value="">— Not received yet —</option>
+          <option value="Cash">Cash</option>
+          <option value="UPI">UPI</option>
+          <option value="Bank Transfer">Bank Transfer</option>
+          <option value="Cheque">Cheque</option>
+          <option value="Card">Card</option>
+          <option value="Multiple">Multiple Modes</option>
+        </select>
+      </div>
     </div>
     <div><label>Notes</label><textarea id="sp-notes" placeholder="Any details..."></textarea></div>
     <div class="modal-footer">
@@ -675,7 +699,7 @@ function renderAdmin(){
       <div class="stall-badge" style="background:${sc.bg};border-color:${sc.border};color:${sc.text}">${e.stall||'?'}</div>
       <div class="ex-info">
         <div class="ex-name">${e.name} <span class="badge badge-cat">${e.cat||'—'}</span></div>
-        <div class="ex-meta">${[e.city, e.fee?'Fee ₹'+Number(e.fee).toLocaleString():'', e.adv?'Adv ₹'+Number(e.adv).toLocaleString():''].filter(Boolean).join(' · ')}</div>
+        <div class="ex-meta">${[e.city, e.fee?'Fee ₹'+Number(e.fee).toLocaleString('en-IN'):'', e.adv?'Adv ₹'+Number(e.adv).toLocaleString('en-IN'):'', e.mode?'via '+e.mode:''].filter(Boolean).join(' · ')}</div>
         ${e.req?`<div class="ex-meta">📌 ${e.req}</div>`:''}
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0">
@@ -694,7 +718,7 @@ function openExModal(idx=null){
   editExId=idx;
   document.getElementById('ex-modal-title').textContent=idx===null?'Add Exhibitor':'Edit Exhibitor';
   const e=idx!==null?exhibitors[idx]:{};
-  ['name','city','stall','fee','adv','req','notes','wa'].forEach(f=>{ const el=document.getElementById('m-'+f); if(el)el.value=e[f]||''; });
+  ['name','city','stall','fee','adv','req','notes','wa','mode'].forEach(f=>{ const el=document.getElementById('m-'+f); if(el)el.value=e[f]||''; });
   refreshCatDropdown();
   document.getElementById('m-cat').value=e.cat||'';
   document.getElementById('m-pay').value=e.pay||'pending';
@@ -709,7 +733,8 @@ async function saveExhibitor(sendWA=false){
   if(stall&&dup){toast('Stall '+stall+' is already assigned to '+dup.name);return;}
   const obj={name,city:document.getElementById('m-city').value.trim(),cat:document.getElementById('m-cat').value,
     stall,fee:document.getElementById('m-fee').value,adv:document.getElementById('m-adv').value,
-    pay:document.getElementById('m-pay').value,req:document.getElementById('m-req').value.trim(),
+    pay:document.getElementById('m-pay').value,mode:document.getElementById('m-mode').value,
+    req:document.getElementById('m-req').value.trim(),
     notes:document.getElementById('m-notes').value.trim(),wa:document.getElementById('m-wa').value.trim(),
     _order:editExId!==null?(exhibitors[editExId]._order||editExId):exhibitors.length};
 
@@ -1007,30 +1032,30 @@ function renderCosts(){
   // ── STALL RECEIVABLES TABLE ──
   const stallRows = exhibitors.filter(e=>e.stall&&e.fee).map(e=>{
     const balance = (+e.fee||0)-(+e.adv||0);
-    const statusColor = e.pay==='paid'?'#2E7D32':e.pay==='partial'?'#8A5700':'#A32D2D';
-    const statusLabel = e.pay==='paid'?'Paid':e.pay==='partial'?'Partial':'Pending';
+    const modeIcon = {'Cash':'💵','UPI':'📱','Bank Transfer':'🏦','Cheque':'📋','Card':'💳','Multiple':'🔀'}[e.mode]||'';
     return `<tr>
       <td style="padding:8px 6px;font-weight:500">${e.stall}</td>
       <td style="padding:8px 6px">${e.name}</td>
       <td style="padding:8px 6px;text-align:right">₹${fmt(+e.fee||0)}</td>
       <td style="padding:8px 6px;text-align:right;color:#2E7D32">₹${fmt(+e.adv||0)}</td>
       <td style="padding:8px 6px;text-align:right;color:${balance>0?'#A32D2D':'#2E7D32'};font-weight:500">₹${fmt(balance)}</td>
-      <td style="padding:8px 6px;text-align:center"><span class="badge badge-${e.pay||'pending'}" style="color:${statusColor}">${statusLabel}</span></td>
+      <td style="padding:8px 6px;text-align:center;font-size:11px">${modeIcon} ${e.mode||'—'}</td>
+      <td style="padding:8px 6px;text-align:center"><span class="badge badge-${e.pay||'pending'}">${e.pay==='paid'?'Paid':e.pay==='partial'?'Partial':'Pending'}</span></td>
     </tr>`;
   }).join('');
 
   // ── SPONSOR RECEIVABLES TABLE ──
   const spRows = sponsors.filter(sp=>sp.amt).map(sp=>{
     const balance = (+sp.amt||0)-(+sp.recv||0);
-    const statusColor = sp.pay==='paid'?'#2E7D32':sp.pay==='partial'?'#8A5700':'#A32D2D';
-    const statusLabel = sp.pay==='paid'?'Received':sp.pay==='partial'?'Partial':'Pending';
+    const modeIcon = {'Cash':'💵','UPI':'📱','Bank Transfer':'🏦','Cheque':'📋','Card':'💳','Multiple':'🔀'}[sp.mode]||'';
     return `<tr>
       <td style="padding:8px 6px;font-weight:500">${sp.name}</td>
       <td style="padding:8px 6px;color:var(--muted)">${sp.type||'—'}</td>
       <td style="padding:8px 6px;text-align:right">₹${fmt(+sp.amt||0)}</td>
       <td style="padding:8px 6px;text-align:right;color:#2E7D32">₹${fmt(+sp.recv||0)}</td>
       <td style="padding:8px 6px;text-align:right;color:${balance>0?'#A32D2D':'#2E7D32'};font-weight:500">₹${fmt(balance)}</td>
-      <td style="padding:8px 6px;text-align:center"><span class="badge badge-${sp.pay||'pending'}" style="color:${statusColor}">${statusLabel}</span></td>
+      <td style="padding:8px 6px;text-align:center;font-size:11px">${modeIcon} ${sp.mode||'—'}</td>
+      <td style="padding:8px 6px;text-align:center"><span class="badge badge-${sp.pay||'pending'}">${sp.pay==='paid'?'Received':sp.pay==='partial'?'Partial':'Pending'}</span></td>
     </tr>`;
   }).join('');
 
@@ -1046,7 +1071,7 @@ function renderCosts(){
           <thead><tr>
             <th style="${thStyle}">Stall</th><th style="${thStyle}">Exhibitor</th>
             <th style="${thStyle};text-align:right">Total</th><th style="${thStyle};text-align:right">Received</th>
-            <th style="${thStyle};text-align:right">Balance</th><th style="${thStyle};text-align:center">Status</th>
+            <th style="${thStyle};text-align:right">Balance</th><th style="${thStyle};text-align:center">Mode</th><th style="${thStyle};text-align:center">Status</th>
           </tr></thead>
           <tbody>${stallRows}</tbody>
         </table>
@@ -1060,7 +1085,7 @@ function renderCosts(){
           <thead><tr>
             <th style="${thStyle}">Sponsor</th><th style="${thStyle}">Type</th>
             <th style="${thStyle};text-align:right">Total</th><th style="${thStyle};text-align:right">Received</th>
-            <th style="${thStyle};text-align:right">Balance</th><th style="${thStyle};text-align:center">Status</th>
+            <th style="${thStyle};text-align:right">Balance</th><th style="${thStyle};text-align:center">Mode</th><th style="${thStyle};text-align:center">Status</th>
           </tr></thead>
           <tbody>${spRows}</tbody>
         </table>
@@ -1219,6 +1244,7 @@ function openSpModal(idx=null){
   document.getElementById('sp-amt').value=sp.amt||'';
   document.getElementById('sp-recv').value=sp.recv||'';
   document.getElementById('sp-pay').value=sp.pay||'pending';
+  document.getElementById('sp-mode').value=sp.mode||'';
   document.getElementById('sp-notes').value=sp.notes||'';
   openModal('sp-modal');
 }
@@ -1233,6 +1259,7 @@ async function saveSponsor(){
     amt:document.getElementById('sp-amt').value,
     recv:document.getElementById('sp-recv').value,
     pay:document.getElementById('sp-pay').value,
+    mode:document.getElementById('sp-mode').value,
     notes:document.getElementById('sp-notes').value.trim(),
     deliverables:editSpId!==null?(sponsors[editSpId].deliverables||[]):[]
   };
