@@ -133,6 +133,18 @@ textarea{resize:vertical;min-height:60px}
 .modal{background:var(--surface);border-radius:12px;padding:1.5rem;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(180,150,0,.18);border:1px solid var(--border)}
 .modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);flex-wrap:wrap}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--y5);color:#FFF8DC;padding:10px 20px;border-radius:8px;font-size:13px;z-index:9999;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap}
+/* ── ADMIN ACCESS CONTROL ── */
+.admin-only{display:none !important}
+body.admin-mode .admin-only{display:flex !important}
+/* PIN keypad */
+.pin-key{width:64px;height:64px;border-radius:50%;border:1.5px solid var(--border);background:var(--surface);font-size:22px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--text);transition:all .15s;display:flex;align-items:center;justify-content:center}
+.pin-key:hover{background:var(--y2);border-color:var(--y3)}
+.pin-key:active{transform:scale(0.92);background:var(--y3)}
+.pin-key-clear{font-size:18px;color:var(--muted)}
+.pin-key-ok{background:var(--y3);border-color:var(--y4);color:var(--y5);font-size:14px;font-weight:700}
+.pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--y3);background:transparent;transition:background .15s}
+.pin-dot.filled{background:var(--y3)}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
 .toast.show{opacity:1}
 .sync-dot{width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;margin-left:6px;vertical-align:middle}
 .sync-dot.live{background:#4CAF50;animation:pulse 2s infinite}
@@ -161,12 +173,13 @@ textarea{resize:vertical;min-height:60px}
     <div class="nav-brand-title">🍋 Rakhi Pop-Up <span class="sync-dot" id="sync-dot" title="Firebase sync status"></span></div>
     <div class="nav-brand-sub">19–20 July 2026 · Kota</div>
   </div>
-  <div class="nav-tab active" onclick="showPage('admin',this)">Exhibitors</div>
-  <div class="nav-tab" onclick="showPage('floor',this)">Floor Plan</div>
-  <div class="nav-tab" onclick="showPage('visitors',this)">Visitors</div>
-  <div class="nav-tab" onclick="showPage('costs',this)">Costs</div>
-  <div class="nav-tab" onclick="showPage('sponsors',this)">Sponsors</div>
-  <div class="nav-tab" onclick="showPage('public',this)">Guest View</div>
+  <div class="nav-tab admin-only" id="tab-admin" onclick="showPage('admin',this)">Exhibitors</div>
+  <div class="nav-tab admin-only" id="tab-floor" onclick="showPage('floor',this)">Floor Plan</div>
+  <div class="nav-tab admin-only" id="tab-visitors" onclick="showPage('visitors',this)">Visitors</div>
+  <div class="nav-tab admin-only" id="tab-costs" onclick="showPage('costs',this)">Costs</div>
+  <div class="nav-tab admin-only" id="tab-sponsors" onclick="showPage('sponsors',this)">Sponsors</div>
+  <div class="nav-tab active" id="tab-public" onclick="showPage('public',this)">Guest View</div>
+  <button id="admin-btn" onclick="toggleAdmin()" style="margin-left:auto;flex-shrink:0;padding:5px 14px;background:var(--light);border:1.5px solid var(--border);color:var(--muted);border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif;align-self:center;margin-right:4px">🔒 Admin</button>
 </nav>
 <div class="ticker">
   <span>🍋</span><span>HOTEL SWAN · AERODROME CIRCLE · KOTA</span>
@@ -384,13 +397,29 @@ textarea{resize:vertical;min-height:60px}
     <div class="venue">🏨 Hotel Swan, Aerodrome Circle, Kota</div>
     <div style="margin-top:12px;font-size:13px;color:var(--muted)">A curated lifestyle exhibition celebrating the spirit of Raksha Bandhan</div>
   </div>
+
+  <!-- Category pills -->
   <div class="cat-grid" id="pub-cats"></div>
-  <div class="card"><h3 style="margin-bottom:1rem">🗺 Exhibition Map</h3>
+
+  <!-- Floor plan — view only -->
+  <div class="card" style="margin-bottom:1rem">
+    <h3 style="margin-bottom:1rem">🗺 Exhibition Map</h3>
     <div style="background:#d6d0c4;border-radius:8px;padding:8px;overflow-x:auto" id="pub-map"></div>
+    <div style="font-size:11px;color:var(--muted);margin-top:6px">Tap any stall to see who's there.</div>
   </div>
-  <div class="card" style="margin-top:1rem"><h3 style="margin-bottom:1rem">🛍 Brands at the Show</h3>
-    <div class="brand-grid" id="pub-brands"></div>
-    <div id="pub-brands-empty" style="text-align:center;color:var(--muted);font-size:13px;padding:1rem">Details appear once stalls are booked.</div>
+
+  <!-- Exhibitors list — no pricing -->
+  <div class="card" style="margin-bottom:1rem">
+    <h3 style="margin-bottom:1rem">🛍 Exhibitors at the Show</h3>
+    <div id="pub-exhibitors">
+      <div style="text-align:center;color:var(--muted);font-size:13px;padding:1rem">Exhibitor details will appear once stalls are confirmed.</div>
+    </div>
+  </div>
+
+  <!-- Sponsors list — no amounts -->
+  <div class="card" id="pub-sponsors-card" style="display:none;margin-bottom:1rem">
+    <h3 style="margin-bottom:1rem">🤝 Our Sponsors</h3>
+    <div id="pub-sponsors"></div>
   </div>
 </div>
 
@@ -585,6 +614,34 @@ textarea{resize:vertical;min-height:60px}
   </div>
 </div>
 
+<!-- ═══ PIN MODAL ═══ -->
+<div id="pin-modal" style="display:none;position:fixed;inset:0;background:rgba(42,34,0,.4);z-index:500;align-items:center;justify-content:center;padding:1rem">
+  <div style="background:var(--surface);border-radius:16px;padding:2rem 1.5rem;width:100%;max-width:300px;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.2)">
+    <div style="font-size:40px;margin-bottom:.5rem">🔐</div>
+    <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--y5);margin-bottom:.35rem">Admin Login</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:1.5rem">Enter your 4-digit PIN</div>
+    <!-- dots -->
+    <div id="pin-dots" style="display:flex;justify-content:center;gap:14px;margin-bottom:1.5rem"></div>
+    <!-- keypad -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:220px;margin:0 auto 1rem">
+      <button class="pin-key" onclick="pinKey('1')">1</button>
+      <button class="pin-key" onclick="pinKey('2')">2</button>
+      <button class="pin-key" onclick="pinKey('3')">3</button>
+      <button class="pin-key" onclick="pinKey('4')">4</button>
+      <button class="pin-key" onclick="pinKey('5')">5</button>
+      <button class="pin-key" onclick="pinKey('6')">6</button>
+      <button class="pin-key" onclick="pinKey('7')">7</button>
+      <button class="pin-key" onclick="pinKey('8')">8</button>
+      <button class="pin-key" onclick="pinKey('9')">9</button>
+      <button class="pin-key pin-key-clear" onclick="pinBackspace()">⌫</button>
+      <button class="pin-key" onclick="pinKey('0')">0</button>
+      <button class="pin-key pin-key-ok" onclick="pinSubmit()">OK</button>
+    </div>
+    <div id="pin-error" style="font-size:12px;color:#A32D2D;min-height:18px;margin-bottom:.5rem"></div>
+    <button onclick="document.getElementById('pin-modal').style.display='none'" style="background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif">Cancel</button>
+  </div>
+</div>
+
 <!-- ═══ CATEGORY MANAGER ═══ -->
 <div id="cat-modal" class="modal-overlay" onclick="if(event.target.id==='cat-modal')closeModal('cat-modal')">
   <div class="modal" style="max-width:380px">
@@ -619,10 +676,10 @@ let fbReady=false;
 document.addEventListener('firebase-ready', () => {
   fbReady=true;
   document.getElementById('sync-dot').classList.add('live');
-  window._listen('exhibitors', data => { exhibitors=data.sort((a,b)=>(a._order||0)-(b._order||0)); renderAdmin(); renderFloor(); });
+  window._listen('exhibitors', data => { exhibitors=data.sort((a,b)=>(a._order||0)-(b._order||0)); renderAdmin(); renderFloor(); renderPublic(); });
   window._listen('visitors',   data => { visitors={'1':[],'2':[]}; data.forEach(v=>{ if(!visitors[v.day])visitors[v.day]=[]; visitors[v.day].push(v); }); renderVisitors(); });
   window._listen('costs',      data => { costs=data; renderCosts(); });
-  window._listen('sponsors',   data => { sponsors=data; renderSponsors(); renderCosts(); });
+  window._listen('sponsors',   data => { sponsors=data; renderSponsors(); renderCosts(); renderPublic(); });
 });
 
 // Fallback localStorage
@@ -630,9 +687,15 @@ function lsLoad(){ exhibitors=JSON.parse(localStorage.getItem('rp_ex')||'[]'); v
 function lsSave(){ localStorage.setItem('rp_ex',JSON.stringify(exhibitors)); localStorage.setItem('rp_vis',JSON.stringify(visitors)); localStorage.setItem('rp_costs',JSON.stringify(costs)); localStorage.setItem('rp_sponsors',JSON.stringify(sponsors)); }
 
 function showPage(id,el){
+  const adminPages=['admin','floor','visitors','costs','sponsors'];
+  if(adminPages.includes(id)&&!document.body.classList.contains('admin-mode')){
+    toast('🔒 Admin PIN required.');
+    return;
+  }
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('page-'+id).classList.add('active'); el.classList.add('active');
+  document.getElementById('page-'+id).classList.add('active');
+  el.classList.add('active');
   ({admin:renderAdmin,floor:renderFloor,visitors:renderVisitors,costs:renderCosts,sponsors:renderSponsors,public:renderPublic})[id]?.();
 }
 
@@ -1113,17 +1176,51 @@ async function deleteCost(i){ if(!confirm('Remove?'))return; if(fbReady) await w
 
 /* ── PUBLIC ── */
 function renderPublic(){
-  const catCounts={};exhibitors.forEach(e=>{if(e.cat)catCounts[e.cat]=(catCounts[e.cat]||0)+1;});
+  // Category pills
+  const catCounts={};
+  exhibitors.forEach(e=>{if(e.cat)catCounts[e.cat]=(catCounts[e.cat]||0)+1;});
   document.getElementById('pub-cats').innerHTML=Object.entries(catCounts).length
     ?Object.entries(catCounts).map(([c,n])=>`<div class="cat-card"><div style="font-size:20px;margin-bottom:4px">${CATS[c]||'✨'}</div><div style="font-size:11.5px;font-weight:500">${c}</div><div style="font-size:10.5px;color:var(--muted);margin-top:2px">${n} brand${n!==1?'s':''}</div></div>`).join('')
-    :'<div style="color:var(--muted);font-size:13px">Categories appear once exhibitors are added.</div>';
+    :'';
+
+  // Floor map — clone SVG (view only, stall names already rendered)
   document.getElementById('pub-map').innerHTML='<svg viewBox="0 0 700 1300" style="width:100%;height:auto">'+document.getElementById('floor-svg').innerHTML+'</svg>';
-  const booked=exhibitors.filter(e=>e.stall);
-  document.getElementById('pub-brands-empty').style.display=booked.length?'none':'block';
-  document.getElementById('pub-brands').innerHTML=booked.map(e=>{
-    const sc=stallColor(e.stall);
-    return `<div class="brand-item"><div class="stall-badge" style="background:${sc.bg};border-color:${sc.border};color:${sc.text}">${e.stall}</div><div><div style="font-size:13px;font-weight:500">${e.name}</div><div style="font-size:11px;color:var(--muted)">${CATS[e.cat]||'✨'} ${e.cat||'—'}</div></div></div>`;
-  }).join('');
+
+  // Exhibitors list — name, stall, category only. NO pricing, NO actions
+  const booked = exhibitors.filter(e=>e.stall).sort((a,b)=>{
+    const na=parseInt(a.stall)||999, nb=parseInt(b.stall)||999;
+    return na-nb;
+  });
+  document.getElementById('pub-exhibitors').innerHTML = booked.length
+    ? booked.map(e=>{
+        const sc=stallColor(e.stall);
+        return `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)">
+          <div class="stall-badge" style="background:${sc.bg};border-color:${sc.border};color:${sc.text};flex-shrink:0">${e.stall}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:500">${e.name}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">${CATS[e.cat]||'✨'} ${e.cat||''}${e.city?' · '+e.city:''}</div>
+          </div>
+        </div>`;
+      }).join('')
+    : '<div style="text-align:center;color:var(--muted);font-size:13px;padding:1rem">Exhibitor details will appear once stalls are confirmed.</div>';
+
+  // Sponsors list — name & type only. NO amounts, NO deliverables
+  const pubSpCard = document.getElementById('pub-sponsors-card');
+  if(sponsors.length){
+    pubSpCard.style.display='block';
+    document.getElementById('pub-sponsors').innerHTML = sponsors.map(sp=>{
+      const initials=(sp.name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+      return `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)">
+        <div class="sp-avatar" style="flex-shrink:0">${initials}</div>
+        <div>
+          <div style="font-size:13px;font-weight:500">${sp.name}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">${sp.type||'Sponsor'}</div>
+        </div>
+      </div>`;
+    }).join('');
+  } else {
+    pubSpCard.style.display='none';
+  }
 }
 
 /* ── HELPERS ── */
@@ -1410,6 +1507,84 @@ function deleteCategory(i){
   renderCatList();
   refreshCatDropdown();
   toast('Category removed.');
+}
+
+/* ── ADMIN PIN ── */
+const ADMIN_PIN = '2026'; // ← change this to your preferred PIN
+let pinBuffer = '';
+
+function toggleAdmin(){
+  if(document.body.classList.contains('admin-mode')){
+    if(confirm('Log out of admin mode?')){
+      document.body.classList.remove('admin-mode');
+      const btn = document.getElementById('admin-btn');
+      btn.textContent = '🔒 Admin';
+      btn.style.cssText = 'margin-left:auto;flex-shrink:0;padding:5px 14px;background:var(--light);border:1.5px solid var(--border);color:var(--muted);border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;font-family:DM Sans,sans-serif;align-self:center;margin-right:4px';
+      sessionStorage.removeItem('rp_admin');
+      // Switch to guest view
+      document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+      document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+      document.getElementById('page-public').classList.add('active');
+      document.getElementById('tab-public').classList.add('active');
+      renderPublic();
+      toast('🔒 Admin mode off');
+    }
+  } else {
+    pinBuffer = '';
+    updatePinDots();
+    document.getElementById('pin-error').textContent = '';
+    document.getElementById('pin-modal').style.display = 'flex';
+  }
+}
+
+function pinKey(k){
+  if(pinBuffer.length >= 4) return;
+  pinBuffer += k;
+  updatePinDots();
+  if(pinBuffer.length === 4) setTimeout(pinSubmit, 150);
+}
+
+function pinBackspace(){
+  pinBuffer = pinBuffer.slice(0, -1);
+  updatePinDots();
+  document.getElementById('pin-error').textContent = '';
+}
+
+function updatePinDots(){
+  document.getElementById('pin-dots').innerHTML =
+    [0,1,2,3].map(i=>`<div class="pin-dot${i<pinBuffer.length?' filled':''}"></div>`).join('');
+}
+
+function pinSubmit(){
+  if(pinBuffer === ADMIN_PIN){
+    document.getElementById('pin-modal').style.display = 'none';
+    document.body.classList.add('admin-mode');
+    sessionStorage.setItem('rp_admin','true');
+    const btn = document.getElementById('admin-btn');
+    btn.textContent = '🔓 Admin';
+    btn.style.background = '#EAF3DE';
+    btn.style.color = '#2D5A10';
+    btn.style.borderColor = '#A8D878';
+    // Go to exhibitors
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+    document.getElementById('page-admin').classList.add('active');
+    document.getElementById('tab-admin').classList.add('active');
+    renderAdmin();
+    toast('🔓 Welcome back!');
+  } else {
+    document.getElementById('pin-error').textContent = 'Incorrect PIN. Try again.';
+    const dots = document.getElementById('pin-dots');
+    dots.style.animation = 'shake .35s ease';
+    setTimeout(()=>{ dots.style.animation=''; pinBuffer=''; updatePinDots(); }, 400);
+  }
+}
+
+// Restore admin session if page refreshed
+if(sessionStorage.getItem('rp_admin')==='true'){
+  document.body.classList.add('admin-mode');
+  const btn = document.getElementById('admin-btn');
+  if(btn){ btn.textContent='🔓 Admin'; btn.style.background='#EAF3DE'; btn.style.color='#2D5A10'; btn.style.borderColor='#A8D878'; }
 }
 
 lsLoad(); renderAdmin();
