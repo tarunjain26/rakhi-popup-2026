@@ -546,11 +546,14 @@ body.admin-mode .admin-only{display:flex !important}
     <div class="row2">
       <div><label>Phone / WhatsApp</label><input id="sp-phone" type="tel" placeholder="10-digit number"></div>
       <div><label>Sponsorship Type</label>
-        <select id="sp-type">
-          <option>Title Sponsor</option><option>Co-Sponsor</option>
-          <option>Associate Sponsor</option><option>In-Kind Sponsor</option>
-          <option>Media Partner</option><option>Other</option>
-        </select>
+        <div style="display:flex;gap:6px">
+          <select id="sp-type" style="flex:1">
+            <option>Title Sponsor</option><option>Co-Sponsor</option>
+            <option>Associate Sponsor</option><option>In-Kind Sponsor</option>
+            <option>Media Partner</option><option>Other</option>
+          </select>
+          <button type="button" class="btn btn-sm" onclick="openSpTypeManager()" style="flex-shrink:0;font-size:16px;padding:0 12px" title="Add / remove sponsorship types">⚙</button>
+        </div>
       </div>
     </div>
     <div class="row2">
@@ -642,6 +645,24 @@ body.admin-mode .admin-only{display:flex !important}
   </div>
 </div>
 
+<!-- ═══ SPONSORSHIP TYPE MANAGER ═══ -->
+<div id="sp-type-modal" style="display:none;position:fixed;inset:0;background:rgba(42,34,0,.35);z-index:300;align-items:center;justify-content:center;padding:1rem" onclick="if(event.target.id==='sp-type-modal')closeModal('sp-type-modal')">
+  <div class="modal" style="max-width:380px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+      <span style="font-size:17px;font-weight:600;font-family:'Cormorant Garamond',serif;color:var(--y5)">Sponsorship Types</span>
+      <button onclick="closeModal('sp-type-modal')" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted)">×</button>
+    </div>
+    <div id="sp-type-list" style="margin-bottom:1rem;max-height:300px;overflow-y:auto"></div>
+    <div style="display:flex;gap:8px">
+      <input id="sp-type-new" placeholder="New sponsorship type..." style="flex:1" onkeydown="if(event.key==='Enter')addSpType()">
+      <button class="btn btn-primary btn-sm" onclick="addSpType()">Add</button>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary btn-sm" onclick="closeModal('sp-type-modal')">Done</button>
+    </div>
+  </div>
+</div>
+
 <!-- ═══ CATEGORY MANAGER ═══ -->
 <div id="cat-modal" class="modal-overlay" onclick="if(event.target.id==='cat-modal')closeModal('cat-modal')">
   <div class="modal" style="max-width:380px">
@@ -678,8 +699,9 @@ document.addEventListener('firebase-ready', () => {
   document.getElementById('sync-dot').classList.add('live');
   window._listen('exhibitors', data => {
     exhibitors=data.sort((a,b)=>(a._order||0)-(b._order||0));
+    renderFloor();
     renderPublic();
-    if(document.body.classList.contains('admin-mode')){ renderAdmin(); renderFloor(); }
+    if(document.body.classList.contains('admin-mode')) renderAdmin();
   });
   window._listen('visitors', data => {
     visitors={'1':[],'2':[]};
@@ -1198,7 +1220,8 @@ function renderPublic(){
     ?Object.entries(catCounts).map(([c,n])=>`<div class="cat-card"><div style="font-size:20px;margin-bottom:4px">${CATS[c]||'✨'}</div><div style="font-size:11.5px;font-weight:500">${c}</div><div style="font-size:10.5px;color:var(--muted);margin-top:2px">${n} brand${n!==1?'s':''}</div></div>`).join('')
     :'';
 
-  // Floor map — clone SVG (view only, stall names already rendered)
+  // Floor map — render stall names first, then clone
+  renderFloor();
   document.getElementById('pub-map').innerHTML='<svg viewBox="0 0 700 1300" style="width:100%;height:auto">'+document.getElementById('floor-svg').innerHTML+'</svg>';
 
   // Exhibitors list — name, stall, category only. NO pricing, NO actions
@@ -1353,6 +1376,7 @@ function openSpModal(idx=null){
   document.getElementById('sp-name').value=sp.name||'';
   document.getElementById('sp-contact').value=sp.contact||'';
   document.getElementById('sp-phone').value=sp.phone||'';
+  refreshSpTypeDropdown();
   document.getElementById('sp-type').value=sp.type||'Co-Sponsor';
   document.getElementById('sp-amt').value=sp.amt||'';
   document.getElementById('sp-recv').value=sp.recv||'';
@@ -1465,6 +1489,64 @@ function sendSpWA(i){
   if(dels.length){ msg+=`\n📦 *Deliverables:*\n`; dels.forEach(d=>{ msg+=`• ${d.custom||d.type}${d.qty?' ('+d.qty+')':''}\n`; }); }
   msg+=`\n📅 19–20 July 2026\n🏨 Hotel Swan, Aerodrome Circle, Kota\n\n*Team Rakhi Pop-Up, Kota*`;
   window.open(`https://wa.me/91${num}?text=${encodeURIComponent(msg)}`,'_blank');
+}
+
+/* ── SPONSORSHIP TYPE MANAGER ── */
+const DEFAULT_SP_TYPES=['Title Sponsor','Co-Sponsor','Associate Sponsor','In-Kind Sponsor','Media Partner','Other'];
+
+function getSpTypes(){
+  try{ const s=localStorage.getItem('rp_sp_types'); return s?JSON.parse(s):[...DEFAULT_SP_TYPES]; }
+  catch(e){ return [...DEFAULT_SP_TYPES]; }
+}
+function saveSpTypes(types){ localStorage.setItem('rp_sp_types',JSON.stringify(types)); }
+
+function refreshSpTypeDropdown(){
+  const types=getSpTypes();
+  const sel=document.getElementById('sp-type');
+  if(!sel)return;
+  const cur=sel.value;
+  sel.innerHTML=types.map(t=>`<option${t===cur?' selected':''}>${t}</option>`).join('');
+}
+
+function openSpTypeManager(){
+  renderSpTypeList();
+  openModal('sp-type-modal');
+}
+
+function renderSpTypeList(){
+  const types=getSpTypes();
+  document.getElementById('sp-type-list').innerHTML=types.map((t,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)">
+      <span style="flex:1;font-size:13px">${t}</span>
+      ${i<DEFAULT_SP_TYPES.length
+        ?`<span style="font-size:10px;color:var(--muted);padding:2px 8px;background:var(--y1);border-radius:20px">default</span>`
+        :`<button class="btn btn-sm btn-danger" style="padding:4px 10px" onclick="deleteSpType(${i})">✕</button>`}
+    </div>`).join('');
+}
+
+function addSpType(){
+  const inp=document.getElementById('sp-type-new');
+  const name=inp.value.trim();
+  if(!name){toast('Please enter a type name.');return;}
+  const types=getSpTypes();
+  if(types.map(t=>t.toLowerCase()).includes(name.toLowerCase())){toast('Type already exists.');return;}
+  types.push(name);
+  saveSpTypes(types);
+  inp.value='';
+  renderSpTypeList();
+  refreshSpTypeDropdown();
+  toast(`✓ "${name}" added`);
+}
+
+function deleteSpType(i){
+  const types=getSpTypes();
+  if(i<DEFAULT_SP_TYPES.length){toast('Default types cannot be removed.');return;}
+  if(!confirm(`Remove "${types[i]}"?`))return;
+  types.splice(i,1);
+  saveSpTypes(types);
+  renderSpTypeList();
+  refreshSpTypeDropdown();
+  toast('Type removed.');
 }
 
 /* ── CATEGORY MANAGER ── */
@@ -1611,6 +1693,8 @@ if(sessionStorage.getItem('rp_admin')==='true'){
 // Always load data and render guest view on start
 lsLoad();
 renderPublic();
+refreshCatDropdown();
+refreshSpTypeDropdown();
 refreshCatDropdown();
 document.getElementById('c-date').value=new Date().toISOString().split('T')[0];
 </script>
