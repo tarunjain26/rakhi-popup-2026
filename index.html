@@ -190,7 +190,7 @@ body.admin-mode .admin-only{display:flex !important}
 </div>
 
 <!-- ═══ EXHIBITORS ═══ -->
-<div id="page-admin" class="page active">
+<div id="page-admin" class="page">
   <div class="section-header">
     <h2>Exhibitors</h2>
     <button class="btn btn-primary btn-sm" onclick="openExModal()">+ Add Exhibitor</button>
@@ -389,7 +389,7 @@ body.admin-mode .admin-only{display:flex !important}
 </div>
 
 <!-- ═══ GUEST VIEW ═══ -->
-<div id="page-public" class="page">
+<div id="page-public" class="page active">
   <div class="pub-hero">
     <div style="font-size:11px;font-weight:600;color:var(--y4);margin-bottom:10px;letter-spacing:.1em">🍃 YOU'RE INVITED 🍃</div>
     <h1>Rakhi Pop-Up</h1>
@@ -676,10 +676,25 @@ let fbReady=false;
 document.addEventListener('firebase-ready', () => {
   fbReady=true;
   document.getElementById('sync-dot').classList.add('live');
-  window._listen('exhibitors', data => { exhibitors=data.sort((a,b)=>(a._order||0)-(b._order||0)); renderAdmin(); renderFloor(); renderPublic(); });
-  window._listen('visitors',   data => { visitors={'1':[],'2':[]}; data.forEach(v=>{ if(!visitors[v.day])visitors[v.day]=[]; visitors[v.day].push(v); }); renderVisitors(); });
-  window._listen('costs',      data => { costs=data; renderCosts(); });
-  window._listen('sponsors',   data => { sponsors=data; renderSponsors(); renderCosts(); renderPublic(); });
+  window._listen('exhibitors', data => {
+    exhibitors=data.sort((a,b)=>(a._order||0)-(b._order||0));
+    renderPublic();
+    if(document.body.classList.contains('admin-mode')){ renderAdmin(); renderFloor(); }
+  });
+  window._listen('visitors', data => {
+    visitors={'1':[],'2':[]};
+    data.forEach(v=>{ if(!visitors[v.day])visitors[v.day]=[]; visitors[v.day].push(v); });
+    if(document.body.classList.contains('admin-mode')) renderVisitors();
+  });
+  window._listen('costs', data => {
+    costs=data;
+    if(document.body.classList.contains('admin-mode')) renderCosts();
+  });
+  window._listen('sponsors', data => {
+    sponsors=data;
+    renderPublic();
+    if(document.body.classList.contains('admin-mode')){ renderSponsors(); renderCosts(); }
+  });
 });
 
 // Fallback localStorage
@@ -1212,10 +1227,11 @@ function renderPublic(){
       const initials=(sp.name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
       return `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)">
         <div class="sp-avatar" style="flex-shrink:0">${initials}</div>
-        <div>
+        <div style="flex:1">
           <div style="font-size:13px;font-weight:500">${sp.name}</div>
           <div style="font-size:11px;color:var(--muted);margin-top:2px">${sp.type||'Sponsor'}</div>
         </div>
+        ${sp.amt?`<div style="font-size:13px;font-weight:600;color:var(--y5)">₹${fmt(+sp.amt)}</div>`:''}
       </div>`;
     }).join('');
   } else {
@@ -1580,14 +1596,21 @@ function pinSubmit(){
   }
 }
 
-// Restore admin session if page refreshed
+// Restore admin session if page was refreshed
 if(sessionStorage.getItem('rp_admin')==='true'){
   document.body.classList.add('admin-mode');
   const btn = document.getElementById('admin-btn');
   if(btn){ btn.textContent='🔓 Admin'; btn.style.background='#EAF3DE'; btn.style.color='#2D5A10'; btn.style.borderColor='#A8D878'; }
+  // Admin session restored — show admin page
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-admin').classList.add('active');
+  document.getElementById('tab-admin').classList.add('active');
 }
 
-lsLoad(); renderAdmin();
+// Always load data and render guest view on start
+lsLoad();
+renderPublic();
 refreshCatDropdown();
 document.getElementById('c-date').value=new Date().toISOString().split('T')[0];
 </script>
