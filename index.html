@@ -223,7 +223,7 @@ body.admin-mode .admin-only{display:flex !important}
     <svg id="floor-svg" style="display:block;width:100%;height:auto" viewBox="0 0 700 1300" xmlns="http://www.w3.org/2000/svg">
     <defs><style>
     .sl{font-family:sans-serif;font-size:11px;font-weight:700;text-anchor:middle;dominant-baseline:central;pointer-events:none}
-    .sn{font-family:sans-serif;font-size:11px;font-weight:700;text-anchor:middle;pointer-events:none}
+    .sn{font-family:sans-serif;font-size:12px;font-weight:700;text-anchor:middle;pointer-events:none}
     .lbl{font-family:sans-serif;font-size:9px;fill:#666;font-weight:600;letter-spacing:.04em;text-anchor:middle}
     .fs{cursor:pointer}.fs:hover rect{filter:brightness(.85)}
     </style></defs>
@@ -1010,9 +1010,20 @@ function renderFloor(){
     r.setAttribute('opacity',ex?'1':'0.42');
     if(n){
       if(ex){
-        // Show name up to 12 chars, then category emoji if fits
-        const nameStr = ex.name.length>14 ? ex.name.slice(0,13)+'…' : ex.name;
-        n.textContent = nameStr;
+        const name = ex.name;
+        if(name.length <= 10){
+          // Short name — single line
+          n.innerHTML = name;
+          n.setAttribute('dy', '0');
+        } else {
+          // Long name — split into two lines of ~10 chars each
+          const mid = name.lastIndexOf(' ', 10);
+          const split = mid > 0 ? mid : 10;
+          const line1 = name.slice(0, split).trim();
+          const line2 = name.slice(split).trim();
+          const x = n.getAttribute('x');
+          n.innerHTML = `<tspan x="${x}" dy="-6">${line1}</tspan><tspan x="${x}" dy="13">${line2.length>10?line2.slice(0,9)+'…':line2}</tspan>`;
+        }
       } else {
         n.textContent = '';
       }
