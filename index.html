@@ -222,8 +222,8 @@ body.admin-mode .admin-only{display:flex !important}
   <div class="floor-wrap">
     <svg id="floor-svg" style="display:block;width:100%;height:auto" viewBox="0 0 700 1300" xmlns="http://www.w3.org/2000/svg">
     <defs><style>
-    .sl{font-family:sans-serif;font-size:12px;font-weight:700;text-anchor:middle;dominant-baseline:central;pointer-events:none}
-    .sn{font-family:sans-serif;font-size:9px;font-weight:600;text-anchor:middle;pointer-events:none}
+    .sl{font-family:sans-serif;font-size:11px;font-weight:700;text-anchor:middle;dominant-baseline:central;pointer-events:none}
+    .sn{font-family:sans-serif;font-size:11px;font-weight:700;text-anchor:middle;pointer-events:none}
     .lbl{font-family:sans-serif;font-size:9px;fill:#666;font-weight:600;letter-spacing:.04em;text-anchor:middle}
     .fs{cursor:pointer}.fs:hover rect{filter:brightness(.85)}
     </style></defs>
@@ -1011,7 +1011,7 @@ function renderFloor(){
     if(n){
       if(ex){
         // Show name up to 12 chars, then category emoji if fits
-        const nameStr = ex.name.length>12 ? ex.name.slice(0,11)+'…' : ex.name;
+        const nameStr = ex.name.length>14 ? ex.name.slice(0,13)+'…' : ex.name;
         n.textContent = nameStr;
       } else {
         n.textContent = '';
