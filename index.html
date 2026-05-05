@@ -805,9 +805,9 @@ We're thrilled to confirm your participation at *Rakhi Pop-Up 2026*.
 • Stall Fee: ₹${e.fee?Number(e.fee).toLocaleString():'—'}
 • Advance Paid: ₹${e.adv?Number(e.adv).toLocaleString():'0'}
 • Status: ${payLabel}
-${e.adv&&e.fee&&(+e.fee-(+e.adv||0))>0?`• Balance Due: ₹${(+e.fee-(+e.adv||0)).toLocaleString()}`:''}
+${e.adv&&e.fee&&(+e.fee-(+e.adv||0))>0?'• Balance Due: ₹'+(+e.fee-(+e.adv||0)).toLocaleString('en-IN'):''}
 
-${e.req?`📌 *Your Requirements:*\n${e.req}\n\nWe have noted your requirements and will ensure they are arranged.\n`:''}
+${e.req?'📌 *Your Requirements:*\n'+e.req+'\n\nWe have noted your requirements and will ensure they are arranged.\n':''}
 For any queries, please reach out to us.
 
 Looking forward to seeing you at the exhibition! 🍋✨
@@ -846,8 +846,8 @@ function renderAdmin(){
       <div class="ex-info">
         <div class="ex-name">${e.name} <span class="badge badge-cat">${e.cat||'—'}</span></div>
         <div class="ex-meta">${[e.city, e.fee?'Fee ₹'+Number(e.fee).toLocaleString('en-IN'):'', e.adv?'Adv ₹'+Number(e.adv).toLocaleString('en-IN'):''].filter(Boolean).join(' · ')}</div>
-        ${e.mode?`<div class="ex-meta">💳 ${e.mode}${e.ref?' · <em>${e.ref}</em>':''}</div>`:''}
-        ${e.req?`<div class="ex-meta">📌 ${e.req}</div>`:''}
+        ${e.mode?'<div class="ex-meta">💳 '+e.mode+(e.ref?' · <em>'+e.ref+'</em>':'')+'</div>':''}
+        ${e.req?'<div class="ex-meta">📌 '+e.req+'</div>':''}
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0">
         <span class="badge badge-${e.pay||'pending'}">${e.pay==='paid'?'Paid':e.pay==='partial'?'Partial':'Pending'}</span>
@@ -874,7 +874,7 @@ function updatePayRef(){
   else lbl.textContent='Reference / Collected By';
 }
 
-
+function openExModal(idx=null){
   editExId=idx;
   document.getElementById('ex-modal-title').textContent=idx===null?'Add Exhibitor':'Edit Exhibitor';
   const e=idx!==null?exhibitors[idx]:{};
