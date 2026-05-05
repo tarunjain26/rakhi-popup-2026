@@ -459,16 +459,22 @@ body.admin-mode .admin-only{display:flex !important}
         <select id="m-pay"><option value="pending">Pending</option><option value="partial">Partial</option><option value="paid">Paid</option></select>
       </div>
     </div>
-    <div><label>Payment Mode</label>
-      <select id="m-mode">
-        <option value="">— Not received yet —</option>
-        <option value="Cash">Cash</option>
-        <option value="UPI">UPI</option>
-        <option value="Bank Transfer">Bank Transfer</option>
-        <option value="Cheque">Cheque</option>
-        <option value="Card">Card</option>
-        <option value="Multiple">Multiple Modes</option>
-      </select>
+    <div class="row2">
+      <div><label>Payment Mode</label>
+        <select id="m-mode" onchange="updatePayRef()">
+          <option value="">— Not received yet —</option>
+          <option value="Cash">Cash</option>
+          <option value="UPI">UPI</option>
+          <option value="Bank Transfer">Bank Transfer</option>
+          <option value="Cheque">Cheque</option>
+          <option value="Card">Card</option>
+          <option value="Multiple">Multiple Modes</option>
+        </select>
+      </div>
+      <div id="m-ref-wrap">
+        <label id="m-ref-label">Collected By / Reference</label>
+        <input id="m-ref" placeholder="Name or transaction ref...">
+      </div>
     </div>
     <div><label>Additional Requirements</label><textarea id="m-req" placeholder="Power outlet, extra table, hanging rod..."></textarea></div>
     <div><label>Notes</label><textarea id="m-notes" placeholder="Internal notes..."></textarea></div>
@@ -645,6 +651,46 @@ body.admin-mode .admin-only{display:flex !important}
   </div>
 </div>
 
+<!-- ═══ QUICK PAYMENT MODAL ═══ -->
+<div id="qpay-modal" style="display:none;position:fixed;inset:0;background:rgba(42,34,0,.35);z-index:300;align-items:center;justify-content:center;padding:1rem" onclick="if(event.target.id==='qpay-modal')closeModal('qpay-modal')">
+  <div class="modal" style="max-width:420px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+      <span id="qpay-title" style="font-size:17px;font-weight:600;font-family:'Cormorant Garamond',serif;color:var(--y5)">Record Payment</span>
+      <button onclick="closeModal('qpay-modal')" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted)">×</button>
+    </div>
+    <div id="qpay-info" style="background:var(--y1);border-radius:8px;padding:10px 12px;margin-bottom:1rem;font-size:13px;color:var(--y5)"></div>
+    <div class="row2">
+      <div><label>Amount Received (₹) *</label><input id="qpay-amt" type="number" placeholder="0"></div>
+      <div><label>Payment Status</label>
+        <select id="qpay-pay">
+          <option value="partial">Partial</option>
+          <option value="paid">Fully Paid</option>
+        </select>
+      </div>
+    </div>
+    <div class="row2">
+      <div><label>Payment Mode</label>
+        <select id="qpay-mode" onchange="updateQPayRef()">
+          <option value="Cash">Cash</option>
+          <option value="UPI">UPI</option>
+          <option value="Bank Transfer">Bank Transfer</option>
+          <option value="Cheque">Cheque</option>
+          <option value="Card">Card</option>
+          <option value="Multiple">Multiple Modes</option>
+        </select>
+      </div>
+      <div>
+        <label id="qpay-ref-label">Collected By</label>
+        <input id="qpay-ref" placeholder="Name or reference...">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" onclick="closeModal('qpay-modal')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="saveQuickPay()">Save Payment</button>
+    </div>
+  </div>
+</div>
+
 <!-- ═══ SPONSORSHIP TYPE MANAGER ═══ -->
 <div id="sp-type-modal" style="display:none;position:fixed;inset:0;background:rgba(42,34,0,.35);z-index:300;align-items:center;justify-content:center;padding:1rem" onclick="if(event.target.id==='sp-type-modal')closeModal('sp-type-modal')">
   <div class="modal" style="max-width:380px">
@@ -799,7 +845,8 @@ function renderAdmin(){
       <div class="stall-badge" style="background:${sc.bg};border-color:${sc.border};color:${sc.text}">${e.stall||'?'}</div>
       <div class="ex-info">
         <div class="ex-name">${e.name} <span class="badge badge-cat">${e.cat||'—'}</span></div>
-        <div class="ex-meta">${[e.city, e.fee?'Fee ₹'+Number(e.fee).toLocaleString('en-IN'):'', e.adv?'Adv ₹'+Number(e.adv).toLocaleString('en-IN'):'', e.mode?'via '+e.mode:''].filter(Boolean).join(' · ')}</div>
+        <div class="ex-meta">${[e.city, e.fee?'Fee ₹'+Number(e.fee).toLocaleString('en-IN'):'', e.adv?'Adv ₹'+Number(e.adv).toLocaleString('en-IN'):''].filter(Boolean).join(' · ')}</div>
+        ${e.mode?`<div class="ex-meta">💳 ${e.mode}${e.ref?' · <em>${e.ref}</em>':''}</div>`:''}
         ${e.req?`<div class="ex-meta">📌 ${e.req}</div>`:''}
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0">
@@ -814,14 +861,28 @@ function renderAdmin(){
   }).join('');
 }
 
-function openExModal(idx=null){
+function updatePayRef(){
+  const mode = document.getElementById('m-mode').value;
+  const wrap = document.getElementById('m-ref-wrap');
+  const lbl  = document.getElementById('m-ref-label');
+  if(!mode){ wrap.style.opacity='0.4'; return; }
+  wrap.style.opacity='1';
+  if(mode==='Cash') lbl.textContent='Collected By (name)';
+  else if(mode==='UPI') lbl.textContent='UPI Ref / Transaction ID';
+  else if(mode==='Bank Transfer') lbl.textContent='Transfer Ref / UTR';
+  else if(mode==='Cheque') lbl.textContent='Cheque No. / Bank';
+  else lbl.textContent='Reference / Collected By';
+}
+
+
   editExId=idx;
   document.getElementById('ex-modal-title').textContent=idx===null?'Add Exhibitor':'Edit Exhibitor';
   const e=idx!==null?exhibitors[idx]:{};
-  ['name','city','stall','fee','adv','req','notes','wa','mode'].forEach(f=>{ const el=document.getElementById('m-'+f); if(el)el.value=e[f]||''; });
+  ['name','city','stall','fee','adv','req','notes','wa','mode','ref'].forEach(f=>{ const el=document.getElementById('m-'+f); if(el)el.value=e[f]||''; });
   refreshCatDropdown();
   document.getElementById('m-cat').value=e.cat||'';
   document.getElementById('m-pay').value=e.pay||'pending';
+  updatePayRef();
   openModal('ex-modal');
 }
 
@@ -834,6 +895,7 @@ async function saveExhibitor(sendWA=false){
   const obj={name,city:document.getElementById('m-city').value.trim(),cat:document.getElementById('m-cat').value,
     stall,fee:document.getElementById('m-fee').value,adv:document.getElementById('m-adv').value,
     pay:document.getElementById('m-pay').value,mode:document.getElementById('m-mode').value,
+    ref:document.getElementById('m-ref').value.trim(),
     req:document.getElementById('m-req').value.trim(),
     notes:document.getElementById('m-notes').value.trim(),wa:document.getElementById('m-wa').value.trim(),
     _order:editExId!==null?(exhibitors[editExId]._order||editExId):exhibitors.length};
@@ -1140,17 +1202,20 @@ function renderCosts(){
   }
 
   // ── STALL RECEIVABLES TABLE ──
-  const stallRows = exhibitors.filter(e=>e.stall&&e.fee).map(e=>{
+  const stallRows = exhibitors.filter(e=>e.stall&&e.fee).map((e,i)=>{
     const balance = (+e.fee||0)-(+e.adv||0);
     const modeIcon = {'Cash':'💵','UPI':'📱','Bank Transfer':'🏦','Cheque':'📋','Card':'💳','Multiple':'🔀'}[e.mode]||'';
+    const exIdx = exhibitors.indexOf(e);
     return `<tr>
       <td style="padding:8px 6px;font-weight:500">${e.stall}</td>
       <td style="padding:8px 6px">${e.name}</td>
       <td style="padding:8px 6px;text-align:right">₹${fmt(+e.fee||0)}</td>
       <td style="padding:8px 6px;text-align:right;color:#2E7D32">₹${fmt(+e.adv||0)}</td>
       <td style="padding:8px 6px;text-align:right;color:${balance>0?'#A32D2D':'#2E7D32'};font-weight:500">₹${fmt(balance)}</td>
-      <td style="padding:8px 6px;text-align:center;font-size:11px">${modeIcon} ${e.mode||'—'}</td>
+      <td style="padding:8px 6px;font-size:11px">${modeIcon} ${e.mode||'—'}${e.ref?`<br><span style="color:var(--muted)">${e.ref}</span>`:''}
+      </td>
       <td style="padding:8px 6px;text-align:center"><span class="badge badge-${e.pay||'pending'}">${e.pay==='paid'?'Paid':e.pay==='partial'?'Partial':'Pending'}</span></td>
+      <td style="padding:8px 6px"><button class="btn btn-sm btn-green" style="font-size:11px;padding:4px 8px" onclick="openQuickPay(${exIdx})">+ Pay</button></td>
     </tr>`;
   }).join('');
 
@@ -1181,7 +1246,7 @@ function renderCosts(){
           <thead><tr>
             <th style="${thStyle}">Stall</th><th style="${thStyle}">Exhibitor</th>
             <th style="${thStyle};text-align:right">Total</th><th style="${thStyle};text-align:right">Received</th>
-            <th style="${thStyle};text-align:right">Balance</th><th style="${thStyle};text-align:center">Mode</th><th style="${thStyle};text-align:center">Status</th>
+            <th style="${thStyle};text-align:right">Balance</th><th style="${thStyle}">Mode / Ref</th><th style="${thStyle}">Status</th><th style="${thStyle}"></th>
           </tr></thead>
           <tbody>${stallRows}</tbody>
         </table>
@@ -1501,7 +1566,52 @@ function sendSpWA(i){
   window.open(`https://wa.me/91${num}?text=${encodeURIComponent(msg)}`,'_blank');
 }
 
-/* ── SPONSORSHIP TYPE MANAGER ── */
+/* ── QUICK PAYMENT (from Costs tab) ── */
+let qpayIdx = null;
+
+function openQuickPay(exIdx){
+  qpayIdx = exIdx;
+  const e = exhibitors[exIdx];
+  const balance = (+e.fee||0)-(+e.adv||0);
+  document.getElementById('qpay-title').textContent = `Record Payment — ${e.name}`;
+  document.getElementById('qpay-info').innerHTML =
+    `Stall <b>${e.stall}</b> · Fee ₹${fmt(+e.fee||0)} · Received ₹${fmt(+e.adv||0)} · <b style="color:${balance>0?'#A32D2D':'#2E7D32'}">Balance ₹${fmt(balance)}</b>`;
+  document.getElementById('qpay-amt').value = balance > 0 ? balance : '';
+  document.getElementById('qpay-pay').value = 'paid';
+  document.getElementById('qpay-mode').value = e.mode||'Cash';
+  document.getElementById('qpay-ref').value = e.ref||'';
+  updateQPayRef();
+  openModal('qpay-modal');
+}
+
+function updateQPayRef(){
+  const mode = document.getElementById('qpay-mode').value;
+  const lbl = document.getElementById('qpay-ref-label');
+  if(mode==='Cash') lbl.textContent='Collected By (name)';
+  else if(mode==='UPI') lbl.textContent='UPI / Transaction ID';
+  else if(mode==='Bank Transfer') lbl.textContent='Transfer Ref / UTR';
+  else if(mode==='Cheque') lbl.textContent='Cheque No. / Bank';
+  else lbl.textContent='Reference / Collected By';
+}
+
+async function saveQuickPay(){
+  const amt = document.getElementById('qpay-amt').value;
+  if(!amt){toast('Please enter the amount received.');return;}
+  const e = exhibitors[qpayIdx];
+  const updated = {
+    ...e,
+    adv: (+e.adv||0) + (+amt),
+    pay: document.getElementById('qpay-pay').value,
+    mode: document.getElementById('qpay-mode').value,
+    ref: document.getElementById('qpay-ref').value.trim(),
+  };
+  if(fbReady) await window._set('exhibitors', e._id, updated);
+  else { exhibitors[qpayIdx]=updated; lsSave(); renderAdmin(); renderCosts(); }
+  closeModal('qpay-modal');
+  toast(`✓ ₹${fmt(+amt)} recorded for ${e.name}`);
+}
+
+
 const DEFAULT_SP_TYPES=['Title Sponsor','Co-Sponsor','Associate Sponsor','In-Kind Sponsor','Media Partner','Other'];
 
 function getSpTypes(){
