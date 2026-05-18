@@ -1355,7 +1355,9 @@ function stallColor(stall){
   // Table stalls
   if(s.startsWith('TS'))  return {bg:'#ede8de',border:'#bbb',text:'#555'};
   // Blue island stalls 24–35
-  if(num>=24&&num<=35)     return {bg:'#5B9BD5',border:'#3a7ab8',text:'#fff'};
+  // Blue island stalls 24–35 except 30 & 31 which are pink
+  if(s==='30'||s==='31')       return {bg:'#E8748A',border:'#c25570',text:'#fff'};
+  if(num>=24&&num<=35)         return {bg:'#5B9BD5',border:'#3a7ab8',text:'#fff'};
   // Blue wall stalls 5, 6
   if(s==='5'||s==='6')    return {bg:'#5B9BD5',border:'#3a7ab8',text:'#fff'};
   // Pink wall stalls (everything else numbered)
