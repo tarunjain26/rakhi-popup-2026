@@ -1076,8 +1076,8 @@ function shareFloorPlanWA(){
       // BOOKED — faded, no brand name, just stall number
       ctx.globalAlpha=0.25; ctx.fillStyle=s.fill; ctx.fill(); ctx.globalAlpha=1;
       ctx.strokeStyle='rgba(160,160,160,0.4)'; ctx.lineWidth=1; ctx.stroke();
-      ctx.fillStyle='rgba(80,80,80,0.55)'; ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.font='bold '+Math.round(Math.min(13,h*0.22))+'px sans-serif';
+      ctx.fillStyle='rgba(80,80,80,0.65)'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.font='bold '+Math.round(Math.min(20,h*0.35))+'px sans-serif';
       ctx.fillText(s.id, x+w/2, y+h/2);
     } else {
       // AVAILABLE — full bright colour, stall number + AVAILABLE label
@@ -1086,11 +1086,11 @@ function shareFloorPlanWA(){
       const light=s.fill==='#d4cec4'||s.fill==='#F5C518';
       const tc=light?'#333':'#fff';
       ctx.fillStyle=tc; ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.font='bold '+Math.round(Math.min(13,h*0.22))+'px sans-serif';
-      ctx.fillText(s.id, x+w/2, y+(h>55?h*0.32:h*0.45));
+      ctx.font='bold '+Math.round(Math.min(20,h*0.32))+'px sans-serif';
+      ctx.fillText(s.id, x+w/2, y+(h>55?h*0.32:h/2));
       if(h>50){
-        ctx.font=Math.round(Math.min(9,h*0.15))+'px sans-serif';
-        ctx.fillText('AVAILABLE', x+w/2, y+h*0.68);
+        ctx.font='bold '+Math.round(Math.min(13,h*0.22))+'px sans-serif';
+        ctx.fillText('AVAILABLE', x+w/2, y+h*0.70);
       }
     }
   });
