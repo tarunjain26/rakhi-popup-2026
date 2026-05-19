@@ -989,75 +989,166 @@ function sendStallStatusWA(){
 }
 
 function shareFloorPlanWA(){
-  // Step 1: render SVG → Canvas → JPG → download
-  const svg = document.getElementById('floor-svg');
-  const svgData = new XMLSerializer().serializeToString(svg);
-  const vb = svg.getAttribute('viewBox').split(' ');
-  const vbW = +vb[2], vbH = +vb[3];
-  const scale = 2; // 2× for crisp JPG
+  const exMap={};
+  exhibitors.forEach(e=>{ if(e.stall) exMap[e.stall.toUpperCase()]=e; });
 
-  const canvas = document.createElement('canvas');
-  canvas.width  = vbW * scale;
-  canvas.height = vbH * scale;
-  const ctx = canvas.getContext('2d');
+  const STALLS=[
+    {id:'1', x:498,y:822,w:135,h:64, fill:'#4CAF50'},
+    {id:'2', x:543,y:758,w:90,h:64,  fill:'#E8748A'},
+    {id:'3', x:543,y:694,w:90,h:64,  fill:'#E8748A'},
+    {id:'4', x:543,y:630,w:90,h:64,  fill:'#E8748A'},
+    {id:'5', x:543,y:566,w:90,h:64,  fill:'#5B9BD5'},
+    {id:'6', x:543,y:474,w:90,h:64,  fill:'#5B9BD5'},
+    {id:'7', x:543,y:408,w:90,h:64,  fill:'#E8748A'},
+    {id:'8', x:543,y:344,w:90,h:64,  fill:'#E8748A'},
+    {id:'9', x:543,y:280,w:90,h:64,  fill:'#E8748A'},
+    {id:'10',x:543,y:216,w:90,h:64,  fill:'#E8748A'},
+    {id:'11',x:543,y:0,  w:90,h:214, fill:'#4CAF50'},
+    {id:'12',x:486,y:2,  w:55,h:82,  fill:'#E8748A'},
+    {id:'13',x:429,y:2,  w:55,h:82,  fill:'#E8748A'},
+    {id:'14',x:372,y:2,  w:55,h:82,  fill:'#E8748A'},
+    {id:'15',x:315,y:2,  w:55,h:82,  fill:'#E8748A'},
+    {id:'16',x:258,y:2,  w:55,h:82,  fill:'#E8748A'},
+    {id:'17',x:117,y:2,  w:139,h:82, fill:'#E8748A'},
+    {id:'18',x:3,  y:98, w:125,h:94, fill:'#E8748A'},
+    {id:'19',x:3,  y:194,w:125,h:94, fill:'#E8748A'},
+    {id:'20',x:3,  y:290,w:125,h:94, fill:'#E8748A'},
+    {id:'21',x:3,  y:386,w:125,h:94, fill:'#E8748A'},
+    {id:'22',x:3,  y:482,w:125,h:94, fill:'#E8748A'},
+    {id:'23',x:3,  y:578,w:125,h:94, fill:'#E8748A'},
+    {id:'24',x:247,y:192,w:143,h:95, fill:'#5B9BD5'},
+    {id:'25',x:400,y:192,w:143,h:95, fill:'#5B9BD5'},
+    {id:'26',x:247,y:293,w:143,h:95, fill:'#5B9BD5'},
+    {id:'27',x:400,y:293,w:143,h:95, fill:'#5B9BD5'},
+    {id:'28',x:247,y:437,w:143,h:88, fill:'#5B9BD5'},
+    {id:'29',x:400,y:437,w:143,h:88, fill:'#5B9BD5'},
+    {id:'30',x:247,y:531,w:143,h:88, fill:'#E8748A'},
+    {id:'31',x:400,y:531,w:143,h:88, fill:'#E8748A'},
+    {id:'32',x:247,y:625,w:143,h:98, fill:'#5B9BD5'},
+    {id:'33',x:400,y:625,w:143,h:98, fill:'#5B9BD5'},
+    {id:'34',x:247,y:767,w:143,h:106,fill:'#5B9BD5'},
+    {id:'35',x:400,y:767,w:143,h:106,fill:'#5B9BD5'},
+    {id:'TS1',x:134,y:764,w:60,h:44, fill:'#d4cec4'},
+    {id:'TS2',x:134,y:810,w:60,h:44, fill:'#d4cec4'},
+    {id:'TS3',x:134,y:856,w:60,h:44, fill:'#d4cec4'},
+    {id:'TS4',x:134,y:1000,w:60,h:50,fill:'#d4cec4'},
+    {id:'TS5',x:247,y:875,w:60,h:50, fill:'#d4cec4'},
+    {id:'TS6',x:247,y:927,w:60,h:50, fill:'#d4cec4'},
+    {id:'TS7',x:330,y:940,w:70,h:50, fill:'#d4cec4'},
+    {id:'FS1',x:370,y:1177,w:112,h:84,fill:'#F5C518'},
+    {id:'FS2',x:252,y:1177,w:112,h:84,fill:'#F5C518'},
+    {id:'FS3',x:134,y:1177,w:112,h:84,fill:'#F5C518'},
+  ];
 
-  // White background
-  ctx.fillStyle = '#FFF9E0';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  const S=1.5; // scale
+  const CW=Math.round(700*S), CH=Math.round(1300*S);
+  const canvas=document.createElement('canvas');
+  canvas.width=CW; canvas.height=CH;
+  const ctx=canvas.getContext('2d');
 
-  // Add event title overlay at top of image
-  ctx.fillStyle = '#7A5C00';
-  ctx.font = `bold ${28*scale}px serif`;
-  ctx.textAlign = 'center';
+  // Floor background
+  ctx.fillStyle='#e8e3d8'; ctx.fillRect(0,0,CW,CH);
 
-  const img = new Image();
-  const blob = new Blob([svgData], {type:'image/svg+xml;charset=utf-8'});
-  const url  = URL.createObjectURL(blob);
+  // Wall bands
+  const wb=(x,y,w,h)=>{ ctx.fillStyle='#cdc8bc'; ctx.fillRect(x*S,y*S,w*S,h*S); };
+  wb(115,0,425,90); wb(540,0,100,850); wb(0,0,132,720); wb(132,90,470,820);
+  // Food area
+  ctx.fillStyle='#d4cbb8'; ctx.fillRect(0,1150*S,550*S,150*S);
 
-  img.onload = function(){
-    ctx.scale(scale, scale);
-    ctx.drawImage(img, 0, 0, vbW, vbH);
-    URL.revokeObjectURL(url);
+  function rrect(x,y,w,h,r){
+    ctx.beginPath();
+    ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y);
+    ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+    ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+    ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+    ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y);
+    ctx.closePath();
+  }
 
-    // Add a header banner
-    ctx.fillStyle = 'rgba(255,248,160,0.92)';
-    ctx.fillRect(0, 0, vbW, 44);
-    ctx.fillStyle = '#7A5C00';
-    ctx.font = 'bold 14px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('🎀 Rakhi Pop-Up 2026  ·  19–20 July  ·  Hotel Swan, Kota', vbW/2, 28);
+  STALLS.forEach(s=>{
+    const booked=!!exMap[s.id];
+    const ex=exMap[s.id];
+    const x=s.x*S, y=s.y*S, w=s.w*S, h=s.h*S, r=6;
 
-    // Download as JPG
-    const jpgUrl = canvas.toDataURL('image/jpeg', 0.92);
-    const a = document.createElement('a');
-    a.href = jpgUrl;
-    a.download = 'RakhiPopUp_FloorPlan.jpg';
-    a.click();
+    rrect(x,y,w,h,r);
 
-    // After short delay open WhatsApp with instructions
-    setTimeout(()=>{
-      const booked = exhibitors.filter(e=>e.stall);
-      let msg = '🎀 *Rakhi Pop-Up 2026 — Floor Plan*\n📅 19–20 July 2026\n🏨 Hotel Swan, Aerodrome Circle, Kota\n\n';
-      msg += '📊 *' + booked.length + ' stalls booked*\n\n';
-      if(booked.length){
-        msg += '*Booked Stalls:*\n';
-        booked.forEach(e=>{ msg += '• Stall ' + e.stall + ' — ' + e.name + ' (' + (e.cat||'—') + ')\n'; });
+    if(booked){
+      ctx.fillStyle=s.fill; ctx.fill();
+      ctx.strokeStyle='rgba(0,0,0,0.15)'; ctx.lineWidth=1.5; ctx.stroke();
+      const light=s.fill==='#d4cec4'||s.fill==='#F5C518';
+      const tc=light?'#333':'#fff';
+      ctx.fillStyle=tc; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.font='bold '+Math.round(Math.min(13,h*0.22))+'px sans-serif';
+      ctx.fillText(s.id, x+w/2, y+(h>60?h*0.3:h*0.42));
+      if(h>50&&ex){
+        const name=ex.name;
+        ctx.font='bold '+Math.round(Math.min(10,h*0.16))+'px sans-serif';
+        const mid=name.lastIndexOf(' ',10);
+        if(name.length>10&&mid>0&&h>70){
+          ctx.fillText(name.slice(0,mid), x+w/2, y+h*0.58);
+          ctx.fillText(name.slice(mid+1,mid+11), x+w/2, y+h*0.74);
+        } else {
+          ctx.fillText(name.slice(0,12), x+w/2, y+h*0.65);
+        }
       }
-      msg += '\n_(Floor plan JPG has been saved to your device — attach it to this chat)_';
-      window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
-      toast('📥 JPG saved! Attach it in WhatsApp.');
-    }, 800);
-  };
+    } else {
+      // Available — faded fill + "AVAILABLE" label
+      ctx.globalAlpha=0.2; ctx.fillStyle=s.fill; ctx.fill(); ctx.globalAlpha=1;
+      ctx.strokeStyle='rgba(160,160,160,0.5)'; ctx.lineWidth=1; ctx.stroke();
+      ctx.fillStyle='rgba(80,80,80,0.6)'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.font='bold '+Math.round(Math.min(11,h*0.2))+'px sans-serif';
+      ctx.fillText(s.id, x+w/2, y+(h>55?h*0.3:h*0.45));
+      if(h>50){
+        ctx.fillStyle='rgba(40,120,40,0.75)';
+        ctx.font=Math.round(Math.min(8,h*0.14))+'px sans-serif';
+        ctx.fillText('AVAILABLE', x+w/2, y+h*0.68);
+      }
+    }
+  });
 
-  img.onerror = function(){
-    toast('Could not generate image — opening WhatsApp with text summary.');
-    const booked = exhibitors.filter(e=>e.stall);
-    let msg = '🎀 *Rakhi Pop-Up 2026 — Floor Plan*\n📅 19–20 July 2026\n🏨 Hotel Swan, Aerodrome Circle, Kota\n\n';
-    booked.forEach(e=>{ msg += '• Stall ' + e.stall + ' — ' + e.name + '\n'; });
-    window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
-  };
+  // Header banner
+  ctx.fillStyle='rgba(255,248,150,0.96)'; ctx.fillRect(0,0,CW,34*S);
+  ctx.fillStyle='#7A5C00'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.font='bold '+Math.round(12*S)+'px sans-serif';
+  ctx.fillText('🎀 Rakhi Pop-Up 2026  ·  19–20 July  ·  Hotel Swan, Kota', CW/2, 17*S);
 
-  img.src = url;
+  // Legend
+  const ly=CH-18*S;
+  const ls=14*S;
+  ctx.fillStyle='#5B9BD5'; ctx.fillRect(8*S,ly,ls,ls);
+  ctx.fillStyle='#555'; ctx.font=Math.round(9*S)+'px sans-serif'; ctx.textAlign='left'; ctx.textBaseline='top';
+  ctx.fillText('Booked', 26*S, ly+1*S);
+  ctx.globalAlpha=0.25; ctx.fillStyle='#E8748A'; ctx.fillRect(80*S,ly,ls,ls); ctx.globalAlpha=1;
+  ctx.strokeStyle='#aaa'; ctx.lineWidth=1; ctx.strokeRect(80*S,ly,ls,ls);
+  ctx.fillStyle='#555'; ctx.fillText('Available', 98*S, ly+1*S);
+
+  // Entry + Food label
+  ctx.setLineDash([5,4]); ctx.strokeStyle='#888'; ctx.lineWidth=1.5;
+  ctx.strokeRect(480*S,1090*S,120*S,30*S);
+  ctx.setLineDash([]); ctx.fillStyle='#777'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.font=Math.round(9*S)+'px sans-serif';
+  ctx.fillText('ENTRY',540*S,1107*S);
+  ctx.fillText('FOOD STALL',280*S,1268*S);
+
+  // Download JPG
+  const a=document.createElement('a');
+  a.href=canvas.toDataURL('image/jpeg',0.92);
+  a.download='RakhiPopUp_StallAvailability.jpg';
+  a.click();
+
+  // WhatsApp message
+  setTimeout(()=>{
+    const bk=exhibitors.filter(e=>e.stall).length;
+    const av=STALLS.length-bk;
+    const msg='🎀 *Rakhi Pop-Up 2026 — Stall Availability*\n'
+      +'📅 19–20 July 2026 · Hotel Swan, Kota\n\n'
+      +'✅ *'+bk+' Stalls Booked*\n'
+      +'🔲 *'+av+' Stalls Available*\n\n'
+      +'_(Attaching floor plan — booked stalls shown in full colour, available stalls faded with "AVAILABLE" label)_\n\n'
+      +'Contact us to book your stall! 🎀';
+    window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+    toast('📥 Floor plan saved! Attach it in WhatsApp.');
+  },800);
 }
 
 function downloadFloorPlanJPG(){
