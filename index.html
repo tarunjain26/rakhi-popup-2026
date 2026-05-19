@@ -1073,34 +1073,23 @@ function shareFloorPlanWA(){
     rrect(x,y,w,h,r);
 
     if(booked){
+      // BOOKED — faded, no brand name, just stall number
+      ctx.globalAlpha=0.25; ctx.fillStyle=s.fill; ctx.fill(); ctx.globalAlpha=1;
+      ctx.strokeStyle='rgba(160,160,160,0.4)'; ctx.lineWidth=1; ctx.stroke();
+      ctx.fillStyle='rgba(80,80,80,0.55)'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.font='bold '+Math.round(Math.min(13,h*0.22))+'px sans-serif';
+      ctx.fillText(s.id, x+w/2, y+h/2);
+    } else {
+      // AVAILABLE — full bright colour, stall number + AVAILABLE label
       ctx.fillStyle=s.fill; ctx.fill();
       ctx.strokeStyle='rgba(0,0,0,0.15)'; ctx.lineWidth=1.5; ctx.stroke();
       const light=s.fill==='#d4cec4'||s.fill==='#F5C518';
       const tc=light?'#333':'#fff';
       ctx.fillStyle=tc; ctx.textAlign='center'; ctx.textBaseline='middle';
       ctx.font='bold '+Math.round(Math.min(13,h*0.22))+'px sans-serif';
-      ctx.fillText(s.id, x+w/2, y+(h>60?h*0.3:h*0.42));
-      if(h>50&&ex){
-        const name=ex.name;
-        ctx.font='bold '+Math.round(Math.min(10,h*0.16))+'px sans-serif';
-        const mid=name.lastIndexOf(' ',10);
-        if(name.length>10&&mid>0&&h>70){
-          ctx.fillText(name.slice(0,mid), x+w/2, y+h*0.58);
-          ctx.fillText(name.slice(mid+1,mid+11), x+w/2, y+h*0.74);
-        } else {
-          ctx.fillText(name.slice(0,12), x+w/2, y+h*0.65);
-        }
-      }
-    } else {
-      // Available — faded fill + "AVAILABLE" label
-      ctx.globalAlpha=0.2; ctx.fillStyle=s.fill; ctx.fill(); ctx.globalAlpha=1;
-      ctx.strokeStyle='rgba(160,160,160,0.5)'; ctx.lineWidth=1; ctx.stroke();
-      ctx.fillStyle='rgba(80,80,80,0.6)'; ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.font='bold '+Math.round(Math.min(11,h*0.2))+'px sans-serif';
-      ctx.fillText(s.id, x+w/2, y+(h>55?h*0.3:h*0.45));
+      ctx.fillText(s.id, x+w/2, y+(h>55?h*0.32:h*0.45));
       if(h>50){
-        ctx.fillStyle='rgba(40,120,40,0.75)';
-        ctx.font=Math.round(Math.min(8,h*0.14))+'px sans-serif';
+        ctx.font=Math.round(Math.min(9,h*0.15))+'px sans-serif';
         ctx.fillText('AVAILABLE', x+w/2, y+h*0.68);
       }
     }
@@ -1115,12 +1104,12 @@ function shareFloorPlanWA(){
   // Legend
   const ly=CH-18*S;
   const ls=14*S;
-  ctx.fillStyle='#5B9BD5'; ctx.fillRect(8*S,ly,ls,ls);
+  ctx.globalAlpha=0.25; ctx.fillStyle='#E8748A'; ctx.fillRect(8*S,ly,ls,ls); ctx.globalAlpha=1;
+  ctx.strokeStyle='#aaa'; ctx.lineWidth=1; ctx.strokeRect(8*S,ly,ls,ls);
   ctx.fillStyle='#555'; ctx.font=Math.round(9*S)+'px sans-serif'; ctx.textAlign='left'; ctx.textBaseline='top';
-  ctx.fillText('Booked', 26*S, ly+1*S);
-  ctx.globalAlpha=0.25; ctx.fillStyle='#E8748A'; ctx.fillRect(80*S,ly,ls,ls); ctx.globalAlpha=1;
-  ctx.strokeStyle='#aaa'; ctx.lineWidth=1; ctx.strokeRect(80*S,ly,ls,ls);
-  ctx.fillStyle='#555'; ctx.fillText('Available', 98*S, ly+1*S);
+  ctx.fillText('Booked (faded)', 26*S, ly+1*S);
+  ctx.fillStyle='#5B9BD5'; ctx.fillRect(130*S,ly,ls,ls);
+  ctx.fillStyle='#555'; ctx.fillText('Available', 148*S, ly+1*S);
 
   // Entry + Food label
   ctx.setLineDash([5,4]); ctx.strokeStyle='#888'; ctx.lineWidth=1.5;
