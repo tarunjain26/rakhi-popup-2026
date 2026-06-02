@@ -931,21 +931,33 @@ async function moveEx(i, dir){
   const j = i + dir;
   if(j<0||j>=exhibitors.length) return;
   [exhibitors[i],exhibitors[j]] = [exhibitors[j],exhibitors[i]];
-  if(fbReady){
-    await window._set('exhibitors',exhibitors[i]._id,{...exhibitors[i],_order:i});
-    await window._set('exhibitors',exhibitors[j]._id,{...exhibitors[j],_order:j});
-  } else { lsSave(); }
+  // Re-render immediately
   renderAdmin();
+  if(fbReady){
+    const a = {...exhibitors[i], _order:i};
+    const b = {...exhibitors[j], _order:j};
+    await window._set('exhibitors', a._id, a);
+    await window._set('exhibitors', b._id, b);
+  } else {
+    lsSave();
+  }
 }
 
 async function moveSponsor(i, dir){
   const j = i + dir;
   if(j<0||j>=sponsors.length) return;
   [sponsors[i],sponsors[j]] = [sponsors[j],sponsors[i]];
+  // Re-render immediately so UI updates without waiting for Firebase
+  renderSponsors();
   if(fbReady){
-    await window._set('sponsors',sponsors[i]._id,{...sponsors[i],_order:i});
-    await window._set('sponsors',sponsors[j]._id,{...sponsors[j],_order:j});
-  } else { lsSave(); renderSponsors(); }
+    // Update _order for both swapped items
+    const a = {...sponsors[i], _order:i};
+    const b = {...sponsors[j], _order:j};
+    await window._set('sponsors', a._id, a);
+    await window._set('sponsors', b._id, b);
+  } else {
+    lsSave();
+  }
 }
 
 
