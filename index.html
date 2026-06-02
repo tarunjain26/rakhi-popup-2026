@@ -1251,16 +1251,18 @@ function floorClick(id){
   const ex=exMap[id];
   document.getElementById('fm-title').textContent='Stall '+id;
   let body='';
+  const isAdm=document.body.classList.contains('admin-mode');
   if(ex){
     body=`<span style="color:var(--text);font-weight:500;font-size:15px">${ex.name}</span><br>
-    <b>Category:</b> ${ex.cat||'—'}<br><b>City:</b> ${ex.city||'—'}<br>
-    <b>Payment:</b> <span style="font-weight:500;color:${ex.pay==='paid'?'#3B6D11':ex.pay==='partial'?'#8A5700':'#A32D2D'}">${ex.pay==='paid'?'✓ Paid':ex.pay==='partial'?'◑ Partial':'○ Pending'}</span>`;
-    if(ex.adv)body+=`<br><b>Advance:</b> ₹${Number(ex.adv).toLocaleString()}`;
-    if(ex.req)body+=`<br><b>Needs:</b> ${ex.req}`;
+    <b>Category:</b> ${ex.cat||'—'}<br><b>City:</b> ${ex.city||'—'}`;
+    if(isAdm){
+      body+=`<br><b>Payment:</b> <span style="font-weight:500;color:${ex.pay==='paid'?'#3B6D11':ex.pay==='partial'?'#8A5700':'#A32D2D'}">${ex.pay==='paid'?'✓ Paid':ex.pay==='partial'?'◑ Partial':'○ Pending'}</span>`;
+      if(ex.adv) body+=`<br><b>Advance:</b> ₹${Number(ex.adv).toLocaleString('en-IN')}`;
+      if(ex.req) body+=`<br><b>Needs:</b> ${ex.req}`;
+    }
   }else{ body='<span style="color:var(--muted)">Available — not yet assigned.</span>'; }
   document.getElementById('fm-body').innerHTML=body;
   const fi=exhibitors.findIndex(e=>e.stall&&e.stall.toUpperCase()===id);
-  const isAdm=document.body.classList.contains('admin-mode');
   document.getElementById('fm-footer').innerHTML=`<button class="btn btn-sm" onclick="closeModal('floor-modal')">Close</button>`+
     (ex&&isAdm?`<button class="btn btn-sm btn-green" onclick="closeModal('floor-modal');openReassign(${fi})">⇄ Reassign</button>
     <button class="btn btn-sm btn-primary" onclick="closeModal('floor-modal');openExModal(${fi})">Edit</button>
