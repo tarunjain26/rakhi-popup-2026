@@ -763,7 +763,7 @@ document.addEventListener('firebase-ready', () => {
     if(document.body.classList.contains('admin-mode')) renderCosts();
   });
   window._listen('sponsors', data => {
-    sponsors=data;
+    sponsors=data.sort((a,b)=>(a._order||0)-(b._order||0));
     renderPublic();
     if(document.body.classList.contains('admin-mode')){ renderSponsors(); renderCosts(); }
   });
@@ -853,6 +853,10 @@ function renderAdmin(){
         ${e.mode?'<div class="ex-meta">💳 '+e.mode+(e.ref?' · <em>'+e.ref+'</em>':'')+'</div>':''}
         ${e.req?'<div class="ex-meta">📌 '+e.req+'</div>':''}
       </div>
+      <div style="display:flex;flex-direction:column;gap:3px;flex-shrink:0">
+          <button class="btn btn-sm" onclick="moveEx(${i},-1)" style="padding:2px 8px;font-size:14px;line-height:1" ${i===0?'disabled style="opacity:0.3"':''}>↑</button>
+          <button class="btn btn-sm" onclick="moveEx(${i},1)" style="padding:2px 8px;font-size:14px;line-height:1" ${i===exhibitors.length-1?'disabled style="opacity:0.3"':''}>↓</button>
+        </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0">
         <span class="badge badge-${e.pay||'pending'}">${e.pay==='paid'?'Paid':e.pay==='partial'?'Partial':'Pending'}</span>
         <div style="display:flex;gap:4px">
@@ -923,7 +927,28 @@ async function deleteEx(i){
   toast('Removed.');
 }
 
-/* ── DRAG & DROP ── */
+async function moveEx(i, dir){
+  const j = i + dir;
+  if(j<0||j>=exhibitors.length) return;
+  [exhibitors[i],exhibitors[j]] = [exhibitors[j],exhibitors[i]];
+  if(fbReady){
+    await window._set('exhibitors',exhibitors[i]._id,{...exhibitors[i],_order:i});
+    await window._set('exhibitors',exhibitors[j]._id,{...exhibitors[j],_order:j});
+  } else { lsSave(); }
+  renderAdmin();
+}
+
+async function moveSponsor(i, dir){
+  const j = i + dir;
+  if(j<0||j>=sponsors.length) return;
+  [sponsors[i],sponsors[j]] = [sponsors[j],sponsors[i]];
+  if(fbReady){
+    await window._set('sponsors',sponsors[i]._id,{...sponsors[i],_order:i});
+    await window._set('sponsors',sponsors[j]._id,{...sponsors[j],_order:j});
+  } else { lsSave(); renderSponsors(); }
+}
+
+
 function dragStart(e,idx){ dragIdx=idx; e.dataTransfer.effectAllowed='move'; setTimeout(()=>e.target.style.opacity='0.5',0); }
 function dragOver(e){ e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
 function dragLeave(e){ e.currentTarget.classList.remove('drag-over'); }
@@ -1223,8 +1248,9 @@ function floorClick(id){
   }else{ body='<span style="color:var(--muted)">Available — not yet assigned.</span>'; }
   document.getElementById('fm-body').innerHTML=body;
   const fi=exhibitors.findIndex(e=>e.stall&&e.stall.toUpperCase()===id);
+  const isAdm=document.body.classList.contains('admin-mode');
   document.getElementById('fm-footer').innerHTML=`<button class="btn btn-sm" onclick="closeModal('floor-modal')">Close</button>`+
-    (ex?`<button class="btn btn-sm btn-green" onclick="closeModal('floor-modal');openReassign(${fi})">⇄ Reassign</button>
+    (ex&&isAdm?`<button class="btn btn-sm btn-green" onclick="closeModal('floor-modal');openReassign(${fi})">⇄ Reassign</button>
     <button class="btn btn-sm btn-primary" onclick="closeModal('floor-modal');openExModal(${fi})">Edit</button>
     <button class="btn btn-sm" style="background:#E8F5E0;border-color:#A8D878;color:#2D5A10" onclick="sendWhatsApp(exhibitors[${fi}])">WA</button>`:'');
   openModal('floor-modal');
@@ -1554,7 +1580,11 @@ function renderSponsors(){
           </div>`).join('')
         :'<div style="font-size:12px;color:var(--muted);padding:4px 0">No deliverables yet.</div>'}
       </div>
-      <div style="display:flex;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border);flex-wrap:wrap">
+      <div style="display:flex;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border);flex-wrap:wrap;align-items:center">
+        <div style="display:flex;gap:4px;margin-right:4px">
+          <button class="btn btn-sm" onclick="moveSponsor(${i},-1)" style="padding:4px 10px;font-size:14px" ${i===0?'disabled':''}>↑</button>
+          <button class="btn btn-sm" onclick="moveSponsor(${i},1)" style="padding:4px 10px;font-size:14px">↓</button>
+        </div>
         ${sp.phone?`<button class="btn btn-sm" style="background:#E8F5E0;border-color:#A8D878;color:#2D5A10" onclick="sendSpWA(${i})">WA Confirm</button>`:''}
         <button class="btn btn-sm" onclick="openSpModal(${i})">Edit</button>
         <button class="btn btn-sm btn-danger" onclick="deleteSponsor(${i})">Remove</button>
