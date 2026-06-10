@@ -448,7 +448,15 @@ body.admin-mode .admin-only{display:flex !important}
           <button type="button" class="btn btn-sm" onclick="openCatManager()" style="flex-shrink:0;font-size:16px;padding:0 12px" title="Add / remove categories">⚙</button>
         </div>
       </div>
-      <div><label>Stall Number *</label><input id="m-stall" placeholder="e.g. 1, TS1, FS1" style="text-transform:uppercase"></div>
+      <div>
+        <label>Stall Number *</label>
+        <input id="m-stall" placeholder="e.g. 1, TS1, FS1" style="text-transform:uppercase" oninput="updateSplitPreview()">
+        <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
+          <input type="checkbox" id="m-split" onchange="updateSplitPreview()" style="width:auto;height:auto;accent-color:var(--y3);cursor:pointer">
+          <label for="m-split" style="margin:0;font-size:13px;font-weight:400;text-transform:none;letter-spacing:0;cursor:pointer;color:var(--text)">Split into half stalls (A &amp; B)</label>
+        </div>
+        <div id="m-split-preview" style="display:none;font-size:12px;color:var(--y5);background:var(--y1);border-radius:6px;padding:5px 10px;margin-top:5px"></div>
+      </div>
     </div>
     <div><label>WhatsApp Number *</label>
       <div style="display:flex;gap:8px">
@@ -656,41 +664,44 @@ body.admin-mode .admin-only{display:flex !important}
 </div>
 
 <!-- ═══ QUICK PAYMENT MODAL ═══ -->
+<!-- ═══ PAYMENT HISTORY MODAL ═══ -->
 <div id="qpay-modal" style="display:none;position:fixed;inset:0;background:rgba(42,34,0,.35);z-index:300;align-items:center;justify-content:center;padding:1rem" onclick="if(event.target.id==='qpay-modal')closeModal('qpay-modal')">
-  <div class="modal" style="max-width:420px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
-      <span id="qpay-title" style="font-size:17px;font-weight:600;font-family:'Cormorant Garamond',serif;color:var(--y5)">Record Payment</span>
+  <div class="modal" style="max-width:480px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
+      <span id="qpay-title" style="font-size:17px;font-weight:600;font-family:'Cormorant Garamond',serif;color:var(--y5)">Payment History</span>
       <button onclick="closeModal('qpay-modal')" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted)">×</button>
     </div>
     <div id="qpay-info" style="background:var(--y1);border-radius:8px;padding:10px 12px;margin-bottom:1rem;font-size:13px;color:var(--y5)"></div>
-    <div class="row2">
-      <div><label>Amount Received (₹) *</label><input id="qpay-amt" type="number" placeholder="0"></div>
-      <div><label>Payment Status</label>
-        <select id="qpay-pay">
-          <option value="partial">Partial</option>
-          <option value="paid">Fully Paid</option>
-        </select>
+
+    <!-- Payment history list -->
+    <div id="qpay-history" style="margin-bottom:1rem"></div>
+
+    <!-- Add new payment -->
+    <div style="border-top:1px solid var(--border);padding-top:1rem">
+      <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.75rem">+ Add Payment</div>
+      <div class="row2">
+        <div><label>Amount (₹) *</label><input id="qpay-amt" type="number" placeholder="0"></div>
+        <div><label>Date</label><input id="qpay-date" type="date"></div>
       </div>
-    </div>
-    <div class="row2">
-      <div><label>Payment Mode</label>
-        <select id="qpay-mode" onchange="updateQPayRef()">
-          <option value="Cash">Cash</option>
-          <option value="UPI">UPI</option>
-          <option value="Bank Transfer">Bank Transfer</option>
-          <option value="Cheque">Cheque</option>
-          <option value="Card">Card</option>
-          <option value="Multiple">Multiple Modes</option>
-        </select>
-      </div>
-      <div>
-        <label id="qpay-ref-label">Collected By</label>
-        <input id="qpay-ref" placeholder="Name or reference...">
+      <div class="row2">
+        <div><label>Payment Mode</label>
+          <select id="qpay-mode" onchange="updateQPayRef()">
+            <option value="Cash">Cash</option>
+            <option value="UPI">UPI</option>
+            <option value="Bank Transfer">Bank Transfer</option>
+            <option value="Cheque">Cheque</option>
+            <option value="Card">Card</option>
+          </select>
+        </div>
+        <div>
+          <label id="qpay-ref-label">Collected By</label>
+          <input id="qpay-ref" placeholder="Name or reference...">
+        </div>
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-sm" onclick="closeModal('qpay-modal')">Cancel</button>
-      <button class="btn btn-primary btn-sm" onclick="saveQuickPay()">Save Payment</button>
+      <button class="btn btn-sm" onclick="closeModal('qpay-modal')">Close</button>
+      <button class="btn btn-primary btn-sm" onclick="saveQuickPay()">Add Payment</button>
     </div>
   </div>
 </div>
@@ -831,7 +842,7 @@ function sendWhatsApp(e){
 function renderAdmin(){
   const total=exhibitors.length, paid=exhibitors.filter(e=>e.pay==='paid').length;
   const partial=exhibitors.filter(e=>e.pay==='partial').length;
-  const rev=exhibitors.reduce((s,e)=>s+(+e.adv||0),0);
+  const rev=exhibitors.reduce((s,e)=>s+((e.payments||[]).reduce((t,p)=>t+(+p.amt||0),0)),0);
   document.getElementById('ex-metrics').innerHTML=`
     <div class="metric"><div class="metric-val">${total}</div><div class="metric-lbl">Exhibitors</div></div>
     <div class="metric"><div class="metric-val" style="color:var(--g3)">${paid}</div><div class="metric-lbl">Fully Paid</div></div>
@@ -849,8 +860,8 @@ function renderAdmin(){
       <div class="stall-badge" style="background:${sc.bg};border-color:${sc.border};color:${sc.text}">${e.stall||'?'}</div>
       <div class="ex-info">
         <div class="ex-name">${e.name} <span class="badge badge-cat">${e.cat||'—'}</span></div>
-        <div class="ex-meta">${[e.city, e.fee?'Fee ₹'+Number(e.fee).toLocaleString('en-IN'):'', e.adv?'Adv ₹'+Number(e.adv).toLocaleString('en-IN'):''].filter(Boolean).join(' · ')}</div>
-        ${e.mode?'<div class="ex-meta">💳 '+e.mode+(e.ref?' · <em>'+e.ref+'</em>':'')+'</div>':''}
+        <div class="ex-meta">${[e.city, e.fee?'Fee ₹'+Number(e.fee).toLocaleString('en-IN'):'', e.adv?'Paid ₹'+Number(e.adv).toLocaleString('en-IN'):''].filter(Boolean).join(' · ')}</div>
+        ${(e.payments&&e.payments.length)?'<div class="ex-meta">'+e.payments.map(p=>(MODE_ICON[p.mode]||'💰')+' ₹'+fmt(+p.amt)+(p.ref?' ('+p.ref+')':'')).join(' · ')+'</div>':''}
         ${e.req?'<div class="ex-meta">📌 '+e.req+'</div>':''}
       </div>
       <div style="display:flex;flex-direction:column;gap:3px;flex-shrink:0">
@@ -882,6 +893,18 @@ function updatePayRef(){
   else lbl.textContent='Reference / Collected By';
 }
 
+function updateSplitPreview(){
+  const stall = (document.getElementById('m-stall').value||'').trim().toUpperCase();
+  const split = document.getElementById('m-split').checked;
+  const prev  = document.getElementById('m-split-preview');
+  if(split && stall){
+    prev.style.display = 'block';
+    prev.textContent   = '→ Will create: Stall ' + stall + 'A  and  Stall ' + stall + 'B';
+  } else {
+    prev.style.display = 'none';
+  }
+}
+
 function openExModal(idx=null){
   editExId=idx;
   document.getElementById('ex-modal-title').textContent=idx===null?'Add Exhibitor':'Edit Exhibitor';
@@ -890,6 +913,12 @@ function openExModal(idx=null){
   refreshCatDropdown();
   document.getElementById('m-cat').value=e.cat||'';
   document.getElementById('m-pay').value=e.pay||'pending';
+  // Split checkbox — only available when adding new exhibitor
+  const chk = document.getElementById('m-split');
+  chk.checked  = false;
+  chk.disabled = (idx !== null);
+  chk.parentElement.style.opacity = (idx !== null) ? '0.35' : '1';
+  document.getElementById('m-split-preview').style.display = 'none';
   updatePayRef();
   openModal('ex-modal');
 }
@@ -897,7 +926,37 @@ function openExModal(idx=null){
 async function saveExhibitor(sendWA=false){
   const name=document.getElementById('m-name').value.trim();
   const stall=document.getElementById('m-stall').value.trim().toUpperCase();
+  const split=document.getElementById('m-split').checked && editExId===null;
   if(!name){toast('Please enter a name.');return;}
+
+  if(split){
+    // Create two half-stall entries: stallA and stallB
+    const stallA = stall+'A', stallB = stall+'B';
+    const dupA = exhibitors.find(e=>e.stall===stallA);
+    const dupB = exhibitors.find(e=>e.stall===stallB);
+    if(dupA){toast('Stall '+stallA+' is already assigned to '+dupA.name);return;}
+    if(dupB){toast('Stall '+stallB+' is already assigned to '+dupB.name);return;}
+
+    const base={name,city:document.getElementById('m-city').value.trim(),
+      cat:document.getElementById('m-cat').value,fee:document.getElementById('m-fee').value,
+      adv:'0',pay:'pending',mode:'',ref:'',req:document.getElementById('m-req').value.trim(),
+      notes:document.getElementById('m-notes').value.trim(),wa:document.getElementById('m-wa').value.trim(),
+      splitStall:true};
+    const objA={...base,stall:stallA,_order:exhibitors.length};
+    const objB={...base,stall:stallB,_order:exhibitors.length+1};
+    if(fbReady){
+      await window._add('exhibitors',objA);
+      await window._add('exhibitors',objB);
+    } else {
+      exhibitors.push(objA,objB); lsSave(); renderAdmin();
+    }
+    closeModal('ex-modal');
+    toast('✓ Created Stall '+stallA+' and Stall '+stallB);
+    if(sendWA){ sendWhatsApp({...objA,stall:stallA+' & '+stallB}); }
+    return;
+  }
+
+  // Normal single stall save
   const dup=exhibitors.find((e,i)=>e.stall&&e.stall===stall&&(editExId===null||i!==editExId));
   if(stall&&dup){toast('Stall '+stall+' is already assigned to '+dup.name);return;}
   const obj={name,city:document.getElementById('m-city').value.trim(),cat:document.getElementById('m-cat').value,
@@ -907,10 +966,9 @@ async function saveExhibitor(sendWA=false){
     req:document.getElementById('m-req').value.trim(),
     notes:document.getElementById('m-notes').value.trim(),wa:document.getElementById('m-wa').value.trim(),
     _order:editExId!==null?(exhibitors[editExId]._order||editExId):exhibitors.length};
-
   if(fbReady){
-    if(editExId!==null){ await window._set('exhibitors', exhibitors[editExId]._id, obj); }
-    else { await window._add('exhibitors', obj); }
+    if(editExId!==null){ await window._set('exhibitors',exhibitors[editExId]._id,obj); }
+    else { await window._add('exhibitors',obj); }
   } else {
     if(editExId!==null) exhibitors[editExId]=obj; else exhibitors.push(obj);
     lsSave(); renderAdmin();
@@ -1295,7 +1353,7 @@ function renderCosts(){
 
   // Use FULL committed amounts (not just received) for revenue
   const stallTotal    = exhibitors.reduce((s,e)=>s+(+e.fee||0),0);
-  const stallReceived = exhibitors.reduce((s,e)=>s+(+e.adv||0),0);
+  const stallReceived = exhibitors.reduce((s,e)=>s+((e.payments||[]).reduce((t,p)=>t+(+p.amt||0),0)),0);
   const spTotal       = sponsors.reduce((s,sp)=>s+(+sp.amt||0),0);
   const spReceived    = sponsors.reduce((s,sp)=>s+(+sp.recv||0),0);
 
@@ -1360,17 +1418,20 @@ function renderCosts(){
 
   // ── STALL RECEIVABLES TABLE ──
   const stallRows = exhibitors.filter(e=>e.stall&&e.fee).map((e,i)=>{
-    const balance = (+e.fee||0)-(+e.adv||0);
-    const modeIcon = {'Cash':'💵','UPI':'📱','Bank Transfer':'🏦','Cheque':'📋','Card':'💳','Multiple':'🔀'}[e.mode]||'';
+    const payments = e.payments||[];
+    const totalPaid = payments.reduce((s,p)=>s+(+p.amt||0),0);
+    const balance = (+e.fee||0) - totalPaid;
     const exIdx = exhibitors.indexOf(e);
+    const payDetail = payments.length
+      ? payments.map(p=>'<div style="font-size:10px;color:var(--muted)">'+(MODE_ICON[p.mode]||'💰')+' ₹'+fmt(+p.amt)+(p.date?' · '+p.date:'')+(p.ref?' · '+p.ref:'')+'</div>').join('')
+      : '<div style="font-size:10px;color:var(--muted)">—</div>';
     return `<tr>
       <td style="padding:8px 6px;font-weight:500">${e.stall}</td>
       <td style="padding:8px 6px">${e.name}</td>
       <td style="padding:8px 6px;text-align:right">₹${fmt(+e.fee||0)}</td>
-      <td style="padding:8px 6px;text-align:right;color:#2E7D32">₹${fmt(+e.adv||0)}</td>
+      <td style="padding:8px 6px;text-align:right;color:#2E7D32">₹${fmt(totalPaid)}</td>
       <td style="padding:8px 6px;text-align:right;color:${balance>0?'#A32D2D':'#2E7D32'};font-weight:500">₹${fmt(balance)}</td>
-      <td style="padding:8px 6px;font-size:11px">${modeIcon} ${e.mode||'—'}${e.ref?`<br><span style="color:var(--muted)">${e.ref}</span>`:''}
-      </td>
+      <td style="padding:8px 6px">${payDetail}</td>
       <td style="padding:8px 6px;text-align:center"><span class="badge badge-${e.pay||'pending'}">${e.pay==='paid'?'Paid':e.pay==='partial'?'Partial':'Pending'}</span></td>
       <td style="padding:8px 6px"><button class="btn btn-sm btn-green" style="font-size:11px;padding:4px 8px" onclick="openQuickPay(${exIdx})">+ Pay</button></td>
     </tr>`;
@@ -1503,22 +1564,17 @@ function fmt(n){
 
 function stallColor(stall){
   if(!stall) return {bg:'var(--y3)',border:'var(--y4)',text:'var(--y5)'};
-  const s = stall.toUpperCase();
+  // Strip A/B suffix so split stalls (5A, 5B) inherit parent colour
+  const s   = stall.toUpperCase().replace(/[AB]$/,'');
   const num = parseInt(s);
-  // Green corner stalls
-  if(s==='1'||s==='11') return {bg:'#4CAF50',border:'#388E3C',text:'#fff'};
-  // Food stalls
-  if(s.startsWith('FS'))  return {bg:'#F5C518',border:'#c9a020',text:'#5a3e00'};
-  // Table stalls
-  if(s.startsWith('TS'))  return {bg:'#ede8de',border:'#bbb',text:'#555'};
-  // Blue island stalls 24–35
-  // Blue island stalls 24–35 except 30 & 31 which are pink
+  if(s==='1'||s==='11')        return {bg:'#4CAF50',border:'#388E3C',text:'#fff'};
+  if(s.startsWith('FS'))       return {bg:'#F5C518',border:'#c9a020',text:'#5a3e00'};
+  if(s.startsWith('TS'))       return {bg:'#ede8de',border:'#bbb',text:'#555'};
   if(s==='30'||s==='31')       return {bg:'#E8748A',border:'#c25570',text:'#fff'};
   if(num>=24&&num<=35)         return {bg:'#5B9BD5',border:'#3a7ab8',text:'#fff'};
-  // Blue wall stalls 5, 6
-  if(s==='5'||s==='6')    return {bg:'#5B9BD5',border:'#3a7ab8',text:'#fff'};
-  // Pink wall stalls (everything else numbered)
-  if(num>=2&&num<=23)      return {bg:'#E8748A',border:'#c25570',text:'#fff'};
+  if(s==='5'||s==='6')         return {bg:'#5B9BD5',border:'#3a7ab8',text:'#fff'};
+  if(num>=2&&num<=23)          return {bg:'#E8748A',border:'#c25570',text:'#fff'};
+  return {bg:'var(--y3)',border:'var(--y4)',text:'var(--y5)'};
   // Default yellow
   return {bg:'var(--y3)',border:'var(--y4)',text:'var(--y5)'};
 }
@@ -1729,50 +1785,108 @@ function sendSpWA(i){
   window.open(`https://wa.me/91${num}?text=${encodeURIComponent(msg)}`,'_blank');
 }
 
-/* ── QUICK PAYMENT (from Costs tab) ── */
+/* ── PAYMENT HISTORY ── */
 let qpayIdx = null;
+
+const MODE_ICON = {'Cash':'💵','UPI':'📱','Bank Transfer':'🏦','Cheque':'📋','Card':'💳'};
 
 function openQuickPay(exIdx){
   qpayIdx = exIdx;
   const e = exhibitors[exIdx];
-  const balance = (+e.fee||0)-(+e.adv||0);
-  document.getElementById('qpay-title').textContent = `Record Payment — ${e.name}`;
+  const payments = e.payments || [];
+  const totalPaid = payments.reduce((s,p)=>s+(+p.amt||0),0);
+  const balance = (+e.fee||0) - totalPaid;
+
+  document.getElementById('qpay-title').textContent = 'Payments — ' + e.name;
   document.getElementById('qpay-info').innerHTML =
-    `Stall <b>${e.stall}</b> · Fee ₹${fmt(+e.fee||0)} · Received ₹${fmt(+e.adv||0)} · <b style="color:${balance>0?'#A32D2D':'#2E7D32'}">Balance ₹${fmt(balance)}</b>`;
+    'Stall <b>' + e.stall + '</b> · Fee <b>₹' + fmt(+e.fee||0) + '</b> · Paid <b style="color:#2E7D32">₹' + fmt(totalPaid) + '</b> · Balance <b style="color:' + (balance>0?'#A32D2D':'#2E7D32') + '">₹' + fmt(balance) + '</b>';
+
+  // Payment history list
+  renderPayHistory(payments, exIdx);
+
+  // Reset form
   document.getElementById('qpay-amt').value = balance > 0 ? balance : '';
-  document.getElementById('qpay-pay').value = 'paid';
-  document.getElementById('qpay-mode').value = e.mode||'Cash';
-  document.getElementById('qpay-ref').value = e.ref||'';
+  document.getElementById('qpay-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('qpay-mode').value = 'Cash';
+  document.getElementById('qpay-ref').value = '';
   updateQPayRef();
   openModal('qpay-modal');
 }
 
+function renderPayHistory(payments, exIdx){
+  const el = document.getElementById('qpay-history');
+  if(!payments||!payments.length){
+    el.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:6px 0">No payments recorded yet.</div>';
+    return;
+  }
+  el.innerHTML = '<div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Payment History</div>' +
+    payments.map((p,pi)=>`
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+        <div style="font-size:18px">${MODE_ICON[p.mode]||'💰'}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:500">₹${fmt(+p.amt)} · ${p.mode}</div>
+          <div style="font-size:11px;color:var(--muted)">${[p.date, p.ref].filter(Boolean).join(' · ')}</div>
+        </div>
+        <button class="btn btn-sm btn-danger" style="padding:3px 8px;font-size:11px" onclick="deletePayment(${exIdx},${pi})">✕</button>
+      </div>`).join('');
+}
+
 function updateQPayRef(){
   const mode = document.getElementById('qpay-mode').value;
-  const lbl = document.getElementById('qpay-ref-label');
-  if(mode==='Cash') lbl.textContent='Collected By (name)';
-  else if(mode==='UPI') lbl.textContent='UPI / Transaction ID';
+  const lbl  = document.getElementById('qpay-ref-label');
+  if(mode==='Cash')          lbl.textContent='Collected By (name)';
+  else if(mode==='UPI')      lbl.textContent='UPI / Transaction ID';
   else if(mode==='Bank Transfer') lbl.textContent='Transfer Ref / UTR';
-  else if(mode==='Cheque') lbl.textContent='Cheque No. / Bank';
-  else lbl.textContent='Reference / Collected By';
+  else if(mode==='Cheque')   lbl.textContent='Cheque No. / Bank';
+  else                       lbl.textContent='Reference';
 }
 
 async function saveQuickPay(){
-  const amt = document.getElementById('qpay-amt').value;
-  if(!amt){toast('Please enter the amount received.');return;}
+  const amt = +document.getElementById('qpay-amt').value;
+  if(!amt||amt<=0){toast('Please enter a valid amount.');return;}
   const e = exhibitors[qpayIdx];
-  const updated = {
-    ...e,
-    adv: (+e.adv||0) + (+amt),
-    pay: document.getElementById('qpay-pay').value,
+  const payments = [...(e.payments||[])];
+  payments.push({
+    amt,
     mode: document.getElementById('qpay-mode').value,
-    ref: document.getElementById('qpay-ref').value.trim(),
-  };
+    ref:  document.getElementById('qpay-ref').value.trim(),
+    date: document.getElementById('qpay-date').value,
+  });
+  const totalPaid = payments.reduce((s,p)=>s+(+p.amt||0),0);
+  const autoStatus = totalPaid>=(+e.fee||0)?'paid':totalPaid>0?'partial':'pending';
+  const updated = {...e, payments, adv:totalPaid, pay:autoStatus};
+
   if(fbReady) await window._set('exhibitors', e._id, updated);
   else { exhibitors[qpayIdx]=updated; lsSave(); renderAdmin(); renderCosts(); }
-  closeModal('qpay-modal');
-  toast(`✓ ₹${fmt(+amt)} recorded for ${e.name}`);
+
+  // Refresh modal info
+  const balance = (+e.fee||0) - totalPaid;
+  document.getElementById('qpay-info').innerHTML =
+    'Stall <b>'+e.stall+'</b> · Fee <b>₹'+fmt(+e.fee||0)+'</b> · Paid <b style="color:#2E7D32">₹'+fmt(totalPaid)+'</b> · Balance <b style="color:'+(balance>0?'#A32D2D':'#2E7D32')+'">₹'+fmt(balance)+'</b>';
+  renderPayHistory(payments, qpayIdx);
+  document.getElementById('qpay-amt').value = balance > 0 ? balance : '';
+  document.getElementById('qpay-ref').value = '';
+  toast('✓ ₹'+fmt(amt)+' recorded via '+document.getElementById('qpay-mode').value);
 }
+
+async function deletePayment(exIdx, payIdx){
+  if(!confirm('Remove this payment entry?'))return;
+  const e = exhibitors[exIdx];
+  const payments = [...(e.payments||[])];
+  payments.splice(payIdx,1);
+  const totalPaid = payments.reduce((s,p)=>s+(+p.amt||0),0);
+  const autoStatus = totalPaid>=(+e.fee||0)?'paid':totalPaid>0?'partial':'pending';
+  const updated = {...e, payments, adv:totalPaid, pay:autoStatus};
+  if(fbReady) await window._set('exhibitors', e._id, updated);
+  else { exhibitors[exIdx]=updated; lsSave(); renderAdmin(); renderCosts(); }
+  renderPayHistory(payments, exIdx);
+  const balance=(+e.fee||0)-totalPaid;
+  document.getElementById('qpay-info').innerHTML =
+    'Stall <b>'+e.stall+'</b> · Fee <b>₹'+fmt(+e.fee||0)+'</b> · Paid <b style="color:#2E7D32">₹'+fmt(totalPaid)+'</b> · Balance <b style="color:'+(balance>0?'#A32D2D':'#2E7D32')+'">₹'+fmt(balance)+'</b>';
+  toast('Payment removed.');
+}
+
+
 
 
 const DEFAULT_SP_TYPES=['Title Sponsor','Co-Sponsor','Associate Sponsor','In-Kind Sponsor','Media Partner','Other'];
