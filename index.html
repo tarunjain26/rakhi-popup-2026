@@ -451,9 +451,12 @@ body.admin-mode .admin-only{display:flex !important}
       <div>
         <label>Stall Number *</label>
         <input id="m-stall" placeholder="e.g. 1, TS1, FS1" style="text-transform:uppercase" oninput="updateSplitPreview()">
-        <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
-          <input type="checkbox" id="m-split" onchange="updateSplitPreview()" style="width:auto;height:auto;accent-color:var(--y3);cursor:pointer">
-          <label for="m-split" style="margin:0;font-size:13px;font-weight:400;text-transform:none;letter-spacing:0;cursor:pointer;color:var(--text)">Split into half stalls (A &amp; B)</label>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:8px;cursor:pointer" onclick="document.getElementById('m-split').checked=!document.getElementById('m-split').checked;updateSplitPreview()">
+          <div id="m-split-box" style="width:18px;height:18px;border:2px solid var(--y3);border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:#fff;transition:background .15s">
+            <svg id="m-split-tick" width="12" height="12" viewBox="0 0 12 12" style="display:none"><polyline points="2,6 5,9 10,3" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+          <input type="checkbox" id="m-split" onchange="updateSplitPreview()" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none">
+          <span style="font-size:13px;color:var(--text);user-select:none">Split into half stalls (A &amp; B)</span>
         </div>
         <div id="m-split-preview" style="display:none;font-size:12px;color:var(--y5);background:var(--y1);border-radius:6px;padding:5px 10px;margin-top:5px"></div>
       </div>
@@ -842,7 +845,7 @@ function sendWhatsApp(e){
 function renderAdmin(){
   const total=exhibitors.length, paid=exhibitors.filter(e=>e.pay==='paid').length;
   const partial=exhibitors.filter(e=>e.pay==='partial').length;
-  const rev=exhibitors.reduce((s,e)=>s+((e.payments||[]).reduce((t,p)=>t+(+p.amt||0),0)),0);
+  const rev=exhibitors.reduce((s,e)=>s+paidAmt(e),0);
   document.getElementById('ex-metrics').innerHTML=`
     <div class="metric"><div class="metric-val">${total}</div><div class="metric-lbl">Exhibitors</div></div>
     <div class="metric"><div class="metric-val" style="color:var(--g3)">${paid}</div><div class="metric-lbl">Fully Paid</div></div>
@@ -893,10 +896,19 @@ function updatePayRef(){
   else lbl.textContent='Reference / Collected By';
 }
 
+// Helper — returns total paid for an exhibitor, backward-compatible with old adv field
+function paidAmt(e){ return (e.payments&&e.payments.length) ? e.payments.reduce((s,p)=>s+(+p.amt||0),0) : (+e.adv||0); }
+
 function updateSplitPreview(){
   const stall = (document.getElementById('m-stall').value||'').trim().toUpperCase();
   const split = document.getElementById('m-split').checked;
   const prev  = document.getElementById('m-split-preview');
+  // Sync visual checkbox
+  const box  = document.getElementById('m-split-box');
+  const tick = document.getElementById('m-split-tick');
+  if(box)  box.style.background  = split ? 'var(--y3)' : '#fff';
+  if(tick) tick.style.display    = split ? 'block' : 'none';
+  // Preview text
   if(split && stall){
     prev.style.display = 'block';
     prev.textContent   = '→ Will create: Stall ' + stall + 'A  and  Stall ' + stall + 'B';
@@ -917,7 +929,12 @@ function openExModal(idx=null){
   const chk = document.getElementById('m-split');
   chk.checked  = false;
   chk.disabled = (idx !== null);
-  chk.parentElement.style.opacity = (idx !== null) ? '0.35' : '1';
+  const box  = document.getElementById('m-split-box');
+  const tick = document.getElementById('m-split-tick');
+  const wrap = chk.parentElement;
+  if(box)  box.style.background = '#fff';
+  if(tick) tick.style.display   = 'none';
+  if(wrap) wrap.style.opacity   = (idx !== null) ? '0.35' : '1';
   document.getElementById('m-split-preview').style.display = 'none';
   updatePayRef();
   openModal('ex-modal');
@@ -1353,7 +1370,7 @@ function renderCosts(){
 
   // Use FULL committed amounts (not just received) for revenue
   const stallTotal    = exhibitors.reduce((s,e)=>s+(+e.fee||0),0);
-  const stallReceived = exhibitors.reduce((s,e)=>s+((e.payments||[]).reduce((t,p)=>t+(+p.amt||0),0)),0);
+  const stallReceived = exhibitors.reduce((s,e)=>s+paidAmt(e),0);
   const spTotal       = sponsors.reduce((s,sp)=>s+(+sp.amt||0),0);
   const spReceived    = sponsors.reduce((s,sp)=>s+(+sp.recv||0),0);
 
@@ -1419,7 +1436,7 @@ function renderCosts(){
   // ── STALL RECEIVABLES TABLE ──
   const stallRows = exhibitors.filter(e=>e.stall&&e.fee).map((e,i)=>{
     const payments = e.payments||[];
-    const totalPaid = payments.reduce((s,p)=>s+(+p.amt||0),0);
+    const totalPaid = payments.length ? payments.reduce((s,p)=>s+(+p.amt||0),0) : (+e.adv||0);
     const balance = (+e.fee||0) - totalPaid;
     const exIdx = exhibitors.indexOf(e);
     const payDetail = payments.length
@@ -1794,7 +1811,7 @@ function openQuickPay(exIdx){
   qpayIdx = exIdx;
   const e = exhibitors[exIdx];
   const payments = e.payments || [];
-  const totalPaid = payments.reduce((s,p)=>s+(+p.amt||0),0);
+  const totalPaid = paidAmt(e);
   const balance = (+e.fee||0) - totalPaid;
 
   document.getElementById('qpay-title').textContent = 'Payments — ' + e.name;
@@ -1815,8 +1832,16 @@ function openQuickPay(exIdx){
 
 function renderPayHistory(payments, exIdx){
   const el = document.getElementById('qpay-history');
+  const e  = exhibitors[exIdx];
   if(!payments||!payments.length){
-    el.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:6px 0">No payments recorded yet.</div>';
+    // Show legacy adv if it exists
+    if(+e.adv>0){
+      el.innerHTML = '<div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Payment History</div>'
+        +'<div style="padding:8px 0;font-size:13px;color:var(--muted)">💰 ₹'+fmt(+e.adv)+' (legacy entry — recorded before payment history was added)</div>'
+        +'<div style="font-size:11px;color:var(--muted);margin-top:4px">Add a new payment above to start tracking with full details.</div>';
+    } else {
+      el.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:6px 0">No payments recorded yet.</div>';
+    }
     return;
   }
   el.innerHTML = '<div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Payment History</div>' +
