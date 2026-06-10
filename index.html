@@ -1068,34 +1068,57 @@ async function confirmReassign(){
 
 /* ── FLOOR PLAN → JPG DOWNLOAD + WHATSAPP ── */
 /* ── STALL STATUS WA ── */
-function sendStallStatusWA(){
-  const ALL_STALLS = [
-    '1','2','3','4','5','6','7','8','9','10','11',
-    '12','13','14','15','16','17','18','19','20','21','22','23',
-    '24','25','26','27','28','29','30','31','32','33','34','35',
-    'TS1','TS2','TS3','TS4','TS5','TS6','TS7',
-    'FS1','FS2','FS3'
-  ];
+/* ── STALL STATUS HELPER ── */
+function getStallStatus(){
+  const BASE = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31','32','33','34','35','TS1','TS2','TS3','TS4','TS5','TS6','TS7','FS1','FS2','FS3'];
   const exMap = {};
   exhibitors.forEach(e=>{ if(e.stall) exMap[e.stall.toUpperCase()] = e; });
 
-  const booked   = ALL_STALLS.filter(s => exMap[s]);
-  const available = ALL_STALLS.filter(s => !exMap[s]);
+  // Find which base stalls are split
+  const splitStalls = new Set();
+  exhibitors.forEach(e=>{
+    if(e.stall && /[AB]$/i.test(e.stall))
+      splitStalls.add(e.stall.toUpperCase().replace(/[AB]$/,''));
+  });
+
+  const booked = [], available = [];
+  let bookedCount = 0, availableCount = 0;
+
+  BASE.forEach(s=>{
+    if(splitStalls.has(s)){
+      // Handle A and B halves independently
+      const hasA = !!exMap[s+'A'], hasB = !!exMap[s+'B'];
+      if(hasA){ booked.push(s+'A'); bookedCount += 0.5; }
+      else    { available.push(s+'A'); availableCount += 0.5; }
+      if(hasB){ booked.push(s+'B'); bookedCount += 0.5; }
+      else    { available.push(s+'B'); availableCount += 0.5; }
+    } else if(exMap[s]){
+      booked.push(s); bookedCount += 1;
+    } else {
+      available.push(s); availableCount += 1;
+    }
+  });
+
+  return { booked, available, bookedCount, availableCount, total: BASE.length };
+}
+
+// Format count — show .5 as fraction
+function fmtCount(n){ return n % 1 === 0.5 ? (n - 0.5) + '½' : n.toString(); }
+
+function sendStallStatusWA(){
+  const { booked, available, bookedCount, availableCount } = getStallStatus();
 
   let msg = '🎀 *Rakhi Pop-Up 2026 — Stall Status*\n';
   msg += '📅 19–20 July 2026 · Hotel Swan, Kota\n\n';
-  msg += '📊 *' + booked.length + ' Booked · ' + available.length + ' Available*\n\n';
+  msg += '📊 *' + fmtCount(bookedCount) + ' Booked · ' + fmtCount(availableCount) + ' Available*\n\n';
 
-  msg += '✅ *Booked Stalls (' + booked.length + '):*\n';
-  // Group into rows of 6 for readability
-  for(let i=0; i<booked.length; i+=6){
+  msg += '✅ *Booked (' + fmtCount(bookedCount) + '):*\n';
+  for(let i=0; i<booked.length; i+=6)
     msg += booked.slice(i,i+6).join('  ') + '\n';
-  }
 
-  msg += '\n🔲 *Available Stalls (' + available.length + '):*\n';
-  for(let i=0; i<available.length; i+=6){
+  msg += '\n🔲 *Available (' + fmtCount(availableCount) + '):*\n';
+  for(let i=0; i<available.length; i+=6)
     msg += available.slice(i,i+6).join('  ') + '\n';
-  }
 
   msg += '\n_Contact us to book your stall!_';
   window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
@@ -1178,32 +1201,66 @@ function shareFloorPlanWA(){
     ctx.closePath();
   }
 
+  // Build split stall set
+  const splitStalls = new Set();
+  exhibitors.forEach(e=>{ if(e.stall&&/[AB]$/i.test(e.stall)) splitStalls.add(e.stall.toUpperCase().replace(/[AB]$/,'')); });
+
   STALLS.forEach(s=>{
-    const booked=!!exMap[s.id];
-    const ex=exMap[s.id];
     const x=s.x*S, y=s.y*S, w=s.w*S, h=s.h*S, r=6;
+    const light=s.fill==='#d4cec4'||s.fill==='#F5C518';
 
-    rrect(x,y,w,h,r);
-
-    if(booked){
-      // BOOKED — faded, no brand name, just stall number
-      ctx.globalAlpha=0.25; ctx.fillStyle=s.fill; ctx.fill(); ctx.globalAlpha=1;
-      ctx.strokeStyle='rgba(160,160,160,0.4)'; ctx.lineWidth=1; ctx.stroke();
-      ctx.fillStyle='rgba(80,80,80,0.65)'; ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.font='bold '+Math.round(Math.min(20,h*0.35))+'px sans-serif';
-      ctx.fillText(s.id, x+w/2, y+h/2);
+    if(splitStalls.has(s.id)){
+      // SPLIT STALL — draw two vertical halves
+      const hw = Math.floor(w/2);
+      const halves = [{id:s.id+'A', x:x, w:hw}, {id:s.id+'B', x:x+hw, w:w-hw}];
+      halves.forEach(half=>{
+        const bookedH = !!exMap[half.id];
+        // Draw half rect (no rounding on inner edge)
+        ctx.beginPath(); ctx.rect(half.x, y, half.w, h); ctx.closePath();
+        if(bookedH){
+          ctx.globalAlpha=0.25; ctx.fillStyle=s.fill; ctx.fill(); ctx.globalAlpha=1;
+          ctx.strokeStyle='rgba(160,160,160,0.3)'; ctx.lineWidth=0.5; ctx.stroke();
+          ctx.fillStyle='rgba(80,80,80,0.65)'; ctx.textAlign='center'; ctx.textBaseline='middle';
+          ctx.font='bold '+Math.round(Math.min(14,half.w*0.28))+'px sans-serif';
+          ctx.fillText(half.id, half.x+half.w/2, y+h/2);
+        } else {
+          ctx.fillStyle=s.fill; ctx.fill();
+          ctx.strokeStyle='rgba(0,0,0,0.12)'; ctx.lineWidth=0.5; ctx.stroke();
+          const tc=light?'#333':'#fff';
+          ctx.fillStyle=tc; ctx.textAlign='center'; ctx.textBaseline='middle';
+          ctx.font='bold '+Math.round(Math.min(14,half.w*0.28))+'px sans-serif';
+          ctx.fillText(half.id, half.x+half.w/2, y+(h>55?h*0.32:h/2));
+          if(h>50){
+            ctx.font='bold '+Math.round(Math.min(9,half.w*0.18))+'px sans-serif';
+            ctx.fillText('AVAIL', half.x+half.w/2, y+h*0.70);
+          }
+        }
+      });
+      // Dashed divider
+      ctx.setLineDash([4,3]);
+      ctx.strokeStyle='rgba(255,255,255,0.7)'; ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.moveTo(x+Math.floor(w/2),y); ctx.lineTo(x+Math.floor(w/2),y+h); ctx.stroke();
+      ctx.setLineDash([]);
     } else {
-      // AVAILABLE — full bright colour, stall number + AVAILABLE label
-      ctx.fillStyle=s.fill; ctx.fill();
-      ctx.strokeStyle='rgba(0,0,0,0.15)'; ctx.lineWidth=1.5; ctx.stroke();
-      const light=s.fill==='#d4cec4'||s.fill==='#F5C518';
-      const tc=light?'#333':'#fff';
-      ctx.fillStyle=tc; ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.font='bold '+Math.round(Math.min(20,h*0.32))+'px sans-serif';
-      ctx.fillText(s.id, x+w/2, y+(h>55?h*0.32:h/2));
-      if(h>50){
-        ctx.font='bold '+Math.round(Math.min(13,h*0.22))+'px sans-serif';
-        ctx.fillText('AVAILABLE', x+w/2, y+h*0.70);
+      const booked=!!exMap[s.id];
+      rrect(x,y,w,h,r);
+      if(booked){
+        ctx.globalAlpha=0.25; ctx.fillStyle=s.fill; ctx.fill(); ctx.globalAlpha=1;
+        ctx.strokeStyle='rgba(160,160,160,0.4)'; ctx.lineWidth=1; ctx.stroke();
+        ctx.fillStyle='rgba(80,80,80,0.65)'; ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.font='bold '+Math.round(Math.min(20,h*0.35))+'px sans-serif';
+        ctx.fillText(s.id, x+w/2, y+h/2);
+      } else {
+        ctx.fillStyle=s.fill; ctx.fill();
+        ctx.strokeStyle='rgba(0,0,0,0.15)'; ctx.lineWidth=1.5; ctx.stroke();
+        const tc=light?'#333':'#fff';
+        ctx.fillStyle=tc; ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.font='bold '+Math.round(Math.min(20,h*0.32))+'px sans-serif';
+        ctx.fillText(s.id, x+w/2, y+(h>55?h*0.32:h/2));
+        if(h>50){
+          ctx.font='bold '+Math.round(Math.min(13,h*0.22))+'px sans-serif';
+          ctx.fillText('AVAILABLE', x+w/2, y+h*0.70);
+        }
       }
     }
   });
@@ -1240,12 +1297,11 @@ function shareFloorPlanWA(){
 
   // WhatsApp message
   setTimeout(()=>{
-    const bk=exhibitors.filter(e=>e.stall).length;
-    const av=STALLS.length-bk;
+    const { bookedCount, availableCount } = getStallStatus();
     const msg='🎀 *Rakhi Pop-Up 2026 — Stall Availability*\n'
       +'📅 19–20 July 2026 · Hotel Swan, Kota\n\n'
-      +'✅ *'+bk+' Stalls Booked*\n'
-      +'🔲 *'+av+' Stalls Available*\n\n'
+      +'✅ *'+fmtCount(bookedCount)+' Stalls Booked*\n'
+      +'🔲 *'+fmtCount(availableCount)+' Stalls Available*\n\n'
       +'_(Attaching floor plan — booked stalls shown in full colour, available stalls faded with "AVAILABLE" label)_\n\n'
       +'Contact us to book your stall! 🎀';
     window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
@@ -1301,10 +1357,10 @@ function renderFloor(){
   });
 
   const all=['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31','32','33','34','35','TS1','TS2','TS3','TS4','TS5','TS6','TS7','FS1','FS2','FS3'];
-  const booked=all.filter(s=>exMap[s]||exMap[s+'A']||exMap[s+'B']).length;
+  const { bookedCount, availableCount } = getStallStatus();
   document.getElementById('floor-stats').innerHTML=`
-    <div class="card" style="padding:6px 12px;font-size:12px;margin:0"><b>${booked}</b> / ${all.length} stalls booked</div>
-    <div class="card" style="padding:6px 12px;font-size:12px;margin:0"><b>${all.length-booked}</b> available</div>`;
+    <div class="card" style="padding:6px 12px;font-size:12px;margin:0"><b>${fmtCount(bookedCount)}</b> / ${all.length} stalls booked</div>
+    <div class="card" style="padding:6px 12px;font-size:12px;margin:0"><b>${fmtCount(availableCount)}</b> available</div>`;
 
   all.forEach(s=>{
     const g = document.getElementById('fr'+s)?.parentElement; // the <g> element
