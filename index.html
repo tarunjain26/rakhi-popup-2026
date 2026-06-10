@@ -748,6 +748,7 @@ body.admin-mode .admin-only{display:flex !important}
 <div id="toast" class="toast"></div>
 
 <script>
+const MODE_ICON = {'Cash':'💵','UPI':'📱','Bank Transfer':'🏦','Cheque':'📋','Card':'💳'};
 const CATS={'Jewellery':'💎','Clothing & Apparel':'👗','Rakhi & Gifting':'🎁','Home Decor':'🏡','Food & Mithai':'🍡','Beauty & Wellness':'💄','Accessories':'👜','Art & Prints':'🖼','Kids & Toys':'🧸','Plants & Nature':'🌿','Other':'✨'};
 const COST_ICONS={'Venue':'🏛','Decoration':'🎀','Marketing':'📣','Logistics':'🚚','Staffing':'👥','Food & Beverage':'🍽','Technology':'💻','Miscellaneous':'📦','Revenue':'💰'};
 
@@ -1593,8 +1594,10 @@ function renderCosts(){
     const balance = (+e.fee||0) - totalPaid;
     const exIdx = exhibitors.indexOf(e);
     const payDetail = payments.length
-      ? payments.map(p=>'<div style="font-size:10px;color:var(--muted)">'+(MODE_ICON[p.mode]||'💰')+' ₹'+fmt(+p.amt)+(p.date?' · '+p.date:'')+(p.ref?' · '+p.ref:'')+'</div>').join('')
-      : '<div style="font-size:10px;color:var(--muted)">—</div>';
+      ? payments.map(p=>'<div style="font-size:10px;color:var(--muted)">'+(MODE_ICON[p.mode]||'💰')+' ₹'+fmt(+p.amt)+(p.date?' · '+p.date:'')+(p.ref?' · <b>'+p.ref+'</b>':'')+'</div>').join('')
+      : (+e.adv||0) > 0
+        ? '<div style="font-size:10px;color:var(--muted)">'+(MODE_ICON[e.mode]||'💰')+' ₹'+fmt(+e.adv)+(e.mode?' · '+e.mode:'')+(e.ref?' · <b>'+e.ref+'</b>':'')+'</div>'
+        : '<div style="font-size:10px;color:var(--muted)">—</div>';
     return `<tr>
       <td style="padding:8px 6px;font-weight:500">${e.stall}</td>
       <td style="padding:8px 6px">${e.name}</td>
@@ -1957,8 +1960,6 @@ function sendSpWA(i){
 
 /* ── PAYMENT HISTORY ── */
 let qpayIdx = null;
-
-const MODE_ICON = {'Cash':'💵','UPI':'📱','Bank Transfer':'🏦','Cheque':'📋','Card':'💳'};
 
 function openQuickPay(exIdx){
   qpayIdx = exIdx;
