@@ -1288,41 +1288,170 @@ function downloadFloorPlanJPG(){
 
 
 function renderFloor(){
-  const exMap={};exhibitors.forEach(e=>{if(e.stall)exMap[e.stall.toUpperCase()]=e;});
+  const exMap={};
+  exhibitors.forEach(e=>{ if(e.stall) exMap[e.stall.toUpperCase()]=e; });
+
+  // Detect which base stalls are split (have A or B entries)
+  const splitStalls = new Set();
+  exhibitors.forEach(e=>{
+    if(e.stall && /[AB]$/i.test(e.stall)){
+      splitStalls.add(e.stall.toUpperCase().replace(/[AB]$/,''));
+    }
+  });
+
   const all=['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31','32','33','34','35','TS1','TS2','TS3','TS4','TS5','TS6','TS7','FS1','FS2','FS3'];
-  const booked=all.filter(s=>exMap[s]).length;
+  const booked=all.filter(s=>exMap[s]||exMap[s+'A']||exMap[s+'B']).length;
   document.getElementById('floor-stats').innerHTML=`
     <div class="card" style="padding:6px 12px;font-size:12px;margin:0"><b>${booked}</b> / ${all.length} stalls booked</div>
-    <div class="card" style="padding:6px 12px;font-size:12px;margin:0;color:var(--g3)"><b>${all.length-booked}</b> available</div>`;
+    <div class="card" style="padding:6px 12px;font-size:12px;margin:0"><b>${all.length-booked}</b> available</div>`;
+
   all.forEach(s=>{
-    const r=document.getElementById('fr'+s), n=document.getElementById('fn'+s);
-    if(!r)return;
-    const ex=exMap[s];
-    r.setAttribute('opacity',ex?'1':'0.42');
-    if(n){
-      if(ex){
-        const name = ex.name;
-        const x = n.getAttribute('x');
-        if(name.length <= 10){
-          // Short name — single line, pushed down a bit
-          n.innerHTML = `<tspan x="${x}" dy="0">${name}</tspan>`;
-        } else {
-          // Long name — split into two lines
-          const mid = name.lastIndexOf(' ', 10);
-          const split = mid > 0 ? mid : 10;
-          const line1 = name.slice(0, split).trim();
-          const line2 = name.slice(split).trim();
-          n.innerHTML = `<tspan x="${x}" dy="0">${line1}</tspan><tspan x="${x}" dy="14">${line2.length>10?line2.slice(0,9)+'…':line2}</tspan>`;
-        }
+    const g = document.getElementById('fr'+s)?.parentElement; // the <g> element
+    const r = document.getElementById('fr'+s);
+    const n = document.getElementById('fn'+s);
+    if(!r) return;
+
+    if(splitStalls.has(s)){
+      // ── SPLIT STALL — render two halves ──
+      const exA = exMap[s+'A'], exB = exMap[s+'B'];
+      const rx   = +r.getAttribute('x'), ry = +r.getAttribute('y');
+      const rw   = +r.getAttribute('width'), rh = +r.getAttribute('height');
+      const fill = r.getAttribute('fill');
+      const sc   = stallColorByFill(fill);
+
+      // Determine split direction: tall stalls (h > w) split top/bottom, wide split left/right
+      const splitV = rh >= rw; // vertical split = top/bottom halves
+      const ah = splitV ? Math.floor(rh/2) : rh;
+      const aw = splitV ? rw : Math.floor(rw/2);
+      const bx = splitV ? rx : rx + aw;
+      const by = splitV ? ry + ah : ry;
+
+      // Remove old split overlays if any, keep original rect hidden
+      r.style.display = 'none';
+      if(n) n.style.display = 'none';
+      const oldSplit = g.querySelectorAll('.split-half');
+      oldSplit.forEach(el=>el.remove());
+
+      // Draw half A
+      const gA = makeSplitHalf(s+'A', rx, ry, aw, ah, fill, exA, sc);
+      const gB = makeSplitHalf(s+'B', bx, by, aw, splitV ? rh-ah : rh, fill, exB, sc);
+      g.appendChild(gA);
+      g.appendChild(gB);
+
+      // Draw divider line
+      const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+      line.setAttribute('class','split-half');
+      if(splitV){
+        line.setAttribute('x1',rx); line.setAttribute('y1',ry+ah);
+        line.setAttribute('x2',rx+rw); line.setAttribute('y2',ry+ah);
       } else {
-        n.textContent = '';
+        line.setAttribute('x1',rx+aw); line.setAttribute('y1',ry);
+        line.setAttribute('x2',rx+aw); line.setAttribute('y2',ry+rh);
+      }
+      line.setAttribute('stroke','rgba(255,255,255,0.6)');
+      line.setAttribute('stroke-width','2');
+      line.setAttribute('stroke-dasharray','4,3');
+      g.appendChild(line);
+
+    } else {
+      // ── NORMAL STALL ──
+      // Remove any split overlays from a previously split stall
+      const oldSplit = g ? g.querySelectorAll('.split-half') : [];
+      oldSplit.forEach(el=>el.remove());
+      r.style.display = '';
+      if(n) n.style.display = '';
+
+      const ex = exMap[s];
+      r.setAttribute('opacity', ex ? '1' : '0.42');
+      if(n){
+        if(ex){
+          const name = ex.name;
+          const x = n.getAttribute('x');
+          if(name.length <= 10){
+            n.innerHTML = `<tspan x="${x}" dy="0">${name}</tspan>`;
+          } else {
+            const mid = name.lastIndexOf(' ', 10);
+            const split = mid > 0 ? mid : 10;
+            const line1 = name.slice(0, split).trim();
+            const line2 = name.slice(split).trim();
+            n.innerHTML = `<tspan x="${x}" dy="0">${line1}</tspan><tspan x="${x}" dy="14">${line2.length>10?line2.slice(0,9)+'…':line2}</tspan>`;
+          }
+        } else {
+          n.textContent = '';
+        }
       }
     }
   });
 }
 
+function stallColorByFill(fill){
+  if(fill==='#4CAF50') return {light:false};
+  if(fill==='#5B9BD5') return {light:false};
+  if(fill==='#E8748A') return {light:false};
+  if(fill==='#F5C518') return {light:true};
+  if(fill==='#ede8de') return {light:true};
+  return {light:false};
+}
+
+function makeSplitHalf(stallId, x, y, w, h, fill, ex, sc){
+  const ns = 'http://www.w3.org/2000/svg';
+  const g  = document.createElementNS(ns,'g');
+  g.setAttribute('class','split-half fs');
+  g.setAttribute('onclick',`floorClick('${stallId}')`);
+  g.style.cursor = 'pointer';
+
+  const rect = document.createElementNS(ns,'rect');
+  rect.setAttribute('x',x); rect.setAttribute('y',y);
+  rect.setAttribute('width',w); rect.setAttribute('height',h);
+  rect.setAttribute('fill', ex ? fill : fill);
+  rect.setAttribute('opacity', ex ? '1' : '0.38');
+  rect.setAttribute('rx','3');
+  g.appendChild(rect);
+
+  const tc = sc.light ? '#333' : '#fff';
+  const cx = x + w/2;
+
+  // Stall label (A or B part)
+  const label = document.createElementNS(ns,'text');
+  label.setAttribute('x', cx);
+  label.setAttribute('y', y + h*0.32);
+  label.setAttribute('text-anchor','middle');
+  label.setAttribute('dominant-baseline','middle');
+  label.setAttribute('fill', ex ? tc : 'rgba(80,80,80,0.7)');
+  label.setAttribute('font-size', Math.min(11, h*0.22));
+  label.setAttribute('font-weight','700');
+  label.setAttribute('font-family','sans-serif');
+  label.setAttribute('pointer-events','none');
+  label.textContent = stallId; // e.g. "5A"
+  g.appendChild(label);
+
+  // Name or Available
+  const nameEl = document.createElementNS(ns,'text');
+  nameEl.setAttribute('x', cx);
+  nameEl.setAttribute('y', y + h*0.65);
+  nameEl.setAttribute('text-anchor','middle');
+  nameEl.setAttribute('dominant-baseline','middle');
+  nameEl.setAttribute('font-family','sans-serif');
+  nameEl.setAttribute('pointer-events','none');
+  if(ex){
+    nameEl.setAttribute('fill', tc);
+    nameEl.setAttribute('font-size', Math.min(10, h*0.18));
+    nameEl.setAttribute('font-weight','600');
+    const name = ex.name;
+    nameEl.textContent = name.length > 9 ? name.slice(0,8)+'…' : name;
+  } else {
+    nameEl.setAttribute('fill','rgba(60,120,60,0.8)');
+    nameEl.setAttribute('font-size', Math.min(8, h*0.15));
+    nameEl.setAttribute('font-weight','500');
+    nameEl.textContent = h > 35 ? 'AVAILABLE' : '…';
+  }
+  g.appendChild(nameEl);
+
+  return g;
+}
+
 function floorClick(id){
-  const exMap={};exhibitors.forEach(e=>{if(e.stall)exMap[e.stall.toUpperCase()]=e;});
+  const exMap={};exhibitors.forEach(e=>{ if(e.stall) exMap[e.stall.toUpperCase()]=e; });
   const ex=exMap[id];
   document.getElementById('fm-title').textContent='Stall '+id;
   let body='';
@@ -1331,11 +1460,14 @@ function floorClick(id){
     body=`<span style="color:var(--text);font-weight:500;font-size:15px">${ex.name}</span><br>
     <b>Category:</b> ${ex.cat||'—'}<br><b>City:</b> ${ex.city||'—'}`;
     if(isAdm){
-      body+=`<br><b>Payment:</b> <span style="font-weight:500;color:${ex.pay==='paid'?'#3B6D11':ex.pay==='partial'?'#8A5700':'#A32D2D'}">${ex.pay==='paid'?'✓ Paid':ex.pay==='partial'?'◑ Partial':'○ Pending'}</span>`;
-      if(ex.adv) body+=`<br><b>Advance:</b> ₹${Number(ex.adv).toLocaleString('en-IN')}`;
+      const paid=paidAmt(ex);
+      body+=`<br><b>Status:</b> <span style="font-weight:500;color:${ex.pay==='paid'?'#3B6D11':ex.pay==='partial'?'#8A5700':'#A32D2D'}">${ex.pay==='paid'?'✓ Paid':ex.pay==='partial'?'◑ Partial':'○ Pending'}</span>`;
+      if(paid) body+=`<br><b>Paid:</b> ₹${paid.toLocaleString('en-IN')}`;
       if(ex.req) body+=`<br><b>Needs:</b> ${ex.req}`;
     }
-  }else{ body='<span style="color:var(--muted)">Available — not yet assigned.</span>'; }
+  } else {
+    body='<span style="color:var(--muted)">Available — not yet assigned.</span>';
+  }
   document.getElementById('fm-body').innerHTML=body;
   const fi=exhibitors.findIndex(e=>e.stall&&e.stall.toUpperCase()===id);
   document.getElementById('fm-footer').innerHTML=`<button class="btn btn-sm" onclick="closeModal('floor-modal')">Close</button>`+
