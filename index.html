@@ -1211,7 +1211,7 @@ function shareFloorPlanWA(){
 
     if(splitStalls.has(s.id)){
       // SPLIT STALL — tall stalls split top/bottom, wide stalls split left/right
-      const splitV = h > w; // true = horizontal divider (stack top/bottom)
+      const splitV = w > h; // true = horizontal divider (stack top/bottom)
       const hw = splitV ? w : Math.floor(w/2);
       const hh = splitV ? Math.floor(h/2) : h;
       const halves = splitV
@@ -1385,7 +1385,7 @@ function renderFloor(){
 
       // Tall/narrow stalls (left & right walls) split horizontally (top/bottom)
       // Wide stalls (top wall, islands) split vertically (left/right)
-      const splitV = rh > rw; // true = horizontal divider, halves stacked top/bottom
+      const splitV = rw > rh; // true = horizontal divider, halves stacked top/bottom
       const aw = splitV ? rw : Math.floor(rw/2);
       const ah = splitV ? Math.floor(rh/2) : rh;
       const bx = splitV ? rx : rx + aw;
