@@ -1210,36 +1210,43 @@ function shareFloorPlanWA(){
     const light=s.fill==='#d4cec4'||s.fill==='#F5C518';
 
     if(splitStalls.has(s.id)){
-      // SPLIT STALL — draw two vertical halves
-      const hw = Math.floor(w/2);
-      const halves = [{id:s.id+'A', x:x, w:hw}, {id:s.id+'B', x:x+hw, w:w-hw}];
+      // SPLIT STALL — tall stalls split top/bottom, wide stalls split left/right
+      const splitV = h > w; // true = horizontal divider (stack top/bottom)
+      const hw = splitV ? w : Math.floor(w/2);
+      const hh = splitV ? Math.floor(h/2) : h;
+      const halves = splitV
+        ? [{id:s.id+'A', x:x, y:y, w:w, h:hh}, {id:s.id+'B', x:x, y:y+hh, w:w, h:h-hh}]
+        : [{id:s.id+'A', x:x, y:y, w:hw, h:h}, {id:s.id+'B', x:x+hw, y:y, w:w-hw, h:h}];
       halves.forEach(half=>{
         const bookedH = !!exMap[half.id];
-        // Draw half rect (no rounding on inner edge)
-        ctx.beginPath(); ctx.rect(half.x, y, half.w, h); ctx.closePath();
+        const hcx=half.x+half.w/2, hcy=half.y+half.h/2;
+        ctx.beginPath(); ctx.rect(half.x, half.y, half.w, half.h); ctx.closePath();
         if(bookedH){
           ctx.globalAlpha=0.25; ctx.fillStyle=s.fill; ctx.fill(); ctx.globalAlpha=1;
           ctx.strokeStyle='rgba(160,160,160,0.3)'; ctx.lineWidth=0.5; ctx.stroke();
           ctx.fillStyle='rgba(80,80,80,0.65)'; ctx.textAlign='center'; ctx.textBaseline='middle';
-          ctx.font='bold '+Math.round(Math.min(14,half.w*0.28))+'px sans-serif';
-          ctx.fillText(half.id, half.x+half.w/2, y+h/2);
+          ctx.font='bold '+Math.round(Math.min(14,Math.min(half.w,half.h)*0.3))+'px sans-serif';
+          ctx.fillText(half.id, hcx, hcy);
         } else {
           ctx.fillStyle=s.fill; ctx.fill();
           ctx.strokeStyle='rgba(0,0,0,0.12)'; ctx.lineWidth=0.5; ctx.stroke();
           const tc=light?'#333':'#fff';
           ctx.fillStyle=tc; ctx.textAlign='center'; ctx.textBaseline='middle';
-          ctx.font='bold '+Math.round(Math.min(14,half.w*0.28))+'px sans-serif';
-          ctx.fillText(half.id, half.x+half.w/2, y+(h>55?h*0.32:h/2));
-          if(h>50){
-            ctx.font='bold '+Math.round(Math.min(9,half.w*0.18))+'px sans-serif';
-            ctx.fillText('AVAIL', half.x+half.w/2, y+h*0.70);
+          ctx.font='bold '+Math.round(Math.min(14,Math.min(half.w,half.h)*0.3))+'px sans-serif';
+          ctx.fillText(half.id, hcx, half.y+(half.h>40?half.h*0.35:half.h/2));
+          if(half.h>30){
+            ctx.font='bold '+Math.round(Math.min(9,half.w*0.16))+'px sans-serif';
+            ctx.fillText('AVAIL', hcx, half.y+half.h*0.68);
           }
         }
       });
       // Dashed divider
       ctx.setLineDash([4,3]);
       ctx.strokeStyle='rgba(255,255,255,0.7)'; ctx.lineWidth=1.5;
-      ctx.beginPath(); ctx.moveTo(x+Math.floor(w/2),y); ctx.lineTo(x+Math.floor(w/2),y+h); ctx.stroke();
+      ctx.beginPath();
+      if(splitV){ ctx.moveTo(x,y+hh); ctx.lineTo(x+w,y+hh); }
+      else { ctx.moveTo(x+hw,y); ctx.lineTo(x+hw,y+h); }
+      ctx.stroke();
       ctx.setLineDash([]);
     } else {
       const booked=!!exMap[s.id];
@@ -1376,12 +1383,13 @@ function renderFloor(){
       const fill = r.getAttribute('fill');
       const sc   = stallColorByFill(fill);
 
-      // Always split left/right (vertical divider)
-      const splitV = false;
-      const aw = Math.floor(rw/2);
-      const ah = rh;
-      const bx = rx + aw;
-      const by = ry;
+      // Tall/narrow stalls (left & right walls) split horizontally (top/bottom)
+      // Wide stalls (top wall, islands) split vertically (left/right)
+      const splitV = rh > rw; // true = horizontal divider, halves stacked top/bottom
+      const aw = splitV ? rw : Math.floor(rw/2);
+      const ah = splitV ? Math.floor(rh/2) : rh;
+      const bx = splitV ? rx : rx + aw;
+      const by = splitV ? ry + ah : ry;
 
       // Remove old split overlays if any, keep original rect hidden
       r.style.display = 'none';
@@ -1390,16 +1398,23 @@ function renderFloor(){
       oldSplit.forEach(el=>el.remove());
 
       // Draw half A
-      const gA = makeSplitHalf(s+'A', rx, ry, aw, ah, fill, exA, sc);
-      const gB = makeSplitHalf(s+'B', bx, by, rw-aw, rh, fill, exB, sc);
+      const gA = makeSplitHalf(s+'A', rx, ry, aw, ah, fill, exA, sc, splitV);
+      const gB = makeSplitHalf(s+'B', bx, by, splitV?rw:rw-aw, splitV?rh-ah:rh, fill, exB, sc, splitV);
       g.appendChild(gA);
       g.appendChild(gB);
 
-      // Vertical divider line
+      // Divider line
       const line = document.createElementNS('http://www.w3.org/2000/svg','line');
       line.setAttribute('class','split-half');
-      line.setAttribute('x1', rx+aw); line.setAttribute('y1', ry);
-      line.setAttribute('x2', rx+aw); line.setAttribute('y2', ry+rh);
+      if(splitV){
+        // horizontal divider
+        line.setAttribute('x1', rx); line.setAttribute('y1', ry+ah);
+        line.setAttribute('x2', rx+rw); line.setAttribute('y2', ry+ah);
+      } else {
+        // vertical divider
+        line.setAttribute('x1', rx+aw); line.setAttribute('y1', ry);
+        line.setAttribute('x2', rx+aw); line.setAttribute('y2', ry+rh);
+      }
       line.setAttribute('stroke','rgba(255,255,255,0.7)');
       line.setAttribute('stroke-width','2');
       line.setAttribute('stroke-dasharray','4,3');
@@ -1445,7 +1460,7 @@ function stallColorByFill(fill){
   return {light:false};
 }
 
-function makeSplitHalf(stallId, x, y, w, h, fill, ex, sc){
+function makeSplitHalf(stallId, x, y, w, h, fill, ex, sc, splitV){
   const ns = 'http://www.w3.org/2000/svg';
   const g  = document.createElementNS(ns,'g');
   g.setAttribute('class','split-half fs');
@@ -1463,7 +1478,7 @@ function makeSplitHalf(stallId, x, y, w, h, fill, ex, sc){
   const tc  = sc.light ? '#333' : '#fff';
   const cx  = x + w/2;
   const cy  = y + h/2;
-  const narrow = w < 55; // narrow half — use vertical text for name
+  const narrow = !splitV && w < 55; // narrow half — only for left/right splits with thin width
 
   // Stall ID label — always horizontal, at top
   const label = document.createElementNS(ns,'text');
