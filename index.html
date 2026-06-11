@@ -1377,6 +1377,7 @@ function renderFloor(){
 
     if(splitStalls.has(s)){
       // ── SPLIT STALL — render two halves ──
+      if(g) g.removeAttribute('onclick');
       const exA = exMap[s+'A'], exB = exMap[s+'B'];
       const rx   = +r.getAttribute('x'), ry = +r.getAttribute('y');
       const rw   = +r.getAttribute('width'), rh = +r.getAttribute('height');
@@ -1427,6 +1428,7 @@ function renderFloor(){
       oldSplit.forEach(el=>el.remove());
       r.style.display = '';
       if(n) n.style.display = '';
+      if(g && !g.hasAttribute('onclick')) g.setAttribute('onclick', "floorClick('"+s+"')");
 
       const ex = exMap[s];
       r.setAttribute('opacity', ex ? '1' : '0.42');
@@ -1464,8 +1466,8 @@ function makeSplitHalf(stallId, x, y, w, h, fill, ex, sc, splitV){
   const ns = 'http://www.w3.org/2000/svg';
   const g  = document.createElementNS(ns,'g');
   g.setAttribute('class','split-half fs');
-  g.setAttribute('onclick',`floorClick('${stallId}')`);
   g.style.cursor = 'pointer';
+  g.setAttribute('onclick', "event.stopPropagation();floorClick('"+stallId+"')");
 
   const rect = document.createElementNS(ns,'rect');
   rect.setAttribute('x',x); rect.setAttribute('y',y);
