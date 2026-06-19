@@ -450,23 +450,10 @@ body.admin-mode .admin-only{display:flex !important}
       </div>
       <div>
         <label>Stall Number *</label>
-        <input id="m-stall" placeholder="e.g. 1, TS1, FS1" style="text-transform:uppercase" oninput="updateSplitPreview()">
-        <div style="display:flex;align-items:center;gap:8px;margin-top:8px;cursor:pointer" onclick="document.getElementById('m-split').checked=!document.getElementById('m-split').checked;updateSplitPreview()">
-          <div id="m-split-box" style="width:18px;height:18px;border:2px solid var(--y3);border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:#fff;transition:background .15s">
-            <svg id="m-split-tick" width="12" height="12" viewBox="0 0 12 12" style="display:none"><polyline points="2,6 5,9 10,3" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
-          </div>
-          <input type="checkbox" id="m-split" onchange="updateSplitPreview()" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none">
-          <span style="font-size:13px;color:var(--text);user-select:none">Split into half stalls (A &amp; B)</span>
+        <input id="m-stall" placeholder="e.g. 1, TS1, FS1" style="text-transform:uppercase">
+        <div style="margin-top:8px">
+          <button type="button" class="btn btn-sm" style="font-size:12px" onclick="openSplitFromExModal()">⊟ This is a split / half stall instead</button>
         </div>
-        <div id="m-split-type-wrap" style="display:none;margin-top:8px">
-          <label style="font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)">Split Direction</label>
-          <select id="m-split-type" onchange="updateSplitPreview()">
-            <option value="v">Vertical — left / right (A | B)</option>
-            <option value="h">Horizontal — top / bottom (A over B)</option>
-            <option value="d">Diagonal — corner split (↙ A / B)</option>
-          </select>
-        </div>
-        <div id="m-split-preview" style="display:none;font-size:12px;color:var(--y5);background:var(--y1);border-radius:6px;padding:5px 10px;margin-top:5px"></div>
       </div>
     </div>
     <div><label>WhatsApp Number *</label>
@@ -508,6 +495,78 @@ body.admin-mode .admin-only{display:flex !important}
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.126.558 4.122 1.532 5.856L0 24l6.335-1.514A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.93 0-3.74-.516-5.295-1.415l-.38-.225-3.76.899.937-3.653-.247-.397A9.955 9.955 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
         Save & Send WhatsApp
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SPLIT STALL MODAL — manage both halves of a split stall together ═══ -->
+<div id="split-modal" class="modal-overlay" onclick="closeMBg(event,'split-modal')">
+  <div class="modal" style="max-width:640px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
+      <h3 id="split-modal-title" style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--y5);margin:0">Split Stall</h3>
+      <button onclick="closeModal('split-modal')" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted)">×</button>
+    </div>
+
+    <!-- Split direction (only editable for new splits) -->
+    <div id="split-dir-wrap" style="margin-bottom:1rem">
+      <label style="font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)">Split Direction</label>
+      <select id="split-dir">
+        <option value="v">Vertical — left / right (A | B)</option>
+        <option value="h">Horizontal — top / bottom (A over B)</option>
+        <option value="d">Diagonal — corner split (↙ A / B)</option>
+      </select>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+      <!-- HALF A -->
+      <div style="border:1.5px solid var(--border);border-radius:10px;padding:.85rem;background:var(--light)">
+        <div style="font-size:13px;font-weight:700;color:var(--y5);margin-bottom:.6rem" id="split-a-label">Stall —A</div>
+        <label style="font-size:11px">Brand Name</label>
+        <input id="sa-name" placeholder="Leave blank = vacant">
+        <label style="font-size:11px;margin-top:6px">Category</label>
+        <select id="sa-cat"><option value="">Select category</option></select>
+        <label style="font-size:11px;margin-top:6px">City</label>
+        <input id="sa-city" placeholder="e.g. Kota">
+        <label style="font-size:11px;margin-top:6px">WhatsApp Number</label>
+        <input id="sa-wa" type="tel" placeholder="10-digit number">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px">
+          <div><label style="font-size:11px">Fee (₹)</label><input id="sa-fee" type="number" placeholder="0"></div>
+          <div><label style="font-size:11px">Paid (₹)</label><input id="sa-adv" type="number" placeholder="0"></div>
+        </div>
+        <label style="font-size:11px;margin-top:6px">Payment Status</label>
+        <select id="sa-pay"><option value="pending">Pending</option><option value="partial">Partial</option><option value="paid">Paid</option></select>
+        <label style="font-size:11px;margin-top:6px">Requirements</label>
+        <input id="sa-req" placeholder="Power, table, etc.">
+      </div>
+      <!-- HALF B -->
+      <div style="border:1.5px solid var(--border);border-radius:10px;padding:.85rem;background:var(--light)">
+        <div style="font-size:13px;font-weight:700;color:var(--y5);margin-bottom:.6rem" id="split-b-label">Stall —B</div>
+        <label style="font-size:11px">Brand Name</label>
+        <input id="sb-name" placeholder="Leave blank = vacant">
+        <label style="font-size:11px;margin-top:6px">Category</label>
+        <select id="sb-cat"><option value="">Select category</option></select>
+        <label style="font-size:11px;margin-top:6px">City</label>
+        <input id="sb-city" placeholder="e.g. Kota">
+        <label style="font-size:11px;margin-top:6px">WhatsApp Number</label>
+        <input id="sb-wa" type="tel" placeholder="10-digit number">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px">
+          <div><label style="font-size:11px">Fee (₹)</label><input id="sb-fee" type="number" placeholder="0"></div>
+          <div><label style="font-size:11px">Paid (₹)</label><input id="sb-adv" type="number" placeholder="0"></div>
+        </div>
+        <label style="font-size:11px;margin-top:6px">Payment Status</label>
+        <select id="sb-pay"><option value="pending">Pending</option><option value="partial">Partial</option><option value="paid">Paid</option></select>
+        <label style="font-size:11px;margin-top:6px">Requirements</label>
+        <input id="sb-req" placeholder="Power, table, etc.">
+      </div>
+    </div>
+
+    <div id="split-unsplit-wrap" style="margin-top:1rem;display:none">
+      <button class="btn btn-sm btn-danger" onclick="unsplitStall()">↩ Remove split — merge back into one stall</button>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-sm" onclick="closeModal('split-modal')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="saveSplitStall()">Save Both</button>
     </div>
   </div>
 </div>
@@ -908,29 +967,6 @@ function updatePayRef(){
 // Helper — returns total paid for an exhibitor, backward-compatible with old adv field
 function paidAmt(e){ return (e.payments&&e.payments.length) ? e.payments.reduce((s,p)=>s+(+p.amt||0),0) : (+e.adv||0); }
 
-function updateSplitPreview(){
-  const stall = (document.getElementById('m-stall').value||'').trim().toUpperCase();
-  const split = document.getElementById('m-split').checked;
-  const prev  = document.getElementById('m-split-preview');
-  const typeWrap = document.getElementById('m-split-type-wrap');
-  const splitType = document.getElementById('m-split-type').value;
-  // Sync visual checkbox
-  const box  = document.getElementById('m-split-box');
-  const tick = document.getElementById('m-split-tick');
-  if(box)  box.style.background  = split ? 'var(--y3)' : '#fff';
-  if(tick) tick.style.display    = split ? 'block' : 'none';
-  // Show/hide split type selector
-  typeWrap.style.display = split ? 'block' : 'none';
-  // Preview text
-  if(split && stall){
-    prev.style.display = 'block';
-    const dirLabel = splitType==='h' ? 'top/bottom' : splitType==='d' ? 'diagonal (corner-to-corner)' : 'left/right';
-    prev.textContent = '→ Will create: Stall ' + stall + 'A  and  Stall ' + stall + 'B  (' + dirLabel + ' split)';
-  } else {
-    prev.style.display = 'none';
-  }
-}
-
 function openExModal(idx=null){
   editExId=idx;
   document.getElementById('ex-modal-title').textContent=idx===null?'Add Exhibitor':'Edit Exhibitor';
@@ -939,60 +975,180 @@ function openExModal(idx=null){
   refreshCatDropdown();
   document.getElementById('m-cat').value=e.cat||'';
   document.getElementById('m-pay').value=e.pay||'pending';
-  // Split checkbox — only available when adding new exhibitor
-  const chk = document.getElementById('m-split');
-  chk.checked  = false;
-  chk.disabled = (idx !== null);
-  const box  = document.getElementById('m-split-box');
-  const tick = document.getElementById('m-split-tick');
-  const wrap = chk.parentElement;
-  if(box)  box.style.background = '#fff';
-  if(tick) tick.style.display   = 'none';
-  if(wrap) wrap.style.opacity   = (idx !== null) ? '0.35' : '1';
-  document.getElementById('m-split-type').value = 'v';
-  document.getElementById('m-split-type-wrap').style.display = 'none';
-  document.getElementById('m-split-preview').style.display = 'none';
   updatePayRef();
   openModal('ex-modal');
+}
+
+// Opens the dedicated Split Stall modal, pre-filling the base stall number
+// typed into the regular Add Exhibitor form (if any), then closes this modal.
+function openSplitFromExModal(){
+  const stallInput = (document.getElementById('m-stall').value||'').trim().toUpperCase();
+  const base = stallInput.replace(/[AB]$/,''); // strip stray A/B if user typed one
+  closeModal('ex-modal');
+  openSplitModal(base || null);
+}
+
+/* ── SPLIT STALL MODAL ── */
+let splitModalBase = null; // the base stall number currently being edited, e.g. "27"
+
+function fillCatSelect(selectId, current){
+  const cats = getCategories();
+  const sel = document.getElementById(selectId);
+  sel.innerHTML = '<option value="">Select category</option>' +
+    cats.map(c=>`<option${c===current?' selected':''}>${c}</option>`).join('');
+}
+
+// Open the split modal for a given base stall number.
+// If base is null, prompts for a stall number first via the floor plan flow.
+function openSplitModal(base){
+  if(!base){ toast('Please enter a stall number first.'); return; }
+  base = base.toUpperCase().replace(/[AB]$/,'');
+  splitModalBase = base;
+
+  const exA = exhibitors.find(e=>e.stall===base+'A');
+  const exB = exhibitors.find(e=>e.stall===base+'B');
+  const alreadySplit = !!(exA || exB);
+
+  document.getElementById('split-modal-title').textContent = 'Split Stall ' + base;
+  document.getElementById('split-a-label').textContent = 'Stall ' + base + 'A';
+  document.getElementById('split-b-label').textContent = 'Stall ' + base + 'B';
+
+  // Direction — locked (shown as text) if already split, editable if new
+  const dirSel = document.getElementById('split-dir');
+  const dirWrap = document.getElementById('split-dir-wrap');
+  if(alreadySplit){
+    const existingType = (exA&&exA.splitType) || (exB&&exB.splitType) || 'v';
+    dirSel.value = existingType;
+    dirSel.disabled = true;
+    dirWrap.style.opacity = '0.6';
+  } else {
+    dirSel.value = 'v';
+    dirSel.disabled = false;
+    dirWrap.style.opacity = '1';
+  }
+
+  // Fill category dropdowns
+  fillCatSelect('sa-cat', exA?exA.cat:'');
+  fillCatSelect('sb-cat', exB?exB.cat:'');
+
+  // Fill half A
+  document.getElementById('sa-name').value = exA?exA.name:'';
+  document.getElementById('sa-city').value = exA?exA.city:'';
+  document.getElementById('sa-wa').value   = exA?exA.wa:'';
+  document.getElementById('sa-fee').value  = exA?exA.fee:'';
+  document.getElementById('sa-adv').value  = exA?exA.adv:'';
+  document.getElementById('sa-pay').value  = exA?(exA.pay||'pending'):'pending';
+  document.getElementById('sa-req').value  = exA?exA.req:'';
+
+  // Fill half B
+  document.getElementById('sb-name').value = exB?exB.name:'';
+  document.getElementById('sb-city').value = exB?exB.city:'';
+  document.getElementById('sb-wa').value   = exB?exB.wa:'';
+  document.getElementById('sb-fee').value  = exB?exB.fee:'';
+  document.getElementById('sb-adv').value  = exB?exB.adv:'';
+  document.getElementById('sb-pay').value  = exB?(exB.pay||'pending'):'pending';
+  document.getElementById('sb-req').value  = exB?exB.req:'';
+
+  // Show "unsplit" option only if already split
+  document.getElementById('split-unsplit-wrap').style.display = alreadySplit ? 'block' : 'none';
+
+  openModal('split-modal');
+}
+
+async function saveSplitStall(){
+  const base = splitModalBase;
+  if(!base){ toast('No stall selected.'); return; }
+
+  const splitType = document.getElementById('split-dir').value;
+  const stallA = base+'A', stallB = base+'B';
+
+  const nameA = document.getElementById('sa-name').value.trim();
+  const nameB = document.getElementById('sb-name').value.trim();
+
+  const existingA = exhibitors.find(e=>e.stall===stallA);
+  const existingB = exhibitors.find(e=>e.stall===stallB);
+
+  // Build half A object — only create/update if a name is given; otherwise leave vacant
+  const buildHalf = (suffix, name)=>({
+    name,
+    city: document.getElementById('s'+suffix+'-city').value.trim(),
+    cat:  document.getElementById('s'+suffix+'-cat').value,
+    wa:   document.getElementById('s'+suffix+'-wa').value.trim(),
+    fee:  document.getElementById('s'+suffix+'-fee').value,
+    adv:  document.getElementById('s'+suffix+'-adv').value,
+    pay:  document.getElementById('s'+suffix+'-pay').value,
+    req:  document.getElementById('s'+suffix+'-req').value.trim(),
+    splitStall: true,
+    splitType
+  });
+
+  // HALF A
+  if(nameA){
+    const objA = {...buildHalf('a', nameA), stall: stallA, _order: existingA?existingA._order:(exhibitors.length)};
+    if(fbReady){
+      if(existingA) await window._set('exhibitors', existingA._id, objA);
+      else await window._add('exhibitors', objA);
+    } else {
+      if(existingA) Object.assign(existingA, objA);
+      else exhibitors.push(objA);
+    }
+  } else if(existingA){
+    // Name cleared — remove this half (becomes vacant)
+    if(fbReady) await window._del('exhibitors', existingA._id);
+    else exhibitors.splice(exhibitors.indexOf(existingA),1);
+  }
+
+  // HALF B
+  if(nameB){
+    const objB = {...buildHalf('b', nameB), stall: stallB, _order: existingB?existingB._order:(exhibitors.length+1)};
+    if(fbReady){
+      if(existingB) await window._set('exhibitors', existingB._id, objB);
+      else await window._add('exhibitors', objB);
+    } else {
+      if(existingB) Object.assign(existingB, objB);
+      else exhibitors.push(objB);
+    }
+  } else if(existingB){
+    if(fbReady) await window._del('exhibitors', existingB._id);
+    else exhibitors.splice(exhibitors.indexOf(existingB),1);
+  }
+
+  if(!fbReady){ lsSave(); renderAdmin(); renderFloor(); }
+  closeModal('split-modal');
+  toast('✓ Stall '+base+' updated');
+}
+
+async function unsplitStall(){
+  const base = splitModalBase;
+  if(!base) return;
+  if(!confirm('Remove the split? Both '+base+'A and '+base+'B exhibitor records will be deleted, and the stall will become one vacant stall again.')) return;
+
+  const existingA = exhibitors.find(e=>e.stall===base+'A');
+  const existingB = exhibitors.find(e=>e.stall===base+'B');
+
+  if(fbReady){
+    if(existingA) await window._del('exhibitors', existingA._id);
+    if(existingB) await window._del('exhibitors', existingB._id);
+  } else {
+    if(existingA) exhibitors.splice(exhibitors.indexOf(existingA),1);
+    if(existingB) exhibitors.splice(exhibitors.indexOf(existingB),1);
+    lsSave(); renderAdmin(); renderFloor();
+  }
+  closeModal('split-modal');
+  toast('✓ Stall '+base+' merged back to one vacant stall');
 }
 
 async function saveExhibitor(sendWA=false){
   const name=document.getElementById('m-name').value.trim();
   const stall=document.getElementById('m-stall').value.trim().toUpperCase();
-  const split=document.getElementById('m-split').checked && editExId===null;
   if(!name){toast('Please enter a name.');return;}
 
-  if(split){
-    // Create two half-stall entries: stallA and stallB
-    const stallA = stall+'A', stallB = stall+'B';
-    const splitType = document.getElementById('m-split-type').value; // 'v' | 'h' | 'd'
-    const dupA = exhibitors.find(e=>e.stall===stallA);
-    const dupB = exhibitors.find(e=>e.stall===stallB);
-    if(dupA){toast('Stall '+stallA+' is already assigned to '+dupA.name);return;}
-    if(dupB){toast('Stall '+stallB+' is already assigned to '+dupB.name);return;}
-
-    const base={name,city:document.getElementById('m-city').value.trim(),
-      cat:document.getElementById('m-cat').value,fee:document.getElementById('m-fee').value,
-      adv:'0',pay:'pending',mode:'',ref:'',req:document.getElementById('m-req').value.trim(),
-      notes:document.getElementById('m-notes').value.trim(),wa:document.getElementById('m-wa').value.trim(),
-      splitStall:true, splitType};
-    const objA={...base,stall:stallA,_order:exhibitors.length};
-    const objB={...base,stall:stallB,_order:exhibitors.length+1};
-    if(fbReady){
-      await window._add('exhibitors',objA);
-      await window._add('exhibitors',objB);
-    } else {
-      exhibitors.push(objA,objB); lsSave(); renderAdmin();
-    }
-    closeModal('ex-modal');
-    toast('✓ Created Stall '+stallA+' and Stall '+stallB);
-    if(sendWA){ sendWhatsApp({...objA,stall:stallA+' & '+stallB}); }
-    return;
-  }
-
-  // Normal single stall save
+  // Guard: prevent creating/editing into a stall ID that is itself a half of an
+  // existing split stall's *other* half naming collision (defensive — UI no longer
+  // allows direct A/B entry via this form, but keep this check for safety).
   const dup=exhibitors.find((e,i)=>e.stall&&e.stall===stall&&(editExId===null||i!==editExId));
   if(stall&&dup){toast('Stall '+stall+' is already assigned to '+dup.name);return;}
+
   const obj={name,city:document.getElementById('m-city').value.trim(),cat:document.getElementById('m-cat').value,
     stall,fee:document.getElementById('m-fee').value,adv:document.getElementById('m-adv').value,
     pay:document.getElementById('m-pay').value,mode:document.getElementById('m-mode').value,
@@ -1694,6 +1850,8 @@ function makeSplitTriangle(stallId, pts, fill, ex, sc, fullW, fullH){
 function floorClick(id){
   const exMap={};exhibitors.forEach(e=>{ if(e.stall) exMap[e.stall.toUpperCase()]=e; });
   const ex=exMap[id];
+  const isHalf = /[AB]$/i.test(id);
+  const baseId = isHalf ? id.replace(/[AB]$/i,'') : id;
   document.getElementById('fm-title').textContent='Stall '+id;
   let body='';
   const isAdm=document.body.classList.contains('admin-mode');
@@ -1708,14 +1866,37 @@ function floorClick(id){
     }
   } else {
     body='<span style="color:var(--muted)">Available — not yet assigned.</span>';
+    if(isHalf && isAdm) body += '<br><span style="font-size:11px;color:var(--muted)">This is half of Stall '+baseId+' (split stall).</span>';
   }
   document.getElementById('fm-body').innerHTML=body;
   const fi=exhibitors.findIndex(e=>e.stall&&e.stall.toUpperCase()===id);
-  document.getElementById('fm-footer').innerHTML=`<button class="btn btn-sm" onclick="closeModal('floor-modal')">Close</button>`+
-    (ex&&isAdm?`<button class="btn btn-sm btn-green" onclick="closeModal('floor-modal');openReassign(${fi})">⇄ Reassign</button>
-    <button class="btn btn-sm btn-primary" onclick="closeModal('floor-modal');openExModal(${fi})">Edit</button>
-    <button class="btn btn-sm" style="background:#E8F5E0;border-color:#A8D878;color:#2D5A10" onclick="sendWhatsApp(exhibitors[${fi}])">WA</button>`:'');
+
+  let footerBtns = `<button class="btn btn-sm" onclick="closeModal('floor-modal')">Close</button>`;
+  if(isAdm){
+    if(isHalf){
+      // Half stall — booked or vacant, always route through the Split Stall modal
+      footerBtns += `<button class="btn btn-sm btn-primary" onclick="closeModal('floor-modal');openSplitModal('${baseId}')">${ex?'Edit Split':'Add to '+id}</button>`;
+      if(ex && ex.wa) footerBtns += `<button class="btn btn-sm" style="background:#E8F5E0;border-color:#A8D878;color:#2D5A10" onclick="sendWhatsApp(exhibitors[${fi}])">WA</button>`;
+    } else if(ex){
+      // Normal booked stall
+      footerBtns += `<button class="btn btn-sm btn-green" onclick="closeModal('floor-modal');openReassign(${fi})">⇄ Reassign</button>
+      <button class="btn btn-sm btn-primary" onclick="closeModal('floor-modal');openExModal(${fi})">Edit</button>
+      <button class="btn btn-sm" style="background:#E8F5E0;border-color:#A8D878;color:#2D5A10" onclick="sendWhatsApp(exhibitors[${fi}])">WA</button>`;
+    } else {
+      // Normal vacant stall — offer to add exhibitor directly, or split it
+      footerBtns += `<button class="btn btn-sm btn-primary" onclick="closeModal('floor-modal');prefillAndOpenEx('${id}')">+ Add Exhibitor</button>
+      <button class="btn btn-sm" onclick="closeModal('floor-modal');openSplitModal('${id}')">⊟ Split Stall</button>`;
+    }
+  }
+  document.getElementById('fm-footer').innerHTML = footerBtns;
   openModal('floor-modal');
+}
+
+// Opens the Add Exhibitor modal with the stall number pre-filled — used when
+// clicking an empty stall directly on the floor plan.
+function prefillAndOpenEx(stallId){
+  openExModal(null);
+  document.getElementById('m-stall').value = stallId;
 }
 
 /* ── VISITORS ── */
