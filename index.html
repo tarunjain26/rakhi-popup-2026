@@ -1600,23 +1600,39 @@ function toggleCatFilter(cat){
 function applyCatHighlight(){
   const svg = document.getElementById('pub-map').querySelector('svg');
   if(!svg) return;
+
+  // Collect every clickable stall element: top-level g.fs (normal stalls)
+  // AND nested g.split-half.fs (halves of split stalls)
+  const allStallEls = svg.querySelectorAll('g.fs');
+
   if(!activeCatFilter){
-    // Reset — remove dimming from all stalls
-    svg.querySelectorAll('.fs, .split-half').forEach(el=>{ el.style.opacity=''; el.style.filter=''; });
+    allStallEls.forEach(el=>{ el.style.opacity=''; el.style.filter=''; });
     return;
   }
+
   // Build set of stall IDs matching the active category
   const matchStalls = new Set();
   exhibitors.forEach(e=>{ if(e.stall && e.cat===activeCatFilter) matchStalls.add(e.stall.toUpperCase()); });
 
-  // Dim all stall groups, then un-dim + glow the matches
-  svg.querySelectorAll('g.fs').forEach(g=>{
+  allStallEls.forEach(g=>{
+    const isSplitHalf = g.classList.contains('split-half');
+    const isParentOfSplit = !isSplitHalf && g.querySelector('.split-half');
+
+    if(isParentOfSplit){
+      // This is a split stall's outer group — don't dim/highlight it directly,
+      // its children (the halves) are handled in their own iteration.
+      g.style.opacity='1';
+      g.style.filter='';
+      return;
+    }
+
     const onclickAttr = g.getAttribute('onclick')||'';
     const idMatch = onclickAttr.match(/floorClick\('([^']+)'\)/);
     const sid = idMatch ? idMatch[1] : null;
+
     if(sid && matchStalls.has(sid)){
       g.style.opacity='1';
-      g.style.filter='drop-shadow(0 0 6px rgba(245,197,24,0.9))';
+      g.style.filter='drop-shadow(0 0 5px rgba(245,197,24,0.95))';
     } else {
       g.style.opacity='0.18';
       g.style.filter='';
