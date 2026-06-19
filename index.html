@@ -458,6 +458,14 @@ body.admin-mode .admin-only{display:flex !important}
           <input type="checkbox" id="m-split" onchange="updateSplitPreview()" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none">
           <span style="font-size:13px;color:var(--text);user-select:none">Split into half stalls (A &amp; B)</span>
         </div>
+        <div id="m-split-type-wrap" style="display:none;margin-top:8px">
+          <label style="font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)">Split Direction</label>
+          <select id="m-split-type" onchange="updateSplitPreview()">
+            <option value="v">Vertical — left / right (A | B)</option>
+            <option value="h">Horizontal — top / bottom (A over B)</option>
+            <option value="d">Diagonal — corner split (↙ A / B)</option>
+          </select>
+        </div>
         <div id="m-split-preview" style="display:none;font-size:12px;color:var(--y5);background:var(--y1);border-radius:6px;padding:5px 10px;margin-top:5px"></div>
       </div>
     </div>
@@ -904,15 +912,20 @@ function updateSplitPreview(){
   const stall = (document.getElementById('m-stall').value||'').trim().toUpperCase();
   const split = document.getElementById('m-split').checked;
   const prev  = document.getElementById('m-split-preview');
+  const typeWrap = document.getElementById('m-split-type-wrap');
+  const splitType = document.getElementById('m-split-type').value;
   // Sync visual checkbox
   const box  = document.getElementById('m-split-box');
   const tick = document.getElementById('m-split-tick');
   if(box)  box.style.background  = split ? 'var(--y3)' : '#fff';
   if(tick) tick.style.display    = split ? 'block' : 'none';
+  // Show/hide split type selector
+  typeWrap.style.display = split ? 'block' : 'none';
   // Preview text
   if(split && stall){
     prev.style.display = 'block';
-    prev.textContent   = '→ Will create: Stall ' + stall + 'A  and  Stall ' + stall + 'B';
+    const dirLabel = splitType==='h' ? 'top/bottom' : splitType==='d' ? 'diagonal (corner-to-corner)' : 'left/right';
+    prev.textContent = '→ Will create: Stall ' + stall + 'A  and  Stall ' + stall + 'B  (' + dirLabel + ' split)';
   } else {
     prev.style.display = 'none';
   }
@@ -936,6 +949,8 @@ function openExModal(idx=null){
   if(box)  box.style.background = '#fff';
   if(tick) tick.style.display   = 'none';
   if(wrap) wrap.style.opacity   = (idx !== null) ? '0.35' : '1';
+  document.getElementById('m-split-type').value = 'v';
+  document.getElementById('m-split-type-wrap').style.display = 'none';
   document.getElementById('m-split-preview').style.display = 'none';
   updatePayRef();
   openModal('ex-modal');
@@ -950,6 +965,7 @@ async function saveExhibitor(sendWA=false){
   if(split){
     // Create two half-stall entries: stallA and stallB
     const stallA = stall+'A', stallB = stall+'B';
+    const splitType = document.getElementById('m-split-type').value; // 'v' | 'h' | 'd'
     const dupA = exhibitors.find(e=>e.stall===stallA);
     const dupB = exhibitors.find(e=>e.stall===stallB);
     if(dupA){toast('Stall '+stallA+' is already assigned to '+dupA.name);return;}
@@ -959,7 +975,7 @@ async function saveExhibitor(sendWA=false){
       cat:document.getElementById('m-cat').value,fee:document.getElementById('m-fee').value,
       adv:'0',pay:'pending',mode:'',ref:'',req:document.getElementById('m-req').value.trim(),
       notes:document.getElementById('m-notes').value.trim(),wa:document.getElementById('m-wa').value.trim(),
-      splitStall:true};
+      splitStall:true, splitType};
     const objA={...base,stall:stallA,_order:exhibitors.length};
     const objB={...base,stall:stallB,_order:exhibitors.length+1};
     if(fbReady){
@@ -1210,44 +1226,84 @@ function shareFloorPlanWA(){
     const light=s.fill==='#d4cec4'||s.fill==='#F5C518';
 
     if(splitStalls.has(s.id)){
-      // SPLIT STALL — tall stalls split top/bottom, wide stalls split left/right
-      const splitV = w > h; // true = horizontal divider (stack top/bottom)
-      const hw = splitV ? w : Math.floor(w/2);
-      const hh = splitV ? Math.floor(h/2) : h;
-      const halves = splitV
-        ? [{id:s.id+'A', x:x, y:y, w:w, h:hh}, {id:s.id+'B', x:x, y:y+hh, w:w, h:h-hh}]
-        : [{id:s.id+'A', x:x, y:y, w:hw, h:h}, {id:s.id+'B', x:x+hw, y:y, w:w-hw, h:h}];
-      halves.forEach(half=>{
-        const bookedH = !!exMap[half.id];
-        const hcx=half.x+half.w/2, hcy=half.y+half.h/2;
-        ctx.beginPath(); ctx.rect(half.x, half.y, half.w, half.h); ctx.closePath();
-        if(bookedH){
-          ctx.globalAlpha=0.25; ctx.fillStyle=s.fill; ctx.fill(); ctx.globalAlpha=1;
-          ctx.strokeStyle='rgba(160,160,160,0.3)'; ctx.lineWidth=0.5; ctx.stroke();
-          ctx.fillStyle='rgba(80,80,80,0.65)'; ctx.textAlign='center'; ctx.textBaseline='middle';
-          ctx.font='bold '+Math.round(Math.min(14,Math.min(half.w,half.h)*0.3))+'px sans-serif';
-          ctx.fillText(half.id, hcx, hcy);
-        } else {
-          ctx.fillStyle=s.fill; ctx.fill();
-          ctx.strokeStyle='rgba(0,0,0,0.12)'; ctx.lineWidth=0.5; ctx.stroke();
-          const tc=light?'#333':'#fff';
-          ctx.fillStyle=tc; ctx.textAlign='center'; ctx.textBaseline='middle';
-          ctx.font='bold '+Math.round(Math.min(14,Math.min(half.w,half.h)*0.3))+'px sans-serif';
-          ctx.fillText(half.id, hcx, half.y+(half.h>40?half.h*0.35:half.h/2));
-          if(half.h>30){
-            ctx.font='bold '+Math.round(Math.min(9,half.w*0.16))+'px sans-serif';
-            ctx.fillText('AVAIL', hcx, half.y+half.h*0.68);
+      const exA = exMap[s.id+'A'], exB = exMap[s.id+'B'];
+      const storedType = (exA&&exA.splitType) || (exB&&exB.splitType);
+      const splitType = storedType || (w > h ? 'h' : 'v');
+
+      if(splitType === 'd'){
+        // DIAGONAL SPLIT — top-right to bottom-left
+        const triA = [[x,y],[x+w,y],[x+w,y+h]];   // upper-right triangle
+        const triB = [[x,y],[x,y+h],[x+w,y+h]];   // lower-left triangle
+        const minDim = Math.min(w,h);
+        [{id:s.id+'A',pts:triA,corner:[x+w,y]}, {id:s.id+'B',pts:triB,corner:[x,y+h]}].forEach(half=>{
+          const bookedH = !!exMap[half.id];
+          const cx=(half.pts[0][0]+half.pts[1][0]+half.pts[2][0])/3;
+          const cy=(half.pts[0][1]+half.pts[1][1]+half.pts[2][1])/3;
+          const offX=(half.corner[0]-cx)*0.18, offY=(half.corner[1]-cy)*0.18;
+          ctx.beginPath();
+          ctx.moveTo(half.pts[0][0],half.pts[0][1]);
+          ctx.lineTo(half.pts[1][0],half.pts[1][1]);
+          ctx.lineTo(half.pts[2][0],half.pts[2][1]);
+          ctx.closePath();
+          if(bookedH){
+            ctx.globalAlpha=0.25; ctx.fillStyle=s.fill; ctx.fill(); ctx.globalAlpha=1;
+            ctx.fillStyle='rgba(80,80,80,0.65)'; ctx.textAlign='center'; ctx.textBaseline='middle';
+            ctx.font='bold '+Math.round(Math.min(13,minDim*0.2))+'px sans-serif';
+            ctx.fillText(half.id, cx+offX, cy+offY);
+          } else {
+            ctx.fillStyle=s.fill; ctx.fill();
+            const tc=light?'#333':'#fff';
+            ctx.fillStyle=tc; ctx.textAlign='center'; ctx.textBaseline='middle';
+            ctx.font='bold '+Math.round(Math.min(13,minDim*0.2))+'px sans-serif';
+            ctx.fillText(half.id, cx+offX, cy+offY-minDim*0.1);
+            ctx.font='bold '+Math.round(Math.min(9,minDim*0.13))+'px sans-serif';
+            ctx.fillText('AVAIL', cx+offX, cy+offY+minDim*0.1);
           }
-        }
-      });
-      // Dashed divider
-      ctx.setLineDash([4,3]);
-      ctx.strokeStyle='rgba(255,255,255,0.7)'; ctx.lineWidth=1.5;
-      ctx.beginPath();
-      if(splitV){ ctx.moveTo(x,y+hh); ctx.lineTo(x+w,y+hh); }
-      else { ctx.moveTo(x+hw,y); ctx.lineTo(x+hw,y+h); }
-      ctx.stroke();
-      ctx.setLineDash([]);
+        });
+        // Diagonal divider
+        ctx.setLineDash([4,3]);
+        ctx.strokeStyle='rgba(255,255,255,0.8)'; ctx.lineWidth=1.5;
+        ctx.beginPath(); ctx.moveTo(x+w,y); ctx.lineTo(x,y+h); ctx.stroke();
+        ctx.setLineDash([]);
+      } else {
+        // VERTICAL or HORIZONTAL SPLIT
+        const splitH = splitType === 'h';
+        const hw = splitH ? w : Math.floor(w/2);
+        const hh = splitH ? Math.floor(h/2) : h;
+        const halves = splitH
+          ? [{id:s.id+'A', x:x, y:y, w:w, h:hh}, {id:s.id+'B', x:x, y:y+hh, w:w, h:h-hh}]
+          : [{id:s.id+'A', x:x, y:y, w:hw, h:h}, {id:s.id+'B', x:x+hw, y:y, w:w-hw, h:h}];
+        halves.forEach(half=>{
+          const bookedH = !!exMap[half.id];
+          const hcx=half.x+half.w/2, hcy=half.y+half.h/2;
+          ctx.beginPath(); ctx.rect(half.x, half.y, half.w, half.h); ctx.closePath();
+          if(bookedH){
+            ctx.globalAlpha=0.25; ctx.fillStyle=s.fill; ctx.fill(); ctx.globalAlpha=1;
+            ctx.strokeStyle='rgba(160,160,160,0.3)'; ctx.lineWidth=0.5; ctx.stroke();
+            ctx.fillStyle='rgba(80,80,80,0.65)'; ctx.textAlign='center'; ctx.textBaseline='middle';
+            ctx.font='bold '+Math.round(Math.min(14,Math.min(half.w,half.h)*0.3))+'px sans-serif';
+            ctx.fillText(half.id, hcx, hcy);
+          } else {
+            ctx.fillStyle=s.fill; ctx.fill();
+            ctx.strokeStyle='rgba(0,0,0,0.12)'; ctx.lineWidth=0.5; ctx.stroke();
+            const tc=light?'#333':'#fff';
+            ctx.fillStyle=tc; ctx.textAlign='center'; ctx.textBaseline='middle';
+            ctx.font='bold '+Math.round(Math.min(14,Math.min(half.w,half.h)*0.3))+'px sans-serif';
+            ctx.fillText(half.id, hcx, half.y+(half.h>40?half.h*0.35:half.h/2));
+            if(half.h>30){
+              ctx.font='bold '+Math.round(Math.min(9,half.w*0.16))+'px sans-serif';
+              ctx.fillText('AVAIL', hcx, half.y+half.h*0.68);
+            }
+          }
+        });
+        ctx.setLineDash([4,3]);
+        ctx.strokeStyle='rgba(255,255,255,0.7)'; ctx.lineWidth=1.5;
+        ctx.beginPath();
+        if(splitH){ ctx.moveTo(x,y+hh); ctx.lineTo(x+w,y+hh); }
+        else { ctx.moveTo(x+hw,y); ctx.lineTo(x+hw,y+h); }
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
     } else {
       const booked=!!exMap[s.id];
       rrect(x,y,w,h,r);
@@ -1376,7 +1432,7 @@ function renderFloor(){
     if(!r) return;
 
     if(splitStalls.has(s)){
-      // ── SPLIT STALL — render two halves ──
+      // ── SPLIT STALL — render two halves (vertical / horizontal / diagonal) ──
       if(g) g.removeAttribute('onclick');
       const exA = exMap[s+'A'], exB = exMap[s+'B'];
       const rx   = +r.getAttribute('x'), ry = +r.getAttribute('y');
@@ -1384,42 +1440,61 @@ function renderFloor(){
       const fill = r.getAttribute('fill');
       const sc   = stallColorByFill(fill);
 
-      // Tall/narrow stalls (left & right walls) split horizontally (top/bottom)
-      // Wide stalls (top wall, islands) split vertically (left/right)
-      const splitV = rw > rh; // true = horizontal divider, halves stacked top/bottom
-      const aw = splitV ? rw : Math.floor(rw/2);
-      const ah = splitV ? Math.floor(rh/2) : rh;
-      const bx = splitV ? rx : rx + aw;
-      const by = splitV ? ry + ah : ry;
+      // Determine split type: stored on the exhibitor record, else auto-detect by stall shape
+      const storedType = (exA&&exA.splitType) || (exB&&exB.splitType);
+      const splitType = storedType || (rw > rh ? 'h' : 'v'); // 'v' | 'h' | 'd'
 
-      // Remove old split overlays if any, keep original rect hidden
+      // Remove old split overlays, hide original rect/name
       r.style.display = 'none';
       if(n) n.style.display = 'none';
       const oldSplit = g.querySelectorAll('.split-half');
       oldSplit.forEach(el=>el.remove());
 
-      // Draw half A
-      const gA = makeSplitHalf(s+'A', rx, ry, aw, ah, fill, exA, sc, splitV);
-      const gB = makeSplitHalf(s+'B', bx, by, splitV?rw:rw-aw, splitV?rh-ah:rh, fill, exB, sc, splitV);
-      g.appendChild(gA);
-      g.appendChild(gB);
-
-      // Divider line
-      const line = document.createElementNS('http://www.w3.org/2000/svg','line');
-      line.setAttribute('class','split-half');
-      if(splitV){
-        // horizontal divider
-        line.setAttribute('x1', rx); line.setAttribute('y1', ry+ah);
-        line.setAttribute('x2', rx+rw); line.setAttribute('y2', ry+ah);
+      if(splitType === 'd'){
+        // ── DIAGONAL SPLIT — top-right to bottom-left (↙) ──
+        // A = upper-right triangle, B = lower-left triangle
+        const triA = [[rx,ry],[rx+rw,ry],[rx+rw,ry+rh]]; // top-left, top-right, bottom-right
+        const triB = [[rx,ry],[rx,ry+rh],[rx+rw,ry+rh]]; // top-left, bottom-left, bottom-right
+        const gA = makeSplitTriangle(s+'A', triA, fill, exA, sc, rw, rh);
+        const gB = makeSplitTriangle(s+'B', triB, fill, exB, sc, rw, rh);
+        g.appendChild(gA);
+        g.appendChild(gB);
+        // Diagonal divider line (top-right to bottom-left)
+        const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+        line.setAttribute('class','split-half');
+        line.setAttribute('x1', rx+rw); line.setAttribute('y1', ry);
+        line.setAttribute('x2', rx);    line.setAttribute('y2', ry+rh);
+        line.setAttribute('stroke','rgba(255,255,255,0.8)');
+        line.setAttribute('stroke-width','2');
+        line.setAttribute('stroke-dasharray','4,3');
+        g.appendChild(line);
       } else {
-        // vertical divider
-        line.setAttribute('x1', rx+aw); line.setAttribute('y1', ry);
-        line.setAttribute('x2', rx+aw); line.setAttribute('y2', ry+rh);
+        // ── VERTICAL or HORIZONTAL SPLIT ──
+        const splitH = splitType === 'h'; // true = stacked top/bottom
+        const aw = splitH ? rw : Math.floor(rw/2);
+        const ah = splitH ? Math.floor(rh/2) : rh;
+        const bx = splitH ? rx : rx + aw;
+        const by = splitH ? ry + ah : ry;
+
+        const gA = makeSplitHalf(s+'A', rx, ry, aw, ah, fill, exA, sc, splitH);
+        const gB = makeSplitHalf(s+'B', bx, by, splitH?rw:rw-aw, splitH?rh-ah:rh, fill, exB, sc, splitH);
+        g.appendChild(gA);
+        g.appendChild(gB);
+
+        const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+        line.setAttribute('class','split-half');
+        if(splitH){
+          line.setAttribute('x1', rx); line.setAttribute('y1', ry+ah);
+          line.setAttribute('x2', rx+rw); line.setAttribute('y2', ry+ah);
+        } else {
+          line.setAttribute('x1', rx+aw); line.setAttribute('y1', ry);
+          line.setAttribute('x2', rx+aw); line.setAttribute('y2', ry+rh);
+        }
+        line.setAttribute('stroke','rgba(255,255,255,0.7)');
+        line.setAttribute('stroke-width','2');
+        line.setAttribute('stroke-dasharray','4,3');
+        g.appendChild(line);
       }
-      line.setAttribute('stroke','rgba(255,255,255,0.7)');
-      line.setAttribute('stroke-width','2');
-      line.setAttribute('stroke-dasharray','4,3');
-      g.appendChild(line);
 
     } else {
       // ── NORMAL STALL ──
@@ -1540,6 +1615,77 @@ function makeSplitHalf(stallId, x, y, w, h, fill, ex, sc, splitV){
       nameEl.setAttribute('y', y + h*0.7);
       nameEl.textContent = 'AVAILABLE';
     }
+  }
+  g.appendChild(nameEl);
+  return g;
+}
+
+// Creates a triangular half for diagonal-split stalls.
+// pts = array of 3 [x,y] points defining the triangle.
+function makeSplitTriangle(stallId, pts, fill, ex, sc, fullW, fullH){
+  const ns = 'http://www.w3.org/2000/svg';
+  const g  = document.createElementNS(ns,'g');
+  g.setAttribute('class','split-half fs');
+  g.style.cursor = 'pointer';
+  g.setAttribute('onclick', "event.stopPropagation();floorClick('"+stallId+"')");
+
+  const poly = document.createElementNS(ns,'polygon');
+  poly.setAttribute('points', pts.map(p=>p[0]+','+p[1]).join(' '));
+  poly.setAttribute('fill', fill);
+  poly.setAttribute('opacity', ex ? '1' : '0.38');
+  g.appendChild(poly);
+
+  // Centroid of the triangle — where label/name should sit
+  const cx = (pts[0][0]+pts[1][0]+pts[2][0]) / 3;
+  const cy = (pts[0][1]+pts[1][1]+pts[2][1]) / 3;
+
+  // Nudge text slightly away from the diagonal line toward the triangle's outer corner,
+  // so it doesn't sit right on the divider.
+  // Find the "outer" corner = the one NOT shared with the diagonal (i.e. the right-angle corner)
+  // For our top-right/bottom-left split: triA outer corner = top-right, triB outer corner = bottom-left
+  const isTriA = pts.some(p=>p[0]===pts[1][0]&&p[1]===pts[1][1]) && pts.length===3;
+  // Determine offset direction based on which corner is the "lone" right-angle vertex
+  // triA points: [topLeft, topRight, bottomRight] → right-angle vertex = topRight
+  // triB points: [topLeft, bottomLeft, bottomRight] → right-angle vertex = bottomLeft
+  let offX = 0, offY = 0;
+  const rightAngleVertex = pts[1]; // by construction this is the unique non-shared corner
+  offX = (rightAngleVertex[0] - cx) * 0.18;
+  offY = (rightAngleVertex[1] - cy) * 0.18;
+
+  const tc = sc.light ? '#333' : '#fff';
+  const minDim = Math.min(fullW, fullH);
+
+  const label = document.createElementNS(ns,'text');
+  label.setAttribute('x', cx + offX);
+  label.setAttribute('y', cy + offY - minDim*0.08);
+  label.setAttribute('text-anchor','middle');
+  label.setAttribute('dominant-baseline','middle');
+  label.setAttribute('fill', ex ? tc : 'rgba(80,80,80,0.7)');
+  label.setAttribute('font-size', Math.min(11, minDim*0.16));
+  label.setAttribute('font-weight','700');
+  label.setAttribute('font-family','sans-serif');
+  label.setAttribute('pointer-events','none');
+  label.textContent = stallId;
+  g.appendChild(label);
+
+  const nameEl = document.createElementNS(ns,'text');
+  nameEl.setAttribute('x', cx + offX);
+  nameEl.setAttribute('y', cy + offY + minDim*0.1);
+  nameEl.setAttribute('text-anchor','middle');
+  nameEl.setAttribute('dominant-baseline','middle');
+  nameEl.setAttribute('font-family','sans-serif');
+  nameEl.setAttribute('pointer-events','none');
+  if(ex){
+    nameEl.setAttribute('fill', tc);
+    nameEl.setAttribute('font-size', Math.min(9, minDim*0.13));
+    nameEl.setAttribute('font-weight','600');
+    const name = ex.name;
+    nameEl.textContent = name.length > 8 ? name.slice(0,7)+'…' : name;
+  } else {
+    nameEl.setAttribute('fill','rgba(50,120,50,0.85)');
+    nameEl.setAttribute('font-size', Math.min(7, minDim*0.1));
+    nameEl.setAttribute('font-weight','500');
+    nameEl.textContent = minDim > 60 ? 'AVAILABLE' : 'AVAIL';
   }
   g.appendChild(nameEl);
   return g;
