@@ -1590,7 +1590,41 @@ async function addVisitor(){
   toast(`✓ ${name} checked in — Day ${visDay}`);
 }
 
-/* ── COSTS ── */
+function toggleCatFilter(cat){
+  activeCatFilter = (activeCatFilter === cat) ? null : cat;
+  renderPublic();
+  // Scroll to map so the highlight is visible
+  document.getElementById('pub-map').scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+function applyCatHighlight(){
+  const svg = document.getElementById('pub-map').querySelector('svg');
+  if(!svg) return;
+  if(!activeCatFilter){
+    // Reset — remove dimming from all stalls
+    svg.querySelectorAll('.fs, .split-half').forEach(el=>{ el.style.opacity=''; el.style.filter=''; });
+    return;
+  }
+  // Build set of stall IDs matching the active category
+  const matchStalls = new Set();
+  exhibitors.forEach(e=>{ if(e.stall && e.cat===activeCatFilter) matchStalls.add(e.stall.toUpperCase()); });
+
+  // Dim all stall groups, then un-dim + glow the matches
+  svg.querySelectorAll('g.fs').forEach(g=>{
+    const onclickAttr = g.getAttribute('onclick')||'';
+    const idMatch = onclickAttr.match(/floorClick\('([^']+)'\)/);
+    const sid = idMatch ? idMatch[1] : null;
+    if(sid && matchStalls.has(sid)){
+      g.style.opacity='1';
+      g.style.filter='drop-shadow(0 0 6px rgba(245,197,24,0.9))';
+    } else {
+      g.style.opacity='0.18';
+      g.style.filter='';
+    }
+  });
+}
+
+
 function renderCosts(){
   const exp        = costs.filter(c=>c.type==='expense').reduce((s,c)=>s+(+c.amt||0),0);
   const otherRev   = costs.filter(c=>c.type==='revenue').reduce((s,c)=>s+(+c.amt||0),0);
@@ -1751,25 +1785,37 @@ async function saveCost(){
 async function deleteCost(i){ if(!confirm('Remove?'))return; if(fbReady) await window._del('costs',costs[i]._id); else{costs.splice(i,1);lsSave();renderCosts();} toast('Removed.');}
 
 /* ── PUBLIC ── */
+let activeCatFilter = null;
+
 function renderPublic(){
-  // Category pills
+  // Category pills — clickable to filter/highlight
   const catCounts={};
   exhibitors.forEach(e=>{if(e.cat)catCounts[e.cat]=(catCounts[e.cat]||0)+1;});
   document.getElementById('pub-cats').innerHTML=Object.entries(catCounts).length
-    ?Object.entries(catCounts).map(([c,n])=>`<div class="cat-card"><div style="font-size:20px;margin-bottom:4px">${CATS[c]||'✨'}</div><div style="font-size:11.5px;font-weight:500">${c}</div><div style="font-size:10.5px;color:var(--muted);margin-top:2px">${n} brand${n!==1?'s':''}</div></div>`).join('')
+    ?Object.entries(catCounts).map(([c,n])=>{
+      const active = activeCatFilter===c;
+      return `<div class="cat-card" onclick="toggleCatFilter('${c.replace(/'/g,"\\'")}')" style="cursor:pointer;${active?'border-color:var(--y4);background:var(--y2);box-shadow:0 0 0 2px var(--y3)':''}">
+        <div style="font-size:20px;margin-bottom:4px">${CATS[c]||'✨'}</div>
+        <div style="font-size:11.5px;font-weight:${active?'700':'500'}">${c}</div>
+        <div style="font-size:10.5px;color:var(--muted);margin-top:2px">${n} brand${n!==1?'s':''}</div>
+      </div>`;
+    }).join('')
     :'';
 
   // Floor map — render stall names first, then clone
   renderFloor();
   document.getElementById('pub-map').innerHTML='<svg viewBox="0 0 700 1300" style="width:100%;height:auto">'+document.getElementById('floor-svg').innerHTML+'</svg>';
+  applyCatHighlight();
 
   // Exhibitors list — name, stall, category only. NO pricing, NO actions
   const booked = exhibitors.filter(e=>e.stall).sort((a,b)=>{
     const na=parseInt(a.stall)||999, nb=parseInt(b.stall)||999;
     return na-nb;
   });
-  document.getElementById('pub-exhibitors').innerHTML = booked.length
-    ? booked.map(e=>{
+  const filtered = activeCatFilter ? booked.filter(e=>e.cat===activeCatFilter) : booked;
+
+  document.getElementById('pub-exhibitors').innerHTML = filtered.length
+    ? filtered.map(e=>{
         const sc=stallColor(e.stall);
         return `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)">
           <div class="stall-badge" style="background:${sc.bg};border-color:${sc.border};color:${sc.text};flex-shrink:0">${e.stall}</div>
@@ -1779,7 +1825,9 @@ function renderPublic(){
           </div>
         </div>`;
       }).join('')
-    : '<div style="text-align:center;color:var(--muted);font-size:13px;padding:1rem">Exhibitor details will appear once stalls are confirmed.</div>';
+    : activeCatFilter
+      ? '<div style="text-align:center;color:var(--muted);font-size:13px;padding:1rem">No exhibitors in this category yet.</div>'
+      : '<div style="text-align:center;color:var(--muted);font-size:13px;padding:1rem">Exhibitor details will appear once stalls are confirmed.</div>';
 
   // Sponsors list — name & type only. NO amounts, NO deliverables
   const pubSpCard = document.getElementById('pub-sponsors-card');
