@@ -535,6 +535,17 @@ body.admin-mode .admin-only{display:flex !important}
         </div>
         <label style="font-size:11px;margin-top:6px">Payment Status</label>
         <select id="sa-pay"><option value="pending">Pending</option><option value="partial">Partial</option><option value="paid">Paid</option></select>
+        <label style="font-size:11px;margin-top:6px">Payment Mode</label>
+        <select id="sa-mode" onchange="updateSplitPayRef('a')">
+          <option value="">— Not received yet —</option>
+          <option value="Cash">Cash</option>
+          <option value="UPI">UPI</option>
+          <option value="Bank Transfer">Bank Transfer</option>
+          <option value="Cheque">Cheque</option>
+          <option value="Card">Card</option>
+        </select>
+        <label style="font-size:11px;margin-top:6px" id="sa-ref-label">Collected By / Reference</label>
+        <input id="sa-ref" placeholder="Name or transaction ref...">
         <label style="font-size:11px;margin-top:6px">Requirements</label>
         <input id="sa-req" placeholder="Power, table, etc.">
       </div>
@@ -555,6 +566,17 @@ body.admin-mode .admin-only{display:flex !important}
         </div>
         <label style="font-size:11px;margin-top:6px">Payment Status</label>
         <select id="sb-pay"><option value="pending">Pending</option><option value="partial">Partial</option><option value="paid">Paid</option></select>
+        <label style="font-size:11px;margin-top:6px">Payment Mode</label>
+        <select id="sb-mode" onchange="updateSplitPayRef('b')">
+          <option value="">— Not received yet —</option>
+          <option value="Cash">Cash</option>
+          <option value="UPI">UPI</option>
+          <option value="Bank Transfer">Bank Transfer</option>
+          <option value="Cheque">Cheque</option>
+          <option value="Card">Card</option>
+        </select>
+        <label style="font-size:11px;margin-top:6px" id="sb-ref-label">Collected By / Reference</label>
+        <input id="sb-ref" placeholder="Name or transaction ref...">
         <label style="font-size:11px;margin-top:6px">Requirements</label>
         <input id="sb-req" placeholder="Power, table, etc.">
       </div>
@@ -964,6 +986,18 @@ function updatePayRef(){
   else lbl.textContent='Reference / Collected By';
 }
 
+// Same dynamic ref-label behavior as the main exhibitor form, but for split halves (a/b)
+function updateSplitPayRef(suffix){
+  const mode = document.getElementById('s'+suffix+'-mode').value;
+  const lbl  = document.getElementById('s'+suffix+'-ref-label');
+  if(!lbl) return;
+  if(mode==='Cash') lbl.textContent='Collected By (name)';
+  else if(mode==='UPI') lbl.textContent='UPI Ref / Transaction ID';
+  else if(mode==='Bank Transfer') lbl.textContent='Transfer Ref / UTR';
+  else if(mode==='Cheque') lbl.textContent='Cheque No. / Bank';
+  else lbl.textContent='Collected By / Reference';
+}
+
 // Helper — returns total paid for an exhibitor, backward-compatible with old adv field
 function paidAmt(e){ return (e.payments&&e.payments.length) ? e.payments.reduce((s,p)=>s+(+p.amt||0),0) : (+e.adv||0); }
 
@@ -1038,7 +1072,10 @@ function openSplitModal(base){
   document.getElementById('sa-fee').value  = exA?exA.fee:'';
   document.getElementById('sa-adv').value  = exA?exA.adv:'';
   document.getElementById('sa-pay').value  = exA?(exA.pay||'pending'):'pending';
+  document.getElementById('sa-mode').value = exA?(exA.mode||''):'';
+  document.getElementById('sa-ref').value  = exA?(exA.ref||''):'';
   document.getElementById('sa-req').value  = exA?exA.req:'';
+  updateSplitPayRef('a');
 
   // Fill half B
   document.getElementById('sb-name').value = exB?exB.name:'';
@@ -1047,7 +1084,10 @@ function openSplitModal(base){
   document.getElementById('sb-fee').value  = exB?exB.fee:'';
   document.getElementById('sb-adv').value  = exB?exB.adv:'';
   document.getElementById('sb-pay').value  = exB?(exB.pay||'pending'):'pending';
+  document.getElementById('sb-mode').value = exB?(exB.mode||''):'';
+  document.getElementById('sb-ref').value  = exB?(exB.ref||''):'';
   document.getElementById('sb-req').value  = exB?exB.req:'';
+  updateSplitPayRef('b');
 
   // Show "unsplit" option only if already split
   document.getElementById('split-unsplit-wrap').style.display = alreadySplit ? 'block' : 'none';
@@ -1077,17 +1117,21 @@ async function saveSplitStall(){
     fee:  document.getElementById('s'+suffix+'-fee').value,
     adv:  document.getElementById('s'+suffix+'-adv').value,
     pay:  document.getElementById('s'+suffix+'-pay').value,
+    mode: document.getElementById('s'+suffix+'-mode').value,
+    ref:  document.getElementById('s'+suffix+'-ref').value.trim(),
     req:  document.getElementById('s'+suffix+'-req').value.trim(),
     splitStall: true,
     splitType
   });
 
+  const baseOrder = exhibitors.length;
+
   // HALF A
   if(nameA){
-    const objA = {...buildHalf('a', nameA), stall: stallA, _order: existingA?existingA._order:(exhibitors.length)};
+    const objA = {...buildHalf('a', nameA), stall: stallA, _order: existingA?existingA._order:baseOrder};
     if(fbReady){
-      if(existingA) await window._set('exhibitors', existingA._id, objA);
-      else await window._add('exhibitors', objA);
+      if(existingA){ await window._set('exhibitors', existingA._id, objA); Object.assign(existingA, objA); }
+      else { const ref = await window._add('exhibitors', objA); exhibitors.push({...objA, _id: ref&&ref.id}); }
     } else {
       if(existingA) Object.assign(existingA, objA);
       else exhibitors.push(objA);
@@ -1095,25 +1139,31 @@ async function saveSplitStall(){
   } else if(existingA){
     // Name cleared — remove this half (becomes vacant)
     if(fbReady) await window._del('exhibitors', existingA._id);
-    else exhibitors.splice(exhibitors.indexOf(existingA),1);
+    const i=exhibitors.indexOf(existingA); if(i>-1) exhibitors.splice(i,1);
   }
 
   // HALF B
   if(nameB){
-    const objB = {...buildHalf('b', nameB), stall: stallB, _order: existingB?existingB._order:(exhibitors.length+1)};
+    const objB = {...buildHalf('b', nameB), stall: stallB, _order: existingB?existingB._order:(baseOrder+1)};
     if(fbReady){
-      if(existingB) await window._set('exhibitors', existingB._id, objB);
-      else await window._add('exhibitors', objB);
+      if(existingB){ await window._set('exhibitors', existingB._id, objB); Object.assign(existingB, objB); }
+      else { const ref = await window._add('exhibitors', objB); exhibitors.push({...objB, _id: ref&&ref.id}); }
     } else {
       if(existingB) Object.assign(existingB, objB);
       else exhibitors.push(objB);
     }
   } else if(existingB){
     if(fbReady) await window._del('exhibitors', existingB._id);
-    else exhibitors.splice(exhibitors.indexOf(existingB),1);
+    const i=exhibitors.indexOf(existingB); if(i>-1) exhibitors.splice(i,1);
   }
 
-  if(!fbReady){ lsSave(); renderAdmin(); renderFloor(); }
+  if(!fbReady){ lsSave(); }
+  // Always re-render immediately — don't rely solely on the Firestore listener,
+  // which can lag and leave the Exhibitor list / Costs sheet looking stale.
+  renderAdmin();
+  renderFloor();
+  renderCosts();
+  renderPublic();
   closeModal('split-modal');
   toast('✓ Stall '+base+' updated');
 }
@@ -1129,11 +1179,16 @@ async function unsplitStall(){
   if(fbReady){
     if(existingA) await window._del('exhibitors', existingA._id);
     if(existingB) await window._del('exhibitors', existingB._id);
-  } else {
-    if(existingA) exhibitors.splice(exhibitors.indexOf(existingA),1);
-    if(existingB) exhibitors.splice(exhibitors.indexOf(existingB),1);
-    lsSave(); renderAdmin(); renderFloor();
   }
+  // Remove from local array immediately regardless of Firebase mode, so the UI
+  // updates right away instead of waiting on the Firestore listener.
+  if(existingA){ const i=exhibitors.indexOf(existingA); if(i>-1) exhibitors.splice(i,1); }
+  if(existingB){ const i=exhibitors.indexOf(existingB); if(i>-1) exhibitors.splice(i,1); }
+  if(!fbReady) lsSave();
+  renderAdmin();
+  renderFloor();
+  renderCosts();
+  renderPublic();
   closeModal('split-modal');
   toast('✓ Stall '+base+' merged back to one vacant stall');
 }
@@ -1607,10 +1662,10 @@ function renderFloor(){
       oldSplit.forEach(el=>el.remove());
 
       if(splitType === 'd'){
-        // ── DIAGONAL SPLIT — top-right to bottom-left (↙) ──
-        // A = upper-right triangle, B = lower-left triangle
-        const triA = [[rx,ry],[rx+rw,ry],[rx+rw,ry+rh]]; // top-left, top-right, bottom-right
-        const triB = [[rx,ry],[rx,ry+rh],[rx+rw,ry+rh]]; // top-left, bottom-left, bottom-right
+        // ── DIAGONAL SPLIT — divider runs top-right to bottom-left (↙) ──
+        // A = LEFT triangle (contains the left edge), B = RIGHT triangle (contains the right edge)
+        const triA = [[rx,ry],[rx,ry+rh],[rx+rw,ry]];     // top-left, bottom-left, top-right (left side)
+        const triB = [[rx,ry+rh],[rx+rw,ry+rh],[rx+rw,ry]]; // bottom-left, bottom-right, top-right (right side)
         const gA = makeSplitTriangle(s+'A', triA, fill, exA, sc, rw, rh);
         const gB = makeSplitTriangle(s+'B', triB, fill, exB, sc, rw, rh);
         g.appendChild(gA);
